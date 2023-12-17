@@ -20,8 +20,8 @@ FetchContent_Declare(glew
 FetchContent_GetProperties(glew)
 if(NOT glew_POPULATED)
   FetchContent_Populate(glew)
-  option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
-  set(glew-cmake_BUILD_SHARED OFF)
+  option(glew-cmake_BUILD_SHARED "Build the shared glew library" ON)
+  set(glew-cmake_BUILD_SHARED ON)
   add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 message("GLEW include " ${glew_SOURCE_DIR}/include)
@@ -32,5 +32,6 @@ add_library(win_lib ${SRC} ${HEADER_FILES})
 # Link glew
 include_directories(${glew_SOURCE_DIR}/include)
 
-target_link_libraries(win_lib DebugLogger glfw libglew_static ${OPENGL_gl_LIBRARY})
+target_link_libraries(win_lib DebugLogger glfw libglew_shared ${OPENGL_gl_LIBRARY})
 target_include_directories(win_lib PUBLIC include nk_include)
+

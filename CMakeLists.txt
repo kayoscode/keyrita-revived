@@ -55,3 +55,7 @@ add_executable(${EXE_NAME} ${SRC} ${HEADER_FILES})
 target_link_libraries(${EXE_NAME} DebugLogger win_lib)
 
 file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Copy glew dll if on windows
+if (WIN32)
+	file (COPY ${glew_BINARY_DIR}/bin/glew-sharedd.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
