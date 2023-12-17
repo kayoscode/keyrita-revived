@@ -51,3 +51,5 @@ endif()
 
 target_include_directories(${EXE_NAME} PRIVATE ${GLEW_INCLUDE_DIRS})
 target_link_libraries(${EXE_NAME} DebugLogger)
+
+file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
