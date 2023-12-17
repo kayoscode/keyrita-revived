@@ -1,3 +1,0 @@
-/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate.dir
-/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/edit_cache.dir
-/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/rebuild_cache.dir

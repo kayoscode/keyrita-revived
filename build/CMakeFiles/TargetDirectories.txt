@@ -1,6 +1,0 @@
-/home/bryce/keyrita-revived/build/CMakeFiles/nuc_gui.dir
-/home/bryce/keyrita-revived/build/CMakeFiles/edit_cache.dir
-/home/bryce/keyrita-revived/build/CMakeFiles/rebuild_cache.dir
-/home/bryce/keyrita-revived/build/build/_deps/debug_logger-src/CMakeFiles/DebugLogger.dir
-/home/bryce/keyrita-revived/build/build/_deps/debug_logger-src/CMakeFiles/edit_cache.dir
-/home/bryce/keyrita-revived/build/build/_deps/debug_logger-src/CMakeFiles/rebuild_cache.dir
