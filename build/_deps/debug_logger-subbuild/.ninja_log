@@ -1,0 +1,21 @@
+# ninja log v5
+1	18	1702771631758064879	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-mkdir	e2348add22b5392d
+1	18	1702771631758064879	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-mkdir	e2348add22b5392d
+19	1155	1702771632894731529	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-download	b55f991dba338fc6
+19	1155	1702771632894731529	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-download	b55f991dba338fc6
+1155	1178	0	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-update	795262a5b3972268
+1155	1178	0	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-update	795262a5b3972268
+1179	1197	1702771632938064862	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-patch	e0e088188148764d
+1179	1197	1702771632938064862	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-patch	e0e088188148764d
+1197	1214	1702771632954731529	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-configure	d4527dc72a5d3066
+1197	1214	1702771632954731529	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-configure	d4527dc72a5d3066
+1214	1231	1702771632971398196	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-build	d66469d2507726dd
+1214	1231	1702771632971398196	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-build	d66469d2507726dd
+1232	1249	1702771632991398195	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-install	29b91dcf8948be09
+1232	1249	1702771632991398195	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-install	29b91dcf8948be09
+1249	1267	1702771633008064862	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-test	9cf465d899eb9935
+1249	1267	1702771633008064862	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-test	9cf465d899eb9935
+1267	1292	1702771633034731528	CMakeFiles/debug_logger-populate-complete	afb36339fdae90d9
+1267	1292	1702771633034731528	debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-done	afb36339fdae90d9
+1267	1292	1702771633034731528	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate-complete	afb36339fdae90d9
+1267	1292	1702771633034731528	/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-done	afb36339fdae90d9

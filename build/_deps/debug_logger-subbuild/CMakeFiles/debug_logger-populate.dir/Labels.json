@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate-complete.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-build.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-configure.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-download.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-install.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-patch.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-test.rule"
+		},
+		{
+			"file" : "/home/bryce/keyrita-revived/build/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/debug_logger-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"debug_logger-populate"
+		],
+		"name" : "debug_logger-populate"
+	}
+}
