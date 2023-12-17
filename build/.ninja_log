@@ -1,5 +1,0 @@
-# ninja log v5
-9	697	1702771634188064843	build/_deps/debug_logger-src/CMakeFiles/DebugLogger.dir/src/example.cpp.o	8dbe33d5dd2cf20c
-698	789	1702771634278064842	build/_deps/debug_logger-src/libDebugLogger.a	6fcc255262a68a2a
-2	1849	1702771635341398162	CMakeFiles/nuc_gui.dir/main.cpp.o	58810841f8ab24ae
-1849	1944	1702771635438064826	nuc_gui	437e2021b9766b77
