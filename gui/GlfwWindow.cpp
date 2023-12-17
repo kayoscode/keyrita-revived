@@ -1,31 +1,11 @@
-#include "GL/glew.h"
-
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_IMPLEMENTATION
-#define NK_GLFW_GL3_IMPLEMENTATION
-#define NK_KEYSTATE_BASED_INPUT
-
-#include <iostream>
-#include "nuklear_glfw_gl3.h"
-#include "DebugLogger.h"
+#include "include/inc_nuk.h"
+#include "Window.h"
 
 namespace 
 {
-	DebugLogger GlfwLogger("GLFW", Level::LEVEL_TRACE);
-	DebugLogger GlLogger("GL");
-	DebugLogger GeneralLogger("LOG");
-
-	void ErrorCallback(int errCode, const char *msg)
+	void GlfwErrorCallback(int errCode, const char *msg)
 	{
-		GlfwLogger.critical("{int}: {str}", errCode, msg);
+		//mGlfwLogger.critical("{int}: {str}", errCode, msg);
 	}
 
 	enum class eTheme
@@ -175,103 +155,237 @@ namespace
 	}
 }
 
-extern int CreateWindow()
+/// <summary>
+/// Context managers.
+/// </summary>
+namespace wgui
 {
-	GlfwLogger.setPrefix("\\[[pn]\\]: ");
-	GlfwLogger.setLevel(Level::LEVEL_TRACE);
-	GlLogger.setPrefix("\\[[pn]\\]: ");
-	GlLogger.setLevel(Level::LEVEL_TRACE);
-	GeneralLogger.setPrefix("\\[[pn]\\]: ");
-	GeneralLogger.setLevel(Level::LEVEL_TRACE);
-
-	GeneralLogger.trace("App startup");
-
-	const int windowWidth = 800;
-	const int windowHeight = 600;
-	
-	static GLFWwindow* win;
-	GlfwLogger.trace("Setting error callback");
-	glfwSetErrorCallback(ErrorCallback);
-	
-	GlfwLogger.trace("Initializing");
-	if (!glfwInit())
+	NuklearGlfwContextManager::~NuklearGlfwContextManager()
 	{
-		GlfwLogger.critical("Failed to initialize glfw");
-		return 1;
+        nk_glfw3_shutdown();
 	}
-	
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	bool NuklearGlfwContextManager::InitWindowContext()
+	{
+		return mGlfwContext.InitContext();
+	}
+
+	bool NuklearGlfwContextManager::InitGlewContext()
+	{
+		return mGlewContext.InitContext();
+	}
+
+	bool NuklearGlfwContextManager::InitNkContext(GLFWwindow* window)
+	{
+        mNkContext = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS);
+        return mNkContext != nullptr;
+	}
+
+    GlfwContextManager::~GlfwContextManager()
+    {
+        glfwTerminate();
+    }
+
+    bool GlfwContextManager::InitContext()
+    {
+        glfwSetErrorCallback(GlfwErrorCallback);
+        
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, std::get<0>(GlfwVersion));
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, std::get<1>(GlfwVersion));
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
-	GlfwLogger.trace("Apple detected -> configuring for apple");
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        mGlfwLogger.trace("Apple detected -> configuring for apple");
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-	
-	GlfwLogger.trace("Creating window {int}x{int}", windowWidth, windowHeight);
-	win = glfwCreateWindow(windowWidth, windowHeight, "Keyrita", nullptr, nullptr);
-	glfwMakeContextCurrent(win);
 
-	// Glew setup
-    glViewport(0, 0, windowWidth, windowHeight);
-	glewExperimental = 1;
-	GlLogger.trace("Creating glew in experimental mode");
-	GlLogger.trace("Initializing");
-	if (glewInit() != GLEW_OK)
-	{
-		GlLogger.critical("Failed to initialize glew");
-		return 1;
-	}
-	
-	GlLogger.trace("Creating gl context");
-	struct nk_context *ctx = nk_glfw3_init(win, NK_GLFW3_INSTALL_CALLBACKS);
-	
-	// Setup fonts
-	GlLogger.trace("Mapping fonts");
+        return glfwInit() == GLFW_TRUE;
+    }
 
-    struct nk_font_atlas *atlas;
-    nk_glfw3_font_stash_begin(&atlas);
-    struct nk_font *font = nk_font_atlas_add_from_file(atlas, "res/fonts/Comfortaa_Regular.ttf", 22, 0);
-    nk_glfw3_font_stash_end();
-
-    nk_style_load_all_cursors(ctx, atlas->cursors);
-    nk_style_set_font(ctx, &font->handle);
-	
-	SetStyle(ctx, eTheme::Dark);
-
-    while (!glfwWindowShouldClose(win))
+    bool GlewContextManager::InitContext()
     {
-		// Input
-        glfwPollEvents();
+		if (glewInit() != GLEW_OK) 
+		{
+			return false;
+		}
+
+        glewExperimental = 1;
+		return true;
+    }
+}
+
+/// <summary>
+/// Window managers
+/// </summary>
+namespace wgui
+{
+	DebugLogger MainWindow::GlfwLogger("GLFW");
+	DebugLogger MainWindow::GlLogger("GL");
+
+	MainWindow::MainWindow()
+		: mNkContext(), WindowBase()
+	{
+		// Initialize loggers.
+        GlfwLogger.setPrefix("\\[[pn]\\]: ");
+        GlfwLogger.setLevel(Level::LEVEL_TRACE);
+        GlLogger.setPrefix("\\[[pn]\\]: ");
+        GlLogger.setLevel(Level::LEVEL_TRACE);
+	}
+
+	bool MainWindow::CreateWindow(const std::string& title, 
+		int width, int height,
+		bool resizable, 
+		bool visible, bool decorated, bool fullScreen) 
+	{
+        GlfwLogger.trace("Setting error callback");
+        glfwSetErrorCallback(GlfwErrorCallback);
+
+        GlfwLogger.trace("Initializing");
+		if (!mNkContext.InitWindowContext()) 
+		{
+            GlfwLogger.critical("Failed to initialize graphics window");
+			return false;
+		}
+        
+        GlfwLogger.trace("Creating window {int}x{int}", width, height);
+        mWindow = glfwCreateWindow(width, height, title.c_str(), fullScreen? glfwGetPrimaryMonitor() : nullptr, nullptr);
+        glfwMakeContextCurrent(mWindow);
+
+		if (!mNkContext.InitGlewContext())
+		{
+			GlLogger.critical("Failed to initialize glew");
+			return false;
+		}
+
+		mNkContext.InitNkContext(mWindow);
+		nk_context* ctx = mNkContext.GetContext();
+
+        // Glew setup
+        glViewport(0, 0, width, height);
+        
+        // Setup fonts
+        GlLogger.trace("Mapping default font");
+
+        struct nk_font_atlas *atlas;
+        nk_glfw3_font_stash_begin(&atlas);
+        struct nk_font *font = nk_font_atlas_add_from_file(atlas, "res/fonts/DroidSans.ttf", 20, 0);
+        nk_glfw3_font_stash_end();
+
+        nk_style_load_all_cursors(ctx, atlas->cursors);
+        nk_style_set_font(ctx, &font->handle);
+        
+        SetStyle(ctx, eTheme::Dark);
+
+        return true;
+	}
+
+	void MainWindow::NewFrame()
+	{
+		int width, height;
+		GetWindowSize(width, height);
+
+		auto* ctx = mNkContext.GetContext();
+
+        // Input
         nk_glfw3_new_frame();
 
-		if (nk_begin(ctx, "Anything window", nk_rect(0, 0, windowWidth, windowHeight), 0))
-		{
-			nk_layout_row_dynamic(ctx, 120, 1);
-			nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
+        if (nk_begin(ctx, "Anything window", nk_rect(0, 0, width, height), 0))
+        {
+            nk_layout_row_dynamic(ctx, 120, 1);
+            nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
 
-			nk_layout_row_dynamic(ctx, 30, 2);
-			nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
-			nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
+            nk_layout_row_dynamic(ctx, 30, 2);
+            nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
+            nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
 
-			nk_layout_row_dynamic(ctx, 30, 1);
-			if (nk_button_label(ctx, "button"))
-			{
-				std::cout << "Pressed button\n";
-			}
-		}
-		nk_end(ctx);
-		
-		// Draw
-		glClear(GL_COLOR_BUFFER_BIT);
-		nk_glfw3_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-		glfwSwapBuffers(win);
+            nk_layout_row_dynamic(ctx, 30, 1);
+            if (nk_button_label(ctx, "button"))
+            {
+                std::cout << "Pressed button\n";
+            }
+        }
+        nk_end(ctx);
+        
+        // Draw
+        glClear(GL_COLOR_BUFFER_BIT);
+        nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
+        glfwSwapBuffers(mWindow);
+        glfwPollEvents();
 	}
-	
-	GlfwLogger.trace("Stopping application");
-	nk_glfw3_shutdown();
-	glfwTerminate();
 
-	return 0;
+	WindowBase::WindowBase()
+		: mWindow(nullptr), mWindowTitle()
+	{
+	}
+
+	WindowBase::~WindowBase()
+	{
+		glfwDestroyWindow(mWindow);
+	}
+
+	void WindowBase::SetWindowSize(int width, int height)
+	{
+		glfwSetWindowSize(mWindow, width, height);
+	}
+
+	void WindowBase::GetWindowSize(int& width, int& height)
+	{
+		glfwGetWindowSize(mWindow, &width, &height);
+	}
+
+	void WindowBase::SetWindowPos(int x, int y)
+	{
+		glfwSetWindowPos(mWindow, x, y);
+	}
+
+	void WindowBase::GetWindowPos(int& x, int& y)
+	{
+		glfwGetWindowPos(mWindow, &x, &y);
+	}
+
+	void WindowBase::SetWindowSizeLimits(int minWidth, int minHeight, int maxWidth, int maxHeight)
+	{
+		glfwSetWindowSizeLimits(mWindow, minWidth, minHeight, maxWidth, maxHeight);
+	}
+
+	void WindowBase::SetWindowTitle(const std::string& title)
+	{
+		this->mWindowTitle = title;
+		glfwSetWindowTitle(mWindow, title.c_str());
+	}
+
+	bool WindowBase::GetWindowFocused()
+	{
+		return glfwGetWindowAttrib(mWindow, GLFW_FOCUSED);
+	}
+
+	bool WindowBase::GetWindowVisible()
+	{
+		return glfwGetWindowAttrib(mWindow, GLFW_VISIBLE);
+	}
+
+	bool WindowBase::GetWindowResizable()
+	{
+		return glfwGetWindowAttrib(mWindow, GLFW_RESIZABLE);
+	}
+
+	bool WindowBase::GetWindowDecorated()
+	{
+		return glfwGetWindowAttrib(mWindow, GLFW_DECORATED);
+	}
+
+	void WindowBase::CloseWindow()
+	{
+		glfwSetWindowShouldClose(mWindow, GLFW_TRUE);
+	}
+
+	void WindowBase::CancelWindowClose()
+	{
+		glfwSetWindowShouldClose(mWindow, GLFW_FALSE);
+	}
+
+	bool WindowBase::Closing()
+	{
+		return glfwWindowShouldClose(mWindow);
+	}
 }

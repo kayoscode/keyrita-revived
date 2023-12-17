@@ -38,7 +38,7 @@ FetchContent_GetProperties(debug_logger)
 add_subdirectory(${debug_logger_SOURCE_DIR})
 FetchContent_GetProperties(glfw3)
 add_subdirectory(${glfw3_SOURCE_DIR})
-add_subdirectory(window)
+add_subdirectory(gui)
 
 file (GLOB SRC
     "*cpp"
@@ -52,7 +52,7 @@ file (GLOB HEADER_FILES
 include_directories(include)
 add_executable(${EXE_NAME} ${SRC} ${HEADER_FILES})
 
-target_link_libraries(${EXE_NAME} DebugLogger win_lib)
+target_link_libraries(${EXE_NAME} DebugLogger wgui)
 
 file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 # Copy glew dll if on windows
