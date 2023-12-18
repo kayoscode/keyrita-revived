@@ -39,6 +39,7 @@ namespace wgui
         bool InitWindowContext();
         bool InitGlewContext();
         bool InitNkContext(GLFWwindow* window);
+        inline nk_context const* GetContext() const { return mNkContext; }
         inline nk_context* GetContext() { return mNkContext; }
 
     private:

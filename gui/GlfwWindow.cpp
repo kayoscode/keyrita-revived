@@ -1,5 +1,6 @@
 #include "include/inc_nuk.h"
 #include "Window.h"
+#include "OperatingSystem.h"
 
 namespace 
 {
@@ -194,10 +195,10 @@ namespace wgui
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, std::get<1>(GlfwVersion));
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE__
-        mGlfwLogger.trace("Apple detected -> configuring for apple");
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+		if (OperatingSystem::GetOperatingSystem() == eOsType::MacOS)
+		{
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		}
 
         return glfwInit() == GLFW_TRUE;
     }
@@ -223,7 +224,7 @@ namespace wgui
 	DebugLogger MainWindow::GlLogger("GL");
 
 	MainWindow::MainWindow()
-		: mNkContext(), WindowBase()
+		: WindowBase()
 	{
 		// Initialize loggers.
         GlfwLogger.setPrefix("\\[[pn]\\]: ");
@@ -257,8 +258,14 @@ namespace wgui
 			return false;
 		}
 
+		GlfwLogger.trace("Creating nk context");
 		mNkContext.InitNkContext(mWindow);
 		nk_context* ctx = mNkContext.GetContext();
+		if (ctx == nullptr)
+		{
+			GlfwLogger.critical("Failed to initialize nk");
+			return false;
+		}
 
         // Glew setup
         glViewport(0, 0, width, height);
@@ -274,7 +281,7 @@ namespace wgui
         nk_style_load_all_cursors(ctx, atlas->cursors);
         nk_style_set_font(ctx, &font->handle);
         
-        SetStyle(ctx, eTheme::Dark);
+        SetStyle(ctx, eTheme::Red);
 
         return true;
 	}
@@ -308,13 +315,65 @@ namespace wgui
         
         // Draw
         glClear(GL_COLOR_BUFFER_BIT);
-        nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
+        nk_glfw3_render(NK_ANTI_ALIASING_OFF, MaxVertexBuffer, MaxElementBuffer);
         glfwSwapBuffers(mWindow);
         glfwPollEvents();
 	}
 
+	bool WindowInput::IsKeyDown(nk_keys key) const
+	{
+		return mWindow->mNkContext.GetContext()->input.keyboard.keys[key].down;
+	}
+
+	bool WindowInput::IsKeyClicked(nk_keys key) const
+	{
+		return mWindow->mNkContext.GetContext()->input.keyboard.keys[key].clicked;
+	}
+
+	bool WindowInput::IsMouseButtonDown(nk_buttons button) const
+	{
+		return mWindow->mNkContext.GetContext()->input.mouse.buttons[button].clicked;
+	}
+
+	bool WindowInput::IsMouseButtonClicked(nk_buttons button) const
+	{
+		return mWindow->mNkContext.GetContext()->input.mouse.buttons[button].clicked;
+	}
+
+	void WindowInput::GetKeyboardText(std::string& resultText) const
+	{
+		nk_context const* ctx = mWindow->mNkContext.GetContext();
+
+		resultText.clear();
+		resultText = std::string(ctx->input.keyboard.text, ctx->input.keyboard.text_len);
+	}
+
+	void WindowInput::GetMouseDelta(int& deltaX, int& deltaY) const
+	{
+		deltaX = mWindow->mNkContext.GetContext()->input.mouse.delta.x;
+		deltaY = mWindow->mNkContext.GetContext()->input.mouse.delta.y;
+	}
+
+	void WindowInput::GetMousePos(int& posX, int& posY) const
+	{
+		posX = mWindow->mNkContext.GetContext()->input.mouse.pos.x;
+		posY = mWindow->mNkContext.GetContext()->input.mouse.pos.y;
+	}
+
+	void WindowInput::GetMousePrevPos(int& posX, int& posY) const
+	{
+		posX = mWindow->mNkContext.GetContext()->input.mouse.prev.x;
+		posY = mWindow->mNkContext.GetContext()->input.mouse.prev.y;
+	}
+
+	void WindowInput::GetMouseScrollDelta(int& deltaX, int& deltaY) const
+	{
+		deltaX = mWindow->mNkContext.GetContext()->input.mouse.scroll_delta.x;
+		deltaY = mWindow->mNkContext.GetContext()->input.mouse.scroll_delta.y;
+	}
+
 	WindowBase::WindowBase()
-		: mWindow(nullptr), mWindowTitle()
+		: mWindow(nullptr), mWindowTitle(), mNkContext()
 	{
 	}
 
@@ -328,7 +387,7 @@ namespace wgui
 		glfwSetWindowSize(mWindow, width, height);
 	}
 
-	void WindowBase::GetWindowSize(int& width, int& height)
+	void WindowBase::GetWindowSize(int& width, int& height) const
 	{
 		glfwGetWindowSize(mWindow, &width, &height);
 	}
@@ -338,7 +397,7 @@ namespace wgui
 		glfwSetWindowPos(mWindow, x, y);
 	}
 
-	void WindowBase::GetWindowPos(int& x, int& y)
+	void WindowBase::GetWindowPos(int& x, int& y) const
 	{
 		glfwGetWindowPos(mWindow, &x, &y);
 	}
@@ -354,22 +413,22 @@ namespace wgui
 		glfwSetWindowTitle(mWindow, title.c_str());
 	}
 
-	bool WindowBase::GetWindowFocused()
+	bool WindowBase::GetWindowFocused() const
 	{
 		return glfwGetWindowAttrib(mWindow, GLFW_FOCUSED);
 	}
 
-	bool WindowBase::GetWindowVisible()
+	bool WindowBase::GetWindowVisible() const
 	{
 		return glfwGetWindowAttrib(mWindow, GLFW_VISIBLE);
 	}
 
-	bool WindowBase::GetWindowResizable()
+	bool WindowBase::GetWindowResizable() const
 	{
 		return glfwGetWindowAttrib(mWindow, GLFW_RESIZABLE);
 	}
 
-	bool WindowBase::GetWindowDecorated()
+	bool WindowBase::GetWindowDecorated() const
 	{
 		return glfwGetWindowAttrib(mWindow, GLFW_DECORATED);
 	}
@@ -384,7 +443,7 @@ namespace wgui
 		glfwSetWindowShouldClose(mWindow, GLFW_FALSE);
 	}
 
-	bool WindowBase::Closing()
+	bool WindowBase::Closing() const
 	{
 		return glfwWindowShouldClose(mWindow);
 	}
