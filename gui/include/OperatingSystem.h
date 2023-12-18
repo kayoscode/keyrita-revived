@@ -1,33 +1,32 @@
 #pragma once
 
-
 namespace wgui
 {
-    enum class eOsType
-    {
-        Windows,
-        Linux,
-        // Unsupported
-        MacOS
-    };
+   enum class eOsType
+   {
+      Windows,
+      Linux,
+      // Unsupported
+      MacOS
+   };
 
-    class OperatingSystem
-    {
-    public:
-        static constexpr eOsType GetOperatingSystem()
-        {
+   class OperatingSystem
+   {
+   public:
+      static constexpr eOsType GetOperatingSystem()
+      {
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(__WIN32)
-            return eOsType::Windows;
+         return eOsType::Windows;
 #endif
 
 #if defined(__linux__)
-            return eOsType::Linux;
+         return eOsType::Linux;
 #endif
 
 #if defined(__APPLE__) || defined(__MACH__)
 #error MacOS untested and unsupported;
 #endif
-            return eOsType::MacOS;
-        }
-    };
+         return eOsType::MacOS;
+      }
+   };
 }
