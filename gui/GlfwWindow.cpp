@@ -332,7 +332,9 @@ namespace wgui
       nk_style_load_all_cursors(ctx, atlas->cursors);
       nk_style_set_font(ctx, &font->handle);
 
-      SetStyle(ctx, eTheme::Red);
+      SetStyle(ctx, eTheme::Dark);
+
+      glfwSwapInterval(1);
 
       return true;
    }
