@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-set(EXE_NAME "nuc_gui")
+set(EXE_NAME "keyrita")
 project(${EXE_NAME} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -28,9 +28,6 @@ FetchContent_Declare(
 FetchContent_Populate(glfw3)
 message(STATUS "glfw loc:" ${glfw3_SOURCE_DIR})
 
-#list(APPEND CMAKE_PREFIX_PATH "./glew")
-#find_package(GLEW REQUIRED)
-
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 
@@ -41,21 +38,25 @@ add_subdirectory(${glfw3_SOURCE_DIR})
 add_subdirectory(gui)
 
 file (GLOB SRC
-    "*cpp"
+    "*.cpp"
 )
 
 file (GLOB HEADER_FILES
     "include/*.h"    
-    "include/*.hpp"
 )
 
-include_directories(include)
 add_executable(${EXE_NAME} ${SRC} ${HEADER_FILES})
 
-target_link_libraries(${EXE_NAME} DebugLogger wgui)
+target_include_directories(${EXE_NAME} PUBLIC include)
+target_link_libraries(${EXE_NAME} wgui DebugLogger)
 
 file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # Copy glew dll if on windows
 if (WIN32)
-	file (COPY ${glew_BINARY_DIR}/bin/glew-sharedd.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+	add_custom_command(TARGET ${EXE_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${glew_BINARY_DIR}/bin/glew-sharedd.dll "${CMAKE_CURRENT_BINARY_DIR}"
+		COMMENT "Copy dll file to ${CMAKE_CURRENT_BINARY_DIR} directory" VERBATIM
+	)
 endif()

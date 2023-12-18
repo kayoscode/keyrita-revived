@@ -1,6 +1,22 @@
-#include "include/inc_nuk.h"
+#include "NuklearWindowRenderer.h"
 #include "Window.h"
 #include "OperatingSystem.h"
+
+#include "GL/glew.h"
+
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_KEYSTATE_BASED_INPUT
+
+#define NK_GLFW_GL3_IMPLEMENTATION
+#define NK_IMPLEMENTATION
+#include "nuklear.h"
+#include "nuklear_glfw_gl3.h"
 
 namespace 
 {
@@ -286,7 +302,7 @@ namespace wgui
         return true;
 	}
 
-	void MainWindow::NewFrame()
+	void MainWindow::NewFrame(NuklearWindowRendererBase* layoutRenderer)
 	{
 		int width, height;
 		GetWindowSize(width, height);
@@ -295,27 +311,15 @@ namespace wgui
 
         // Input
         nk_glfw3_new_frame();
+		float delta = mNkContext.GetContext()->delta_time_seconds;
+		layoutRenderer->RenderStart(this, ctx, delta);
+		layoutRenderer->Render(this, ctx, delta);
 
-        if (nk_begin(ctx, "Anything window", nk_rect(0, 0, width, height), 0))
-        {
-            nk_layout_row_dynamic(ctx, 120, 1);
-            nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
-
-            nk_layout_row_dynamic(ctx, 30, 2);
-            nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
-            nk_label(ctx, "Hello, World", NK_TEXT_CENTERED);
-
-            nk_layout_row_dynamic(ctx, 30, 1);
-            if (nk_button_label(ctx, "button"))
-            {
-                std::cout << "Pressed button\n";
-            }
-        }
-        nk_end(ctx);
-        
         // Draw
         glClear(GL_COLOR_BUFFER_BIT);
         nk_glfw3_render(NK_ANTI_ALIASING_OFF, MaxVertexBuffer, MaxElementBuffer);
+		layoutRenderer->RenderFinish(this, ctx, delta);
+
         glfwSwapBuffers(mWindow);
         glfwPollEvents();
 	}
@@ -448,3 +452,4 @@ namespace wgui
 		return glfwWindowShouldClose(mWindow);
 	}
 }
+

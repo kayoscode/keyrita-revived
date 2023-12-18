@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Window.h"
+struct nk_context;
 
 namespace wgui
 {
+    class WindowBase;
+
     /// <summary>
     /// Base class for all nuklear window render handlers.
     /// The implementation of this class can be as simple as just drawing a textbox or even doing nothing
@@ -25,9 +27,22 @@ namespace wgui
     class NuklearWindowRendererBase
     {
     public:
-        virtual void Render(WindowBase const& window, float delta) = 0;
-        virtual void RenderStart(WindowBase const& window, float delta) = 0;
-        virtual void RenderFinish(WindowBase const& window, float delta) = 0;
+        virtual void RenderStart(WindowBase const* window, nk_context* ctx, float delta) = 0;
+        virtual void Render(WindowBase const* window, nk_context* ctx, float delta) = 0;
+        virtual void RenderFinish(WindowBase const* window, nk_context* ctx, float delta) = 0;
+
+    private:
+    };
+
+    /// <summary>
+    /// Renders the gui based on the controls and layouts given by the developer.
+    /// </summary>
+    class NuklearWindowRendererGui : public NuklearWindowRendererBase
+    {
+    public:
+        void RenderStart(WindowBase const* window, nk_context* ctx, float delta) override;
+        void Render(WindowBase const* window, nk_context* ctx, float delta) override;
+        void RenderFinish(WindowBase const* window, nk_context* ctx, float delta) override;
 
     private:
     };

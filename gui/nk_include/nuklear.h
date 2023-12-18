@@ -4342,7 +4342,7 @@ NK_API void nk_textedit_redo(struct nk_text_edit*);
 
     To use the command queue to draw your own widgets you can access the
     command buffer of each window by calling `nk_window_get_canvas` after
-    previously having called `nk_begin`:
+    previously having called `nk_begin`:/
 
         void draw_red_rectangle_widget(struct nk_context *ctx)
         {

@@ -1,6 +1,6 @@
 set(PROJ_NAME wgui)
 file (GLOB SRC
-    "*cpp"
+    "*.cpp"
 )
 
 file (GLOB HEADER_FILES
@@ -13,17 +13,17 @@ FetchContent_GetProperties(debug_logger)
 FetchContent_GetProperties(glfw3)
 
 FetchContent_Declare(glew
-  GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
-  GIT_TAG glew-cmake-2.2.0
-  GIT_PROGRESS TRUE
+	GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
+	GIT_TAG glew-cmake-2.2.0
+	GIT_PROGRESS TRUE
 )
 
 FetchContent_GetProperties(glew)
 if(NOT glew_POPULATED)
-  FetchContent_Populate(glew)
-  option(glew-cmake_BUILD_SHARED "Build the shared glew library" ON)
-  set(glew-cmake_BUILD_SHARED ON)
-  add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
+	FetchContent_Populate(glew)
+	option(glew-cmake_BUILD_SHARED "Build the shared glew library" ON)
+	set(glew-cmake_BUILD_SHARED ON)
+	add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 message("GLEW include " ${glew_SOURCE_DIR}/include)
 message("GLEW bin " ${glew_BINARY_DIR}/include)
