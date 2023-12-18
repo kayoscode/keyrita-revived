@@ -11,7 +11,7 @@ namespace wgui
         MacOS
     };
 
-    static class OperatingSystem
+    class OperatingSystem
     {
     public:
         static constexpr eOsType GetOperatingSystem()

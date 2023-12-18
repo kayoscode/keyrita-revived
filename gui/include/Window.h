@@ -2,10 +2,10 @@
 #include "DebugLogger.h"
 #include "ContextManager.h"
 
+#include "include_nuk.h"
+
 class GLFWwindow;
 class GLFWmonitor;
-enum nk_keys;
-enum nk_buttons;
 
 namespace wgui 
 {
@@ -102,7 +102,7 @@ namespace wgui
         /// the user calls functions from this class.
         /// </summary>
         /// <param name="window"></param>
-        WindowInput(const WindowBase const* window)
+        WindowInput(const WindowBase* window)
             : mWindow(window) { }
 
         /// <summary>
