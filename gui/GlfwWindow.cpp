@@ -31,7 +31,8 @@ namespace
 		White,
 		Red,
 		Blue,
-		Dark
+		Dark,
+		Custom
 	};
 
 	static void SetStyle(struct nk_context *ctx, enum eTheme theme)
@@ -165,6 +166,40 @@ namespace
 			table[NK_COLOR_TAB_HEADER] = nk_rgba(48, 83, 111, 255);
 			nk_style_from_table(ctx, table);
 		}
+		else if (theme == eTheme::Custom)
+		{
+			// Darker sunset-inspired theme
+			struct nk_color table[NK_COLOR_COUNT];
+			table[NK_COLOR_TEXT] = nk_rgba(220, 200, 180, 255);               // Text color
+			table[NK_COLOR_WINDOW] = nk_rgba(30, 20, 30, 255);                // Window background color
+			table[NK_COLOR_HEADER] = nk_rgba(100, 50, 25, 255);               // Header background color
+			table[NK_COLOR_BORDER] = nk_rgba(50, 25, 12, 255);                // Border color
+			table[NK_COLOR_BUTTON] = nk_rgba(100, 50, 25, 255);               // Button background color
+			table[NK_COLOR_BUTTON_HOVER] = nk_rgba(120, 70, 35, 255);         // Button hover background color
+			table[NK_COLOR_BUTTON_ACTIVE] = nk_rgba(140, 90, 45, 255);        // Button active background color
+			table[NK_COLOR_TOGGLE] = nk_rgba(100, 50, 25, 255);               // Toggle background color
+			table[NK_COLOR_TOGGLE_HOVER] = nk_rgba(120, 70, 35, 255);         // Toggle hover background color
+			table[NK_COLOR_TOGGLE_CURSOR] = nk_rgba(140, 90, 45, 255);        // Toggle cursor color
+			table[NK_COLOR_SELECT] = nk_rgba(30, 20, 30, 255);               // Select background color
+			table[NK_COLOR_SELECT_ACTIVE] = nk_rgba(100, 50, 25, 255);        // Select active background color
+			table[NK_COLOR_SLIDER] = nk_rgba(30, 20, 30, 255);               // Slider background color
+			table[NK_COLOR_SLIDER_CURSOR] = nk_rgba(100, 50, 25, 255);        // Slider cursor color
+			table[NK_COLOR_SLIDER_CURSOR_HOVER] = nk_rgba(120, 70, 35, 255);// Slider cursor hover color
+			table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = nk_rgba(140, 90, 45, 255);// Slider cursor active color
+			table[NK_COLOR_PROPERTY] = nk_rgba(100, 50, 25, 255);            // Property background color
+			table[NK_COLOR_EDIT] = nk_rgba(30, 20, 30, 255);                 // Edit background color
+			table[NK_COLOR_EDIT_CURSOR] = nk_rgba(140, 90, 45, 255);        // Edit cursor color
+			table[NK_COLOR_COMBO] = nk_rgba(30, 20, 30, 255);                // Combo background color
+			table[NK_COLOR_CHART] = nk_rgba(100, 50, 25, 255);               // Chart background color
+			table[NK_COLOR_CHART_COLOR] = nk_rgba(140, 90, 45, 255);        // Chart color
+			table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = nk_rgba(255, 170, 0, 255);// Chart highlight color
+			table[NK_COLOR_SCROLLBAR] = nk_rgba(25, 15, 20, 255);            // Scrollbar background color
+			table[NK_COLOR_SCROLLBAR_CURSOR] = nk_rgba(100, 50, 25, 255);    // Scrollbar cursor color
+			table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = nk_rgba(120, 70, 35, 255); // Scrollbar cursor hover color
+			table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = nk_rgba(140, 90, 45, 255); // Scrollbar cursor active color
+			table[NK_COLOR_TAB_HEADER] = nk_rgba(30, 20, 30, 255);           // Tab header background color
+			nk_style_from_table(ctx, table);
+        }
 		else
 		{
 			nk_style_default(ctx);
@@ -317,7 +352,7 @@ namespace wgui
 
         // Draw
         glClear(GL_COLOR_BUFFER_BIT);
-        nk_glfw3_render(NK_ANTI_ALIASING_OFF, MaxVertexBuffer, MaxElementBuffer);
+        nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
 		layoutRenderer->RenderFinish(this, ctx, delta);
 
         glfwSwapBuffers(mWindow);
