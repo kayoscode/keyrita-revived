@@ -6,11 +6,11 @@
 
 namespace wgui
 {
-   void NuklearWindowRendererGui::RenderStart(WindowBase const* window, nk_context* ctx, float delta)
+   void WindowRendererGui::RenderStart(WindowBase const* window, nk_context* ctx, float delta)
    {
    }
 
-   void NuklearWindowRendererGui::Render(WindowBase const* window, nk_context* ctx, float delta)
+   void WindowRendererGui::Render(WindowBase const* window, nk_context* ctx, float delta)
    {
       int width, height;
       window->GetWindowSize(width, height);
@@ -54,7 +54,7 @@ namespace wgui
       nk_end(ctx);
    }
 
-   void NuklearWindowRendererGui::RenderFinish(WindowBase const* window, nk_context* context, float delta)
+   void WindowRendererGui::RenderFinish(WindowBase const* window, nk_context* context, float delta)
    {
    }
 }

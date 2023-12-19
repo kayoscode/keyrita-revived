@@ -9,7 +9,7 @@ class GLFWmonitor;
 
 namespace wgui
 {
-   class NuklearWindowRendererBase;
+   class WindowRenderer;
 
    /// <summary>
    /// Abstract class for handling basic operations a window can do.
@@ -51,7 +51,7 @@ namespace wgui
       /// <summary>
       /// Renders the next frame to the screen.
       /// </summary>
-      virtual void NewFrame(NuklearWindowRendererBase* renderer) = 0;
+      virtual void NewFrame(WindowRenderer* renderer) = 0;
 
    protected:
       static constexpr int MaxVertexBuffer = 512 * 1024;
@@ -79,7 +79,7 @@ namespace wgui
          bool resizable = true,
          bool visible = true, bool decorated = true, bool fullScreen = false) override;
 
-      void NewFrame(NuklearWindowRendererBase* renderer) override;
+      void NewFrame(WindowRenderer* renderer) override;
 
    private:
       static DebugLogger GlfwLogger;

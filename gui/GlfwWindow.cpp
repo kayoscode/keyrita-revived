@@ -339,7 +339,7 @@ namespace wgui
       return true;
    }
 
-   void MainWindow::NewFrame(NuklearWindowRendererBase* layoutRenderer)
+   void MainWindow::NewFrame(WindowRenderer* layoutRenderer)
    {
       int width, height;
       GetWindowSize(width, height);

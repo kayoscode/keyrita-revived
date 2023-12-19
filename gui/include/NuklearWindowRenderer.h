@@ -7,6 +7,17 @@ namespace wgui
    class WindowBase;
 
    /// <summary>
+   /// Purely abstract class designed to give developers a tool to program a generic ui layout.
+   /// When rendered to the screen, even control is rendered together. They should be grouped up and only drawn within
+   /// the screen space they were allocated for.
+   /// The back end of the gui renderer will handle this part!
+   /// </summary>
+   class GuiControl
+   {
+
+   };
+
+   /// <summary>
    /// Base class for all nuklear window render handlers.
    /// The implementation of this class can be as simple as just drawing a textbox or even doing nothing
    /// and it can be as complex as holding a structured list of controls and rendering them and updating them.
@@ -24,7 +35,7 @@ namespace wgui
    /// 5. Overridable callbacks to all windows events.
    /// 6. The rest is up to the implementer!
    /// </summary>
-   class NuklearWindowRendererBase
+   class WindowRenderer
    {
    public:
       virtual void RenderStart(WindowBase const* window, nk_context* ctx, float delta) = 0;
@@ -37,7 +48,7 @@ namespace wgui
    /// <summary>
    /// Renders the gui based on the controls and layouts given by the developer.
    /// </summary>
-   class NuklearWindowRendererGui : public NuklearWindowRendererBase
+   class WindowRendererGui : public WindowRenderer
    {
    public:
       void RenderStart(WindowBase const* window, nk_context* ctx, float delta) override;

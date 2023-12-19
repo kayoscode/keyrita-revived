@@ -12,7 +12,7 @@ int main()
    mainWindow.CreateWindow("Keyrita", 1920, 1080, false, true, true, false);
    mainWindow.SetWindowSizeLimits(800, 600, -1, -1);
 
-   NuklearWindowRendererGui renderer;
+   WindowRendererGui renderer;
 
    Timer t;
    int frameCount = 0;
