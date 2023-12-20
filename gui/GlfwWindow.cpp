@@ -334,7 +334,7 @@ namespace wgui
 
       SetStyle(ctx, eTheme::Dark);
 
-      glfwSwapInterval(1);
+      glfwSwapInterval(0);
 
       return true;
    }
