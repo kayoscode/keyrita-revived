@@ -14,6 +14,16 @@ int main()
 
    WindowRendererGui renderer;
 
+   GuiWindow primaryWindow("Keyrita Main", 0, 0, 1920, 1080);
+   GuiLayoutRowDynamic layout(40);
+   GuiLabel label("Here is a basic label!", eTextAlignmentFlags::FullyCentered);
+   layout.AddControl(&label);
+   layout.AddControl(&label);
+   layout.AddControl(&label);
+
+   primaryWindow.AddControl(&layout);
+   renderer.AddWindow(&primaryWindow);
+
    Timer t;
    int frameCount = 0;
    while (!mainWindow.Closing())

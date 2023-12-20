@@ -6,55 +6,59 @@
 
 namespace wgui
 {
-   void WindowRendererGui::RenderStart(WindowBase const* window, nk_context* ctx, float delta)
+   void WindowRendererGui::RenderStart(WindowBase* const window, nk_context* context)
    {
    }
 
-   void WindowRendererGui::Render(WindowBase const* window, nk_context* ctx, float delta)
+   void WindowRendererGui::Render(WindowBase* const window, nk_context* context)
    {
-      int width, height;
-      window->GetWindowSize(width, height);
-
-      enum { EASY, HARD };
-      static int op = EASY;
-      static float value = 0.6f;
-      static int i = 20;
-
-      if (nk_begin_titled(ctx, "Show", "title", nk_rect(0, 0, width, height),
-         NK_WINDOW_NO_SCROLLBAR)) {
-         // fixed widget pixel width
-         nk_layout_row_static(ctx, 30, 80, 1);
-         if (nk_button_label(ctx, "button")) {
-            // event handling
-         }
-
-         // fixed widget window ratio width
-
-         nk_layout_row_dynamic(ctx, 200, 2);
-         if (nk_group_begin(ctx, "Group", 0))
-         {
-            float ratios[] = { .25, .75 };
-            nk_layout_row(ctx, NK_DYNAMIC, 40, 2, ratios);
-            nk_label(ctx, "Volume:", NK_TEXT_LEFT);
-            nk_slider_float(ctx, 0, &value, 1.0f, 0.01f);
-
-            nk_layout_row_dynamic(ctx, 30, 2);
-            if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
-            if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;
-
-            nk_group_end(ctx);
-         }
-
-         // custom widget pixel width
-         //nk_layout_row_template_begin(ctx, 40);
-         //nk_layout_row_template_push_dynamic(ctx);
-         //nk_layout_row_template_push_dynamic(ctx);
-         //nk_layout_row_template_end(ctx);
+      for each (const auto& nextWindow in mWindows)
+      {
+         nextWindow->Render(window, context);
       }
-      nk_end(ctx);
    }
 
-   void WindowRendererGui::RenderFinish(WindowBase const* window, nk_context* context, float delta)
+   void WindowRendererGui::RenderFinish(WindowBase* const window, nk_context* context)
    {
    }
+
+   void GuiWindow::Render(WindowBase* window, nk_context* context)
+   {
+      // 0 flags for now! We will have to fix that.
+      if (nk_begin_titled(context, mName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
+      {
+         for each (const auto& control in mControls)
+         {
+            control->Render(window, context);
+         }
+      }
+      nk_end(context);
+   }
+
+#pragma region Gui Controls
+
+   void GuiLabel::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_label(context, mText.c_str(), static_cast<nk_flags>(mTextAlignment));
+   }
+
+#pragma endregion
+
+#pragma region Layout Row Implementations
+
+   void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_layout_row_dynamic(context, mHeight, std::max(static_cast<int>(mControls.size()), mMinCols));
+      RenderControls(window, context);
+      //nk_layout_row_end(context);
+   }
+
+   void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_layout_row_static(context, mHeight, mMinCols, std::max(static_cast<int>(mControls.size()), mMinCols));
+      RenderControls(window, context);
+      //nk_layout_row_end(context);
+   }
+
+#pragma endregion
 }

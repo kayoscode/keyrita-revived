@@ -1542,7 +1542,15 @@ NK_API struct nk_window *nk_window_find(struct nk_context *ctx, const char *name
 ///
 /// Parameter   | Description
 /// ------------|-----------------------------------------------------------
-/// __ctx__     | Must point to an previously initialized `nk_context` struct
+/// __ctx__     | Must point to an previously 
+      if (mWrap)
+      {
+         //nk_label_wrap(context, mText.)
+      }
+      else
+      {
+      }
+initialized `nk_context` struct
 ///
 /// Returns a `nk_rect` struct with window upper left window position and size
 */

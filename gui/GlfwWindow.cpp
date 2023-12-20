@@ -349,13 +349,13 @@ namespace wgui
       // Input
       nk_glfw3_new_frame();
       float delta = mNkContext.GetContext()->delta_time_seconds;
-      layoutRenderer->RenderStart(this, ctx, delta);
-      layoutRenderer->Render(this, ctx, delta);
+      layoutRenderer->RenderStart(this, ctx);
+      layoutRenderer->Render(this, ctx);
 
       // Draw
       glClear(GL_COLOR_BUFFER_BIT);
       nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
-      layoutRenderer->RenderFinish(this, ctx, delta);
+      layoutRenderer->RenderFinish(this, ctx);
 
       glfwSwapBuffers(mWindow);
       glfwPollEvents();
