@@ -97,9 +97,9 @@ namespace wgui
       void AddControl(GuiControlBase* newControl)
       {
          // Make sure it's not another layout row. These cannot be nested.
-         _ASSERT((newControl->GetControlType() != eControlType::LayoutRow) &&
-                 (newControl->GetControlType() != eControlType::Menu)
-         );
+         //_ASSERT((newControl->GetControlType() != eControlType::LayoutRow) &&
+                 //(newControl->GetControlType() != eControlType::Menu)
+         //);
 
          mControls.push_back(newControl);
       }

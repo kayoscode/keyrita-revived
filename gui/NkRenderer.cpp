@@ -12,7 +12,7 @@ namespace wgui
 
    void WindowRendererGui::Render(WindowBase* const window, nk_context* context)
    {
-      for each (const auto& nextWindow in mWindows)
+      for (const auto& nextWindow : mWindows)
       {
          nextWindow->Render(window, context);
       }
@@ -27,7 +27,7 @@ namespace wgui
       // 0 flags for now! We will have to fix that.
       if (nk_begin_titled(context, mName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
       {
-         for each (const auto& control in mControls)
+         for (const auto& control : mControls)
          {
             control->Render(window, context);
          }
