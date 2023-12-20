@@ -12,7 +12,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     debug_logger
-    GIT_REPOSITORY https://github.com/youngbrycecode/DebugLogger.git
+    GIT_REPOSITORY  https://github.com/youngbrycecode/DebugLogger.git
     GIT_TAG         release1.0
 )
 
@@ -22,7 +22,7 @@ message(STATUS "debug_logger loc:" ${debug_logger_SOURCE_DIR})
 FetchContent_Declare(
     glfw3
     GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.3.8
+    GIT_TAG        3.3.9
 )
 
 FetchContent_Populate(glfw3)

@@ -7,14 +7,25 @@ namespace wgui
    class WindowBase;
 
    /// <summary>
+   /// Abstract class representing a control. There's a render.
+   /// All the styling for the control must be done here and all the 
+   /// </summary>
+   class GuiControl
+   {
+   public:
+   private:
+   };
+
+   /// <summary>
    /// Purely abstract class designed to give developers a tool to program a generic ui layout.
    /// When rendered to the screen, even control is rendered together. They should be grouped up and only drawn within
    /// the screen space they were allocated for.
    /// The back end of the gui renderer will handle this part!
    /// </summary>
-   class GuiControl
+   class GuiLayout
    {
-
+   public:
+   private:
    };
 
    /// <summary>
