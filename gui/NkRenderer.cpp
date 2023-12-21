@@ -50,14 +50,12 @@ namespace wgui
    {
       nk_layout_row_dynamic(context, mHeight, std::max(static_cast<int>(mControls.size()), mMinCols));
       RenderControls(window, context);
-      //nk_layout_row_end(context);
    }
 
    void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
    {
       nk_layout_row_static(context, mHeight, mMinCols, std::max(static_cast<int>(mControls.size()), mMinCols));
       RenderControls(window, context);
-      //nk_layout_row_end(context);
    }
 
 #pragma endregion

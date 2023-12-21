@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.26)
 set(EXE_NAME "keyrita")
 project(${EXE_NAME} LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -36,6 +36,7 @@ add_subdirectory(${debug_logger_SOURCE_DIR})
 FetchContent_GetProperties(glfw3)
 add_subdirectory(${glfw3_SOURCE_DIR})
 add_subdirectory(gui)
+add_subdirectory(xml-parser)
 
 file (GLOB SRC
     "*.cpp"
@@ -48,7 +49,7 @@ file (GLOB HEADER_FILES
 add_executable(${EXE_NAME} ${SRC} ${HEADER_FILES})
 
 target_include_directories(${EXE_NAME} PUBLIC include)
-target_link_libraries(${EXE_NAME} wgui DebugLogger)
+target_link_libraries(${EXE_NAME} wgui DebugLogger xml_parser)
 
 file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

@@ -3,8 +3,11 @@
 #include "NuklearWindowRenderer.h"
 
 #include "include_nuk.h"
+#include "XmlFile.h"
+#include <any>
 
 using namespace wgui;
+using namespace xml;
 
 int main()
 {
