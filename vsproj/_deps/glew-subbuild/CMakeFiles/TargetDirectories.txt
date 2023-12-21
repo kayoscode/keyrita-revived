@@ -1,3 +1,0 @@
-C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/glew-populate.dir
-C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/ALL_BUILD.dir
-C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/ZERO_CHECK.dir

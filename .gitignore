@@ -2,4 +2,4 @@ build/
 out/
 .vscode/
 .vs/
-.vsproj/
+vsproj/

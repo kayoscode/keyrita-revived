@@ -1,3 +1,0 @@
-C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate.dir
-C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/ALL_BUILD.dir
-C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/ZERO_CHECK.dir
