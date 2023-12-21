@@ -1,0 +1,10 @@
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\8B4EEDA9D4086BBC322E70EB205D8CDA\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild -BC:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

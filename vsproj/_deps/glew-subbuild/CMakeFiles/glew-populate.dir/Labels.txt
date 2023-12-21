@@ -1,0 +1,14 @@
+# Target labels
+ glew-populate
+# Source files and their labels
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/glew-populate
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/874230daebdbeec8d861fbb76bf609e5/glew-populate.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/5f87b13975978511f03e41aac2ab63ce/glew-populate-complete.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-build.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-configure.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-download.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-install.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-mkdir.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-patch.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-test.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-update.rule

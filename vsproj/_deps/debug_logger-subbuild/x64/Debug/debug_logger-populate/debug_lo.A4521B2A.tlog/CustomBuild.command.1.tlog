@@ -1,0 +1,150 @@
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-MKDIR.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -Dcfgdir=/Debug -P C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/tmp/debug_logger-populate-mkdirs.cmake
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-mkdir
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-DOWNLOAD.RULE
+setlocal
+cd C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -P C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/tmp/debug_logger-populate-gitclone.cmake
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-download
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-UPDATE.RULE
+setlocal
+cd C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-src
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -Dcan_fetch=YES -P C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/tmp/debug_logger-populate-gitupdate.cmake
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-PATCH.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-patch
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-CONFIGURE.RULE
+setlocal
+cd C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-configure
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-BUILD.RULE
+setlocal
+cd C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-build
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-INSTALL.RULE
+setlocal
+cd C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-install
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\403E4A276B7FF7AF4938D4C48F58CA14\DEBUG_LOGGER-POPULATE-TEST.RULE
+setlocal
+cd C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-test
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\A38A14F4560C35FBD2C6818F7BCD6970\DEBUG_LOGGER-POPULATE-COMPLETE.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/Debug
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/Debug/debug_logger-populate-complete
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/debug_logger-populate-prefix/src/debug_logger-populate-stamp/Debug/debug_logger-populate-done
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKEFILES\8B4EEDA9D4086BBC322E70EB205D8CDA\DEBUG_LOGGER-POPULATE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\BRYCE\DESKTOP\KEYRITA-REVIVED\VSPROJ\_DEPS\DEBUG_LOGGER-SUBBUILD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild -BC:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild --check-stamp-file C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

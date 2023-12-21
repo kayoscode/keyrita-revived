@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/glew-populate"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/874230daebdbeec8d861fbb76bf609e5/glew-populate.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/5f87b13975978511f03e41aac2ab63ce/glew-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glew-subbuild/CMakeFiles/29ba947e24f12bb8a3e700a2caf81807/glew-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"glew-populate"
+		],
+		"name" : "glew-populate"
+	}
+}

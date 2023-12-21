@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/8b4eeda9d4086bbc322e70eb205d8cda/debug_logger-populate.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/a38a14f4560c35fbd2c6818f7bcd6970/debug_logger-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"debug_logger-populate"
+		],
+		"name" : "debug_logger-populate"
+	}
+}

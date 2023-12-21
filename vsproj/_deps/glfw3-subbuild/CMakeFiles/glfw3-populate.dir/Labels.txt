@@ -1,0 +1,14 @@
+# Target labels
+ glfw3-populate
+# Source files and their labels
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/glfw3-populate
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/5d4541ecf2ced3fdc27b5b9ec6e44947/glfw3-populate.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/45a03bef012abb167a6eefd6b28d263d/glfw3-populate-complete.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-build.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-configure.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-download.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-install.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-mkdir.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-patch.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-test.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/glfw3-subbuild/CMakeFiles/729f1d7f62de92c47ff8ad962ea9a4c1/glfw3-populate-update.rule

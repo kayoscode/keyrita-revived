@@ -1,0 +1,14 @@
+# Target labels
+ debug_logger-populate
+# Source files and their labels
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/debug_logger-populate
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/8b4eeda9d4086bbc322e70eb205d8cda/debug_logger-populate.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/a38a14f4560c35fbd2c6818f7bcd6970/debug_logger-populate-complete.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-build.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-configure.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-download.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-install.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-mkdir.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-patch.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-test.rule
+C:/Users/Bryce/Desktop/keyrita-revived/vsproj/_deps/debug_logger-subbuild/CMakeFiles/403e4a276b7ff7af4938d4c48f58ca14/debug_logger-populate-update.rule

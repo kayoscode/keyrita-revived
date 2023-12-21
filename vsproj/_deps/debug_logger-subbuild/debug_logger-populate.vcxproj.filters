@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\403e4a276b7ff7af4938d4c48f58ca14\debug_logger-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\a38a14f4560c35fbd2c6818f7bcd6970\debug_logger-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\8b4eeda9d4086bbc322e70eb205d8cda\debug_logger-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Bryce\Desktop\keyrita-revived\vsproj\_deps\debug_logger-subbuild\CMakeFiles\debug_logger-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{B7EA2EEB-38DE-3F85-BA2D-F2B38364A7AD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
