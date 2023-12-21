@@ -274,7 +274,7 @@ namespace xml
       /// </summary>
       /// <param name="xmlText"></param>
       /// <returns></returns>
-      static std::unique_ptr<XmlElement> LoadXml(const std::ifstream& xmlText);
+      static std::unique_ptr<XmlElement> LoadXml(const std::istream& xmlText);
 
       enum class eAttributeOrder 
       { 

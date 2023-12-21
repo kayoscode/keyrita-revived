@@ -19,9 +19,7 @@ int main()
 
    GuiWindow primaryWindow("Keyrita Main", 0, 0, 1920, 1080);
    GuiLayoutRowDynamic layout(40);
-   GuiLabel label("Here is a basic label!", eTextAlignmentFlags::FullyCentered);
-   layout.AddControl(&label);
-   layout.AddControl(&label);
+   GuiLabel label("Hello, World!", eTextAlignmentFlags::FullyCentered);
    layout.AddControl(&label);
 
    primaryWindow.AddControl(&layout);
@@ -33,7 +31,7 @@ int main()
    {
       mainWindow.NewFrame(&renderer);
 
-      if (t.milliseconds() >= 5000)
+      if (t.milliseconds() >= 1000)
       {
          std::cout << "Fps: " << frameCount / 5 << "\n";
          frameCount = 0;
