@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.20)
 
 set(EXE_NAME "keyrita")
 project(${EXE_NAME} LANGUAGES CXX)
@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /ZI /Ob0 /Od /RTC1")
+	add_compile_options(/ZI)
 endif()
 
 # External libs
@@ -40,28 +41,22 @@ add_subdirectory(${debug_logger_SOURCE_DIR})
 FetchContent_GetProperties(glfw3)
 add_subdirectory(${glfw3_SOURCE_DIR})
 add_subdirectory(gui)
-add_subdirectory(xml-parser)
 
-file (GLOB SRC
-    "*.cpp"
-)
-
-file (GLOB HEADER_FILES
-    "include/*.h"    
-)
-
-add_executable(${EXE_NAME} ${SRC} ${HEADER_FILES})
+add_executable(${EXE_NAME} "main.cpp")
 
 target_include_directories(${EXE_NAME} PUBLIC include)
-target_link_libraries(${EXE_NAME} wgui DebugLogger xml_parser)
+target_link_libraries(${EXE_NAME} wgui DebugLogger)
+
+set(SOURCE_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/res/gui)
+set(DESTINATION_RESOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/res/gui)
 
 file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-# Copy glew dll if on windows
-if (WIN32)
-	add_custom_command(TARGET ${EXE_NAME}
-		POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy ${glew_BINARY_DIR}/bin/glew-sharedd.dll "${CMAKE_CURRENT_BINARY_DIR}"
-		COMMENT "Copy dll file to ${CMAKE_CURRENT_BINARY_DIR} directory" VERBATIM
-	)
-endif()
+add_custom_target(copy_resources_target
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SOURCE_RESOURCES_DIR} ${DESTINATION_RESOURCES_DIR}
+    COMMENT "Copying gui resources to destination"
+    VERBATIM
+)
+
+# Make the copy target part of the build process
+add_dependencies(${EXE_NAME} copy_resources_target)

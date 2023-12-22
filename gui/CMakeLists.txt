@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 set(PROJ_NAME wgui)
 file (GLOB SRC
     "*.cpp"
@@ -21,17 +23,32 @@ FetchContent_Declare(glew
 FetchContent_GetProperties(glew)
 if(NOT glew_POPULATED)
 	FetchContent_Populate(glew)
-	option(glew-cmake_BUILD_SHARED "Build the shared glew library" ON)
-	set(glew-cmake_BUILD_SHARED ON)
+	option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
+	set(glew-cmake_BUILD_SHARED OFF)
 	add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 message("GLEW include " ${glew_SOURCE_DIR}/include)
 message("GLEW bin " ${glew_BINARY_DIR}/include)
+
+FetchContent_Declare(
+    xmllib
+    GIT_REPOSITORY  https://github.com/zeux/pugixml.git
+    GIT_TAG         latest
+)
+FetchContent_Populate(xmllib)
+
+FetchContent_GetProperties(xmllib)
+message(STATUS "xml lib loc:" ${xmllib_SOURCE_DIR})
+add_subdirectory(${xmllib_SOURCE_DIR} ${xmllib_BINARY_DIR} EXCLUDE_FROM_ALL)
 
 add_library(${PROJ_NAME} ${SRC} ${HEADER_FILES})
 
 # Link glew
 include_directories(${glew_SOURCE_DIR}/include)
 
-target_link_libraries(${PROJ_NAME} DebugLogger glfw libglew_shared ${OPENGL_gl_LIBRARY})
+target_link_libraries(${PROJ_NAME} DebugLogger 
+								   glfw 
+								   libglew_static 
+								   pugixml-static
+								   ${OPENGL_gl_LIBRARY})
 target_include_directories(${PROJ_NAME} PUBLIC include nk_include)

@@ -326,7 +326,7 @@ namespace wgui
 
       struct nk_font_atlas* atlas;
       nk_glfw3_font_stash_begin(&atlas);
-      struct nk_font* font = nk_font_atlas_add_from_file(atlas, "res/fonts/DroidSans.ttf", 20, 0);
+      struct nk_font* font = nk_font_atlas_add_from_file(atlas, "res/fonts/OpenSans-Regular.ttf", 30, 0);
       nk_glfw3_font_stash_end();
 
       nk_style_load_all_cursors(ctx, atlas->cursors);
@@ -334,7 +334,7 @@ namespace wgui
 
       SetStyle(ctx, eTheme::Dark);
 
-      glfwSwapInterval(0);
+      glfwSwapInterval(1);
 
       return true;
    }

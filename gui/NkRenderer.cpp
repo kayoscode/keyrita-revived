@@ -22,7 +22,7 @@ namespace wgui
    {
    }
 
-   void GuiWindow::Render(WindowBase* window, nk_context* context)
+   void GuiLayoutWindow::Render(WindowBase* window, nk_context* context)
    {
       // 0 flags for now! We will have to fix that.
       if (nk_begin_titled(context, mName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
@@ -48,13 +48,13 @@ namespace wgui
 
    void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_dynamic(context, mHeight, std::max(static_cast<int>(mControls.size()), mMinCols));
+      nk_layout_row_dynamic(context, mHeight, std::max(static_cast<int64_t>(mControls.size()), mMinCols));
       RenderControls(window, context);
    }
 
    void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_static(context, mHeight, mMinCols, std::max(static_cast<int>(mControls.size()), mMinCols));
+      nk_layout_row_static(context, mHeight, mColWidth, std::max(static_cast<int64_t>(mControls.size()), mMinCols));
       RenderControls(window, context);
    }
 
