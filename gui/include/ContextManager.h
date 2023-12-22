@@ -4,6 +4,7 @@
 #include <memory>
 
 class nk_context;
+class nk_glfw;
 class GLFWwindow;
 
 namespace wgui
@@ -34,6 +35,7 @@ namespace wgui
    class NuklearGlfwContextManager
    {
    public:
+      NuklearGlfwContextManager();
       ~NuklearGlfwContextManager();
 
       bool InitWindowContext();
@@ -42,10 +44,14 @@ namespace wgui
       inline nk_context const* GetContext() const { return mNkContext; }
       inline nk_context* GetContext() { return mNkContext; }
 
+      inline nk_glfw const* GetGlfw() const { return mNkGlfw.get(); }
+      inline nk_glfw* GetGlfw() { return mNkGlfw.get(); }
+
    private:
       GlfwContextManager mGlfwContext;
       GlewContextManager mGlewContext;
 
       nk_context* mNkContext;
+      std::unique_ptr<nk_glfw> mNkGlfw;
    };
 }

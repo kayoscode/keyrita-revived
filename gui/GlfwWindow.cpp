@@ -212,9 +212,15 @@ namespace
 /// </summary>
 namespace wgui
 {
+   NuklearGlfwContextManager::NuklearGlfwContextManager()
+      : mNkGlfw(std::make_unique<nk_glfw>())
+   {
+      memset(mNkGlfw.get(), 0, sizeof(nk_glfw));
+   }
+
    NuklearGlfwContextManager::~NuklearGlfwContextManager()
    {
-      nk_glfw3_shutdown();
+      nk_glfw3_shutdown(mNkGlfw.get());
    }
 
    bool NuklearGlfwContextManager::InitWindowContext()
@@ -229,7 +235,7 @@ namespace wgui
 
    bool NuklearGlfwContextManager::InitNkContext(GLFWwindow* window)
    {
-      mNkContext = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS);
+      mNkContext = nk_glfw3_init(mNkGlfw.get(), window, NK_GLFW3_INSTALL_CALLBACKS);
       return mNkContext != nullptr;
    }
 
@@ -312,6 +318,8 @@ namespace wgui
       GlfwLogger.trace("Creating nk context");
       mNkContext.InitNkContext(mWindow);
       nk_context* ctx = mNkContext.GetContext();
+      nk_glfw* nkGlfw = mNkContext.GetGlfw();
+
       if (ctx == nullptr)
       {
          GlfwLogger.critical("Failed to initialize nk");
@@ -325,16 +333,16 @@ namespace wgui
       GlLogger.trace("Mapping default font");
 
       struct nk_font_atlas* atlas;
-      nk_glfw3_font_stash_begin(&atlas);
+      nk_glfw3_font_stash_begin(nkGlfw, &atlas);
       struct nk_font* font = nk_font_atlas_add_from_file(atlas, "res/fonts/OpenSans-Regular.ttf", 30, 0);
-      nk_glfw3_font_stash_end();
+      nk_glfw3_font_stash_end(nkGlfw);
 
       nk_style_load_all_cursors(ctx, atlas->cursors);
       nk_style_set_font(ctx, &font->handle);
 
       SetStyle(ctx, eTheme::Dark);
 
-      glfwSwapInterval(1);
+      glfwSwapInterval(0);
 
       return true;
    }
@@ -344,17 +352,18 @@ namespace wgui
       int width, height;
       GetWindowSize(width, height);
 
-      auto* ctx = mNkContext.GetContext();
+      nk_context* ctx = mNkContext.GetContext();
+      nk_glfw* nkGlfw = mNkContext.GetGlfw();
 
       // Input
-      nk_glfw3_new_frame();
+      nk_glfw3_new_frame(nkGlfw);
       float delta = mNkContext.GetContext()->delta_time_seconds;
       layoutRenderer->RenderStart(this, ctx);
       layoutRenderer->Render(this, ctx);
 
       // Draw
       glClear(GL_COLOR_BUFFER_BIT);
-      nk_glfw3_render(NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
+      nk_glfw3_render(nkGlfw, NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
       layoutRenderer->RenderFinish(this, ctx);
 
       glfwSwapBuffers(mWindow);
