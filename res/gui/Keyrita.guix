@@ -11,9 +11,9 @@
     </VariableGrid>
 
     <DynamicGrid Height="50"
-                  Width1="20%"
-                  Width2="60%"
-                  Width3="20%">
+                 Width1="20%"
+                 Width2="60%"
+                 Width3="20%">
       <Label Text="Dynamic"/>
       <Label Text="Grid"/>
       <Label Text="!"/>
