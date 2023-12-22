@@ -48,14 +48,89 @@ namespace wgui
 
    void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_dynamic(context, mHeight, std::max(static_cast<int64_t>(mControls.size()), mMinCols));
+      nk_layout_row_dynamic(context, mHeight, mControls.size());
       RenderControls(window, context);
    }
 
    void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_static(context, mHeight, mColWidth, std::max(static_cast<int64_t>(mControls.size()), mMinCols));
+      nk_layout_row_static(context, mHeight, mColWidth, mControls.size());
       RenderControls(window, context);
+   }
+
+   void GuiLayoutRowDynamicGrid::Render(WindowBase* const window, nk_context* context)
+   {
+      if (mControls.size() > mScales.size())
+      {
+         throw std::runtime_error("More controls exist than scales.");
+      }
+
+      // Min cols is ignored here.
+      nk_layout_row_begin(context, NK_DYNAMIC, mHeight, mControls.size());
+
+      // There's guaranteed to be one scale for every control.
+      // There might be more scales set, but we can safely ignore those.
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         nk_layout_row_push(context, (float)*mScales[i]);
+         mControls[i]->Render(window, context);
+      }
+
+      nk_layout_row_end(context);
+   }
+
+   void GuiLayoutRowStaticGrid::Render(WindowBase* const window, nk_context* context)
+   {
+      if (mControls.size() > mScales.size())
+      {
+         throw std::runtime_error("More controls exist than scales.");
+      }
+
+      // Min cols is ignored here.
+      nk_layout_row_begin(context, NK_STATIC, mHeight, mControls.size());
+
+      // There's guaranteed to be one scale for every control.
+      // There might be more scales set, but we can safely ignore those.
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         nk_layout_row_push(context, (int)*mScales[i]);
+         mControls[i]->Render(window, context);
+      }
+
+      nk_layout_row_end(context);
+   }
+
+   void GuiLayoutRowVariableGrid::Render(WindowBase* const window, nk_context* context)
+   {
+      if (mControls.size() > mScales.size())
+      {
+         throw std::runtime_error("More controls exist than scales.");
+      }
+
+      // Min cols is ignored here.
+      nk_layout_row_template_begin(context, mHeight);
+
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         nk_layout_row_template_push_variable(context, *mScales[i]);
+      }
+
+      nk_layout_row_template_end(context);
+
+      // There's guaranteed to be one scale for every control.
+      // There might be more scales set, but we can safely ignore those.
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         mControls[i]->Render(window, context);
+      }
+   }
+
+   void GuiLayoutStaticSpace::Render(WindowBase* const window, nk_context* context)
+   {
+      if (mControls.size() > std::min(mWidths.size(), mHeights.size()))
+      {
+         throw std::runtime_error("More controls exist than scales.");
+      }
    }
 
 #pragma endregion

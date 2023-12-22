@@ -7,6 +7,7 @@
 #include <map>
 #include <functional>
 #include <algorithm>
+#include <stdint.h>
 
 #include "pugixml.hpp"
 
@@ -61,7 +62,7 @@ namespace wgui
    {
    public:
       AttrInt()
-         : CtrlAttribute(eAttributeType::Int) {}
+         : mValue(0), CtrlAttribute(eAttributeType::Int) {}
 
       int64_t Get() const { return mValue; }
       operator int64_t() const { return mValue; }
@@ -91,7 +92,7 @@ namespace wgui
    {
    public:
       AttrReal()
-         : CtrlAttribute(eAttributeType::Real) {}
+         : mValue(0.0), CtrlAttribute(eAttributeType::Real) {}
 
       double Get() const { return mValue; }
       operator double() const { return mValue; }
@@ -260,7 +261,7 @@ namespace wgui
    {
    public:
       GuiControlBase()
-         : mAttributes(std::make_unique<AttributeSet>()) {} 
+         : mAttributes(std::make_unique<AttributeSet>()) {}
 
       /// <summary>
       /// Renders the control to the screen.
@@ -336,6 +337,42 @@ namespace wgui
 
    protected:
       std::unique_ptr<AttributeSet> mAttributes;
+
+      int64_t* GetOrChooseAttributeInt(const std::string& attrName) 
+      {
+         return GetOrChooseAttributeBase<int64_t, AttrInt>(attrName, eAttributeType::Int);
+      }
+
+      double* GetOrChooseAttributeDouble(const std::string& attrName)
+      {
+         return GetOrChooseAttributeBase<double, AttrReal>(attrName, eAttributeType::Real);
+      }
+
+      std::string* GetOrChooseAttributeString(const std::string& attrName)
+      {
+         return GetOrChooseAttributeBase<std::string, AttrString>(attrName, eAttributeType::String);
+      }
+
+   private:
+      template <typename T, typename Q>
+      T* GetOrChooseAttributeBase(const std::string& attrName, eAttributeType type)
+         requires (std::is_same_v<T, int64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string>) &&
+      (std::is_convertible_v<Q, CtrlAttribute>)
+      {
+         // Add a new scale property for the newly added control.
+         if (!mAttributes->AttributeExists(attrName))
+         {
+            return &mAttributes->Add(attrName, type)->As<Q>()->GetRef();
+         }
+
+         if (GetAttributeType(attrName) != type)
+         {
+            // TODO: warning case here.
+            mAttributes->Get(attrName)->SetType(type);
+         }
+
+         return &mAttributes->Get(attrName)->As<Q>()->GetRef();
+      }
    };
 
 #pragma region Gui Widgets
@@ -350,7 +387,7 @@ namespace wgui
       Bottom = 0x20,
 
       CenterLeft = Center | Left,
-      FullyCentered = VerticalCenter | Center, 
+      FullyCentered = VerticalCenter | Center,
       CenterRight = Center | Right,
    };
 
@@ -373,7 +410,7 @@ namespace wgui
          : GuiWidget(),
          mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
          mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
-      { 
+      {
          mText = "";
          mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
       }
@@ -400,26 +437,22 @@ namespace wgui
    {
    public:
       static constexpr std::string_view HeightAttr = "Height";
-      static constexpr std::string_view MinColsAttr = "MinCols";
 
-      GuiLayoutRowBase(int height, int minCols = 0) 
+      GuiLayoutRowBase(int height)
          :GuiLayoutRowBase()
       {
          mHeight = height;
-         mMinCols = minCols;
       }
 
       GuiLayoutRowBase()
          : GuiControlBase(),
-         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mMinCols(mAttributes->Add((std::string)MinColsAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
       {
          mHeight = 50;
-         mMinCols = 0;
       }
 
-      eControlType GetControlType() const override 
-      { 
+      eControlType GetControlType() const override
+      {
          return eControlType::LayoutRow;
       }
 
@@ -429,7 +462,7 @@ namespace wgui
       {
          // Make sure it's not another layout row. These cannot be nested.
          if (!(newControl->GetControlType() != eControlType::LayoutRow &&
-               newControl->GetControlType() != eControlType::Menu))
+            newControl->GetControlType() != eControlType::Menu))
          {
             throw std::runtime_error("Control does not support child elements of this type.");
          }
@@ -450,7 +483,6 @@ namespace wgui
 
       std::vector<GuiControlBase*> mControls;
       int64_t& mHeight;
-      int64_t& mMinCols;
    };
 
    /// <summary>
@@ -459,7 +491,7 @@ namespace wgui
    class GuiLayoutRowDynamic : public GuiLayoutRowBase
    {
    public:
-      GuiLayoutRowDynamic(int height, int minCols = 0) : GuiLayoutRowBase(height, minCols) { }
+      GuiLayoutRowDynamic(int height) : GuiLayoutRowBase(height) { }
       GuiLayoutRowDynamic() : GuiLayoutRowBase() { }
       void Render(WindowBase* const window, nk_context* context) override;
    };
@@ -472,17 +504,16 @@ namespace wgui
    public:
       static constexpr std::string_view ColWidthAttr = "ColWidth";
 
-      GuiLayoutRowStatic(int height, int colWidth, int minCols = 0)
+      GuiLayoutRowStatic(int height, int colWidth)
          : GuiLayoutRowStatic()
       {
          mColWidth = colWidth;
          mHeight = height;
-         mMinCols = minCols;
       }
 
       GuiLayoutRowStatic()
-         :  mColWidth(mAttributes->Add((std::string)ColWidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-            GuiLayoutRowBase()
+         : mColWidth(mAttributes->Add((std::string)ColWidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         GuiLayoutRowBase()
       {
          mColWidth = 100;
       }
@@ -499,7 +530,33 @@ namespace wgui
    class GuiLayoutRowDynamicGrid : public GuiLayoutRowBase
    {
    public:
-      GuiLayoutRowDynamicGrid(int height) : GuiLayoutRowBase(height) { }
+      static constexpr std::string_view WidthAttr = "Width";
+
+      GuiLayoutRowDynamicGrid()
+         : GuiLayoutRowBase()
+      {
+      }
+
+      GuiLayoutRowDynamicGrid(int height) : GuiLayoutRowBase(height)
+      {
+      }
+
+      bool AddChild(GuiControlBase* newControl) override
+      {
+         if (GuiLayoutRowBase::AddChild(newControl))
+         {
+            // Add a new scale property for the newly added control.
+            std::string attrName = (std::string)WidthAttr + (std::to_string(mScales.size() + 1));
+            mScales.push_back(GetOrChooseAttributeDouble(attrName));
+         }
+
+         return true;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   private:
+      std::vector<double*> mScales;
    };
 
    /// <summary>
@@ -508,36 +565,95 @@ namespace wgui
    class GuiLayoutRowStaticGrid : public GuiLayoutRowBase
    {
    public:
-      GuiLayoutRowStaticGrid(int height) : GuiLayoutRowBase(height) { }
+      static constexpr std::string_view WidthAttr = "Width";
+
+      GuiLayoutRowStaticGrid(int height) : GuiLayoutRowBase(height)
+      {
+      }
+
+      GuiLayoutRowStaticGrid()
+         : GuiLayoutRowBase() { }
+
+      bool AddChild(GuiControlBase* newControl) override
+      {
+         if (GuiLayoutRowBase::AddChild(newControl))
+         {
+            std::string attrName = (std::string)WidthAttr + (std::to_string(mScales.size() + 1));
+            mScales.push_back(GetOrChooseAttributeInt(attrName));
+         }
+
+         return true;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   private:
+      std::vector<int64_t*> mScales;
    };
 
    /// <summary>
    /// A combination of statically and dynamically spaced columns.
    /// </summary>
-   class GuiLayoutRowMixedGrid : public GuiLayoutRowBase
+   class GuiLayoutRowVariableGrid : public GuiLayoutRowBase
    {
    public:
-      GuiLayoutRowMixedGrid(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutRowVariableGrid(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutRowVariableGrid() : GuiLayoutRowBase() { }
+
+      bool AddChild(GuiControlBase* newControl) override
+      {
+         if (GuiLayoutRowBase::AddChild(newControl))
+         {
+            // Add a new scale property for the newly added control.
+            std::string attrName = "MinWidth" + (std::to_string(mScales.size() + 1));
+            mScales.push_back(GetOrChooseAttributeInt(attrName));
+         }
+
+         return true;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   private:
+      std::vector<int64_t*> mScales;
    };
 
    /// <summary>
    /// Allows you to specify the height and width of columns in the grid (up to the max height)
    /// Statically spaced columns
    /// </summary>
-   class GuiLayoutStaticSpaceGrid : public GuiLayoutRowBase
+   class GuiLayoutStaticSpace : public GuiLayoutRowBase
    {
    public:
-      GuiLayoutStaticSpaceGrid(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutStaticSpace(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutStaticSpace() : GuiLayoutRowBase() { }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+      bool AddChild(GuiControlBase* newControl) override
+      {
+         if (GuiLayoutRowBase::AddChild(newControl))
+         {
+            //std::string attrName = "MinWidth" + (std::to_string(mScales.size() + 1));
+         }
+
+         return true;
+      }
+
+   private:
+      std::vector<int64_t*> mWidths;
+      std::vector<int64_t*> mHeights;
    };
 
    /// <summary>
    /// Allows you to specify the height and width of columns in the grid (up to the max height)
    /// Dynamically spaced columns
    /// </summary>
-   class GuiLayoutDynamicSpaceGrid : public GuiLayoutRowBase
+   class GuiLayoutDynamicSpace : public GuiLayoutRowBase
    {
    public:
-      GuiLayoutDynamicSpaceGrid(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutDynamicSpace(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutDynamicSpace() : GuiLayoutRowBase() { }
    };
 
 #pragma endregion
@@ -610,7 +726,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      eControlType GetControlType() const override 
+      eControlType GetControlType() const override
       {
          return eControlType::Window;
       }
@@ -727,7 +843,7 @@ namespace wgui
       std::vector<std::unique_ptr<GuiControlFactory>> mControlFactories;
 
       void ConstructWindows(const pugi::xml_object_range<pugi::xml_node_iterator>& document);
-      void ConstructComponents(const pugi::xml_object_range<pugi::xml_node_iterator>& document, 
+      void ConstructComponents(const pugi::xml_object_range<pugi::xml_node_iterator>& document,
          GuiControlBase* parent);
 
       std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlName)
@@ -741,6 +857,8 @@ namespace wgui
                return std::move(newControl);
             }
          }
+
+         return nullptr;
       }
    };
 }

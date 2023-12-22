@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
-  <Window name="w1" Title="Keyrita" XPos="100" YPos="0" Width="800" Height="300">
-    <DynamicRow Height="50">
-      <Label text="Left Text" />
-      <Label text="Right Text" />
-    </DynamicRow>
-    <StaticRow ColWidth="150" Height="50">
-      <Label text="Left Text" />
-      <Label text="Middle Text" />
-      <Label text="Right Text" />
-    </StaticRow>
-  </Window>
+  <Window name="w1" Title="Keyrita" XPos="0" YPos="0" Width="1920" Height="1080">
+    <VariableGrid Height="50"
+                  MinWidth1="1000"
+                  MinWidth2="200"
+                  MinWidth3="100">
+      <Label Text="Variable"/>
+      <Label Text="Grid"/>
+      <Label Text="!"/>
+    </VariableGrid>
 
-  <Window Name="w2" Title="w2" XPos="0" YPos="400" Width="1920" Height="600">
-    <DynamicRow Height="50" MinCols="4">
-      <Label text="HelloWorld, new window!"/>
-    </DynamicRow>
-    <DynamicRow Height="50">
-      <Label text="HelloWorld, new window!"/>
-    </DynamicRow>
+    <DynamicGrid Height="50"
+                  Width1="20%"
+                  Width2="60%"
+                  Width3="20%">
+      <Label Text="Dynamic"/>
+      <Label Text="Grid"/>
+      <Label Text="!"/>
+    </DynamicGrid>
   </Window>
 </GuiRoot>

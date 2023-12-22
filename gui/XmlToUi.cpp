@@ -55,7 +55,11 @@ namespace wgui
    {
       if (value[value.size() - 1] == '%')
       {
-         return ParseToReal(value.substr(0, value.size() - 1), dVal);
+         if (ParseToReal(value.substr(0, value.size() - 1), dVal))
+         {
+            dVal /= 100;
+            return true;
+         }
       }
 
       return false;
