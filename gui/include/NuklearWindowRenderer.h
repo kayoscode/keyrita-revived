@@ -8,6 +8,7 @@
 #include <functional>
 #include <algorithm>
 #include <stdint.h>
+#include <memory>
 
 #include "pugixml.hpp"
 
@@ -163,7 +164,7 @@ namespace wgui
       {
          if (!mValue)
          {
-            throw std::exception("Attribute not initialized to a value");
+            throw std::runtime_error("Attribute not intialized to a value");
          }
 
          return reinterpret_cast<T*>(mValue.get());
@@ -174,7 +175,7 @@ namespace wgui
       {
          if (!mValue)
          {
-            throw std::exception("Attribute not initialized to a value");
+            throw std::runtime_error("Attribute not intialized to a value");
          }
 
          return reinterpret_cast<T* const>(mValue.get());

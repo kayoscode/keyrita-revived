@@ -6,8 +6,6 @@ namespace
             std::function<std::unique_ptr<wgui::GuiControlBase>()>, 
             wgui::CaseInsensitiveStrCompare> Factory
    {
-#pragma region Layouts
-
       { "Window", []() { return std::make_unique<wgui::GuiLayoutWindow>(); }},
       { "DynamicRow", []() { return std::make_unique<wgui::GuiLayoutRowDynamic>(); }},
       { "StaticRow", []() { return std::make_unique<wgui::GuiLayoutRowStatic>(); }},
@@ -17,13 +15,7 @@ namespace
       { "StaticSpace", []() { return std::make_unique<wgui::GuiLayoutStaticSpace>(); }},
       //{ "DynamicSpace", []() { return std::make_unique<wgui::GuiLayoutDynamicSpace>(); }},
 
-#pragma endregion
-
-#pragma region Controls
-
       { "label", []() { return std::make_unique<wgui::GuiLabel>(); }},
-
-#pragma endregion
    };
 }
 
