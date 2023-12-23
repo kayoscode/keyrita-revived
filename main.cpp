@@ -2,8 +2,6 @@
 #include "Window.h"
 #include "NuklearWindowRenderer.h"
 
-#include "include_nuk.h"
-
 using namespace wgui;
 
 int main()

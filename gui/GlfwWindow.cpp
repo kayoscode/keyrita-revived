@@ -2,17 +2,6 @@
 #include "Window.h"
 #include "OperatingSystem.h"
 
-#include "GL/glew.h"
-
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_KEYSTATE_BASED_INPUT
-
 #define NK_GLFW_GL3_IMPLEMENTATION
 #define NK_IMPLEMENTATION
 #include "nuklear.h"
@@ -333,7 +322,7 @@ namespace wgui
       GlLogger.trace("Mapping default font");
 
       struct nk_font_atlas* atlas;
-      int fontHeight = 16;
+      int fontHeight = 15;
       struct nk_font_config cfg = nk_font_config(fontHeight);
 
       nk_glfw3_font_stash_begin(nkGlfw, &atlas);
@@ -349,6 +338,8 @@ namespace wgui
       nk_style_set_font(ctx, &font->handle);
 
       SetStyle(ctx, eTheme::Dark);
+
+      ctx->input.mouse.grabbed = 1;
 
       glfwSwapInterval(1);
 

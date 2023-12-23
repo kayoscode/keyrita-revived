@@ -14,7 +14,7 @@
 #include "Attributes.h"
 #include "StandardControls.h"
 
-struct nk_context;
+#include "Window.h"
 
 namespace wgui
 {

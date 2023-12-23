@@ -3,9 +3,7 @@
 #include <functional>
 #include <memory>
 
-class nk_context;
-class nk_glfw;
-class GLFWwindow;
+#include "include_nuk.h"
 
 namespace wgui
 {
