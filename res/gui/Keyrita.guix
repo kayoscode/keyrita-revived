@@ -1,22 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
-  <Window name="w1" Title="Keyrita" XPos="0" YPos="0" Width="1920" Height="1080">
-    <VariableGrid Height="50"
-                  MinWidth1="1000"
-                  MinWidth2="200"
-                  MinWidth3="100">
-      <Label Text="Variable"/>
-      <Label Text="Grid"/>
-      <Label Text="!"/>
-    </VariableGrid>
+  <Window name="w1" Title="Keyrita" XPos="0" YPos="0" Width="1600" Height="1200">
+    <MenuBar>
+      <StaticGrid Height="20" Width1="35"
+                              Width2="35"
+                              Width3="75"
+                              Width4="70">
+        <Menu Text="File" Width="200" Height="200">
+          <DynamicRow Height="40">
+            <MenuItem Text="Test"/>
+          </DynamicRow>
+          <DynamicRow Height="40">
+            <MenuItem Text="Test2"/>
+          </DynamicRow>
+          <DynamicRow Height="40">
+            <MenuItem Text="Test2"/>
+          </DynamicRow>
+        </Menu>
+        <Menu Text="Edit" Width="120" Height="200">
+          <Label Text="Test"/>
+        </Menu>
+        <Menu Text="Heatmap" Width="120" Height="200">
+          <Label Text="Test"/>
+        </Menu>
+        <Menu Text="Analyze" Width="120" Height="200">
+          <Label Text="Test"/>
+        </Menu>
+      </StaticGrid>
+    </MenuBar>
+    
+    <DynamicSpace Height="500">
+      <Label Text="Keyrita" Space.Width="20%"
+                            Space.Height="50%"
+                            Space.PosX="0"
+                            Space.PosY="0"/>
+ 
+      <Label Text="Space" Space.Width="20%"
+                          Space.Height="65%"
+                          Space.PosX="10%"
+                          Space.PosY="10%"/>
 
-    <DynamicGrid Height="50"
-                 Width1="20%"
-                 Width2="60%"
-                 Width3="20%">
-      <Label Text="Dynamic"/>
-      <Label Text="Grid"/>
-      <Label Text="!"/>
-    </DynamicGrid>
+      <Label Text="!" Space.Width="20%"
+                      Space.Height="80%"
+                      Space.PosX="20%"
+                      Space.PosY="20%"/>
+    </DynamicSpace>
   </Window>
 </GuiRoot>

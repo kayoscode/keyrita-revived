@@ -7,15 +7,20 @@ namespace
             wgui::CaseInsensitiveStrCompare> Factory
    {
       { "Window", []() { return std::make_unique<wgui::GuiLayoutWindow>(); }},
+
+      { "MenuBar", []() { return std::make_unique<wgui::GuiMenuBar>(); }},
+      { "Menu", []() { return std::make_unique<wgui::GuiMenu>(); }},
+      { "MenuItem", []() { return std::make_unique<wgui::GuiMenuItem>(); }},
+
       { "DynamicRow", []() { return std::make_unique<wgui::GuiLayoutRowDynamic>(); }},
       { "StaticRow", []() { return std::make_unique<wgui::GuiLayoutRowStatic>(); }},
       { "DynamicGrid", []() { return std::make_unique<wgui::GuiLayoutRowDynamicGrid>(); }},
       { "StaticGrid", []() { return std::make_unique<wgui::GuiLayoutRowStaticGrid>(); }},
       { "VariableGrid", []() { return std::make_unique<wgui::GuiLayoutRowVariableGrid>(); }},
       { "StaticSpace", []() { return std::make_unique<wgui::GuiLayoutStaticSpace>(); }},
-      //{ "DynamicSpace", []() { return std::make_unique<wgui::GuiLayoutDynamicSpace>(); }},
+      { "DynamicSpace", []() { return std::make_unique<wgui::GuiLayoutDynamicSpace>(); }},
 
-      { "label", []() { return std::make_unique<wgui::GuiLabel>(); }},
+      { "Label", []() { return std::make_unique<wgui::GuiLabel>(); }},
    };
 }
 

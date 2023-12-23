@@ -9,8 +9,8 @@ using namespace wgui;
 int main()
 {
    MainWindow mainWindow;
-   mainWindow.CreateWindow("Keyrita", 1920, 1080, false, true, true, false);
-   mainWindow.SetWindowSizeLimits(800, 600, -1, -1);
+   mainWindow.CreateWindow("Keyrita", 1600, 1200, false, true, true, false);
+   mainWindow.SetWindowSizeLimits(1200, 900, -1, -1);
 
    XmlLoadedWindowRenderer renderer;
    renderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");

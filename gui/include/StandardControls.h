@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Attributes.h"
+#include <concepts>
 
 struct nk_context;
 
@@ -85,6 +86,21 @@ namespace wgui
          mAttributes->Get(attributeName)->As<AttrString>()->Set(value);
       }
 
+      int64_t& GetOrCreateAttributeInt(const std::string& attrName)
+      {
+         return GetOrChooseAttributeBase<int64_t, AttrInt>(attrName, eAttributeType::Int);
+      }
+
+      double& GetOrCreateAttributeReal(const std::string& attrName)
+      {
+         return GetOrChooseAttributeBase<double, AttrReal>(attrName, eAttributeType::Real);
+      }
+
+      std::string& GetOrCreateAttributeString(const std::string& attrName)
+      {
+         return GetOrChooseAttributeBase<std::string, AttrString>(attrName, eAttributeType::String);
+      }
+
       int64_t GetAttributeInt(const std::string& attributeName, int64_t value)
       {
          return mAttributes->Get(attributeName)->As<AttrInt>()->Get();
@@ -105,31 +121,16 @@ namespace wgui
    protected:
       std::unique_ptr<AttributeSet> mAttributes;
 
-      int64_t* GetOrCreateAttributeInt(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<int64_t, AttrInt>(attrName, eAttributeType::Int);
-      }
-
-      double* GetOrCreateAttributeDouble(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<double, AttrReal>(attrName, eAttributeType::Real);
-      }
-
-      std::string* GetOrCreateAttributeString(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<std::string, AttrString>(attrName, eAttributeType::String);
-      }
-
    private:
       template <typename T, typename Q>
-      T* GetOrChooseAttributeBase(const std::string& attrName, eAttributeType type)
+      T& GetOrChooseAttributeBase(const std::string& attrName, eAttributeType type)
          requires (std::is_same_v<T, int64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string>) &&
       (std::is_convertible_v<Q, CtrlAttribute>)
       {
          // Add a new scale property for the newly added control.
          if (!mAttributes->AttributeExists(attrName))
          {
-            return &mAttributes->Add(attrName, type)->As<Q>()->GetRef();
+            return mAttributes->Add(attrName, type)->As<Q>()->GetRef();
          }
 
          if (GetAttributeType(attrName) != type)
@@ -138,8 +139,24 @@ namespace wgui
             mAttributes->Get(attrName)->SetType(type);
          }
 
-         return &mAttributes->Get(attrName)->As<Q>()->GetRef();
+         return mAttributes->Get(attrName)->As<Q>()->GetRef();
       }
+   };
+
+   class ChildSupportingGuiControlBase : public GuiControlBase
+   {
+   public:
+      ChildSupportingGuiControlBase() : GuiControlBase() { }
+      bool SupportsChildren() const override { return true; }
+
+      bool AddChild(GuiControlBase* newControl) override
+      {
+         mControls.push_back(newControl);
+         return true;
+      }
+
+   protected:
+      std::vector<GuiControlBase*> mControls;
    };
 
 #pragma region Gui Widgets
@@ -200,7 +217,7 @@ namespace wgui
 
 #pragma region Row Layouts
 
-   class GuiLayoutRowBase : public GuiControlBase
+   class GuiLayoutRowBase : public ChildSupportingGuiControlBase
    {
    public:
       static constexpr std::string_view HeightAttr = "Height";
@@ -212,7 +229,7 @@ namespace wgui
       }
 
       GuiLayoutRowBase()
-         : GuiControlBase(),
+         : ChildSupportingGuiControlBase(),
          mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
       {
          mHeight = 50;
@@ -223,32 +240,7 @@ namespace wgui
          return eControlType::LayoutRow;
       }
 
-      bool SupportsChildren() const override { return true; }
-
-      bool AddChild(GuiControlBase* newControl) override
-      {
-         // Make sure it's not another layout row. These cannot be nested.
-         if (!(newControl->GetControlType() != eControlType::LayoutRow &&
-            newControl->GetControlType() != eControlType::Menu))
-         {
-            throw std::runtime_error("Control does not support child elements of this type.");
-         }
-
-         mControls.push_back(newControl);
-
-         return true;
-      }
-
    protected:
-      inline void RenderControls(WindowBase* const window, nk_context* context)
-      {
-         for (const auto& control : mControls)
-         {
-            control->Render(window, context);
-         }
-      }
-
-      std::vector<GuiControlBase*> mControls;
       int64_t& mHeight;
    };
 
@@ -269,7 +261,7 @@ namespace wgui
    class GuiLayoutRowStatic : public GuiLayoutRowBase
    {
    public:
-      static constexpr std::string_view ColWidthAttr = "ColWidth";
+      static constexpr std::string_view ColWidthAttr = "Width";
 
       GuiLayoutRowStatic(int height, int colWidth)
          : GuiLayoutRowStatic()
@@ -314,7 +306,7 @@ namespace wgui
          {
             // Add a new scale property for the newly added control.
             std::string attrName = (std::string)WidthAttr + (std::to_string(mScales.size() + 1));
-            mScales.push_back(GetOrCreateAttributeDouble(attrName));
+            mScales.push_back(&GetOrCreateAttributeReal(attrName));
          }
 
          return true;
@@ -346,7 +338,7 @@ namespace wgui
          if (GuiLayoutRowBase::AddChild(newControl))
          {
             std::string attrName = (std::string)WidthAttr + (std::to_string(mScales.size() + 1));
-            mScales.push_back(GetOrCreateAttributeInt(attrName));
+            mScales.push_back(&GetOrCreateAttributeInt(attrName));
          }
 
          return true;
@@ -373,7 +365,7 @@ namespace wgui
          {
             // Add a new scale property for the newly added control.
             std::string attrName = "MinWidth" + (std::to_string(mScales.size() + 1));
-            mScales.push_back(GetOrCreateAttributeInt(attrName));
+            mScales.push_back(&GetOrCreateAttributeInt(attrName));
          }
 
          return true;
@@ -385,20 +377,31 @@ namespace wgui
       std::vector<int64_t*> mScales;
    };
 
-   /// <summary>
-   /// Allows you to specify the height and width of columns in the grid (up to the max height)
-   /// Statically spaced columns
-   /// </summary>
-   class GuiLayoutStaticSpace : public GuiLayoutRowBase
+   class GuiLayoutSpace : public GuiLayoutRowBase
    {
    public:
+      GuiLayoutSpace(int height) : GuiLayoutRowBase(height) { }
+      GuiLayoutSpace() : GuiLayoutRowBase() { }
+
+      static constexpr std::string_view RootAttrName = "Space";
+
       static constexpr std::string_view WidthGridAttr = "Width";
       static constexpr std::string_view HeightGridAttr = "Height";
       static constexpr std::string_view PosXGridAttr = "PosY";
       static constexpr std::string_view PosYGridAttr = "PosX";
 
-      GuiLayoutStaticSpace(int height) : GuiLayoutRowBase(height) { }
-      GuiLayoutStaticSpace() : GuiLayoutRowBase() { }
+      void GetBounds(nk_context* context, int& posX, int& posY, int& width, int& height);
+   };
+
+   /// <summary>
+   /// Allows you to specify the height and width of columns in the grid (up to the max height)
+   /// Statically spaced columns
+   /// </summary>
+   class GuiLayoutStaticSpace : public GuiLayoutSpace
+   {
+   public:
+      GuiLayoutStaticSpace(int height) : GuiLayoutSpace(height) { }
+      GuiLayoutStaticSpace() : GuiLayoutSpace() { }
 
       void Render(WindowBase* const window, nk_context* context) override;
 
@@ -406,16 +409,24 @@ namespace wgui
       {
          if (GuiLayoutRowBase::AddChild(newControl))
          {
-            int nextIdx = mWidths.size() + 1;
-
-            std::string attrName = (std::string)WidthGridAttr + (std::to_string(nextIdx + 1));
-            mWidths.push_back(GetOrCreateAttributeInt(attrName));
+            mWidths.push_back(&newControl->GetOrCreateAttributeInt
+               ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
+            mHeights.push_back(&newControl->GetOrCreateAttributeInt
+               ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
+            mPositionsX.push_back(&newControl->GetOrCreateAttributeInt
+               ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
+            mPositionsY.push_back(&newControl->GetOrCreateAttributeInt
+               ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
          }
 
          return true;
       }
 
-   private:
+   protected:
+      /// <summary>
+      /// Pointers to attributes of child elements.
+      /// These attributes do not exist within this instance!!
+      /// </summary>
       std::vector<int64_t*> mWidths;
       std::vector<int64_t*> mHeights;
       std::vector<int64_t*> mPositionsX;
@@ -426,21 +437,43 @@ namespace wgui
    /// Allows you to specify the height and width of columns in the grid (up to the max height)
    /// Dynamically spaced columns
    /// </summary>
-   class GuiLayoutDynamicSpace : public GuiLayoutRowBase
+   class GuiLayoutDynamicSpace : public GuiLayoutSpace
    {
    public:
-      GuiLayoutDynamicSpace(int height) : GuiLayoutRowBase(height) { }
-      GuiLayoutDynamicSpace() : GuiLayoutRowBase() { }
-   };
+      GuiLayoutDynamicSpace(int height) : GuiLayoutSpace(height) { }
+      GuiLayoutDynamicSpace() : GuiLayoutSpace() { }
 
-#pragma endregion
+      void Render(WindowBase* const window, nk_context* context) override;
+
+      bool AddChild(GuiControlBase* newControl) override
+      {
+         if (GuiLayoutRowBase::AddChild(newControl))
+         {
+            mWidths.push_back(&newControl->GetOrCreateAttributeReal
+               ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
+            mHeights.push_back(&newControl->GetOrCreateAttributeReal
+               ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
+            mPositionsX.push_back(&newControl->GetOrCreateAttributeReal
+               ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
+            mPositionsY.push_back(&newControl->GetOrCreateAttributeReal
+               ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
+         }
+
+         return true;
+      }
+
+   protected:
+      /// <summary>
+      /// Pointers to attributes of child elements.
+      /// These attributes do not exist within this instance!!
+      /// </summary>
+      std::vector<double*> mWidths;
+      std::vector<double*> mHeights;
+      std::vector<double*> mPositionsX;
+      std::vector<double*> mPositionsY;
+   };
 
    class GuiLayoutGroup : public GuiControlBase
-   {
-   public:
-   };
-
-   class GuiMenu : public GuiControlBase
    {
    public:
    };
@@ -450,10 +483,112 @@ namespace wgui
    public:
    };
 
+#pragma endregion
+
+#pragma region Menu
+
+   class GuiMenuBar : public ChildSupportingGuiControlBase
+   {
+   public:
+      GuiMenuBar() : ChildSupportingGuiControlBase() { }
+      void Render(WindowBase* const window, nk_context* context) override;
+      eControlType GetControlType() const override { return eControlType::Menu; }
+   };
+
+   class GuiMenu : public ChildSupportingGuiControlBase
+   {
+   public:
+      static constexpr std::string_view TextAlignAttr = "TextAlignment";
+      static constexpr std::string_view TextAttr = "Text";
+      static constexpr std::string_view ImagePathAttr = "Image";
+      static constexpr std::string_view WidthAttr = "Width";
+      static constexpr std::string_view HeightAttr = "Height";
+
+      GuiMenu()
+         : ChildSupportingGuiControlBase(),
+         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+         mImagePath(mAttributes->Add((std::string)ImagePathAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+         mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+      {
+         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
+         mText = "";
+         mImagePath = "";
+
+         mWidth = 100;
+         mHeight = 40;
+      }
+
+      GuiMenu(const std::string& text, const eTextAlignmentFlags alignment, 
+         int height, int width,
+         const std::string& imagePath = "")
+         : GuiMenu()
+      {
+         mTextAlignment = static_cast<int64_t>(alignment);
+         mText = text;
+         mImagePath = imagePath;
+
+         mWidth = width;
+         mHeight = height;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+      eControlType GetControlType() const override { return eControlType::Menu; }
+      bool SupportsChildren() const override { return true; }
+
+   private:
+      int64_t& mTextAlignment;
+      std::string& mText;
+      std::string& mImagePath;
+
+      int64_t& mWidth, & mHeight;
+   };
+
+   class GuiMenuItem : public GuiWidget
+   {
+   public:
+      static constexpr std::string_view TextAlignAttr = "TextAlignment";
+      static constexpr std::string_view TextAttr = "Text";
+      static constexpr std::string_view ImagePathAttr = "Image";
+
+      GuiMenuItem()
+         : GuiWidget(),
+         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+         mImagePath(mAttributes->Add((std::string)ImagePathAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+      {
+         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
+         mText = "";
+         mImagePath = "";
+      }
+
+      GuiMenuItem(const std::string& text, const eTextAlignmentFlags alignment, 
+         int height, int width,
+         const std::string& imagePath = "")
+         : GuiMenuItem()
+      {
+         mTextAlignment = static_cast<int64_t>(alignment);
+         mText = text;
+         mImagePath = imagePath;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+      eControlType GetControlType() const override { return eControlType::Widget; }
+
+   private:
+      int64_t& mTextAlignment;
+      std::string& mText;
+      std::string& mImagePath;
+   };
+
+#pragma endregion
+
    /// <summary>
    /// Represents a window on the Gui. This can hold widgets to menus!
    /// </summary>
-   class GuiLayoutWindow : public GuiControlBase
+   class GuiLayoutWindow : public ChildSupportingGuiControlBase
    {
    public:
       static constexpr std::string_view XPosAttr = "XPos";
@@ -464,7 +599,7 @@ namespace wgui
       static constexpr std::string_view TitleAttr = "Title";
 
       GuiLayoutWindow()
-         : GuiControlBase(),
+         : ChildSupportingGuiControlBase(),
          mPosX(mAttributes->Add((std::string)XPosAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
          mPosY(mAttributes->Add((std::string)YPosAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
          mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
@@ -495,20 +630,12 @@ namespace wgui
          mTitle = title;
       }
 
-      bool AddChild(GuiControlBase* control) override
-      {
-         mControls.push_back(control);
-         return true;
-      }
-
       void Render(WindowBase* const window, nk_context* context) override;
 
       eControlType GetControlType() const override
       {
          return eControlType::Window;
       }
-
-      bool SupportsChildren() const { return true; }
 
    private:
       int64_t& mPosX;
@@ -519,7 +646,5 @@ namespace wgui
 
       std::string& mName;
       std::string& mTitle;
-
-      std::vector<GuiControlBase*> mControls;
    };
 }

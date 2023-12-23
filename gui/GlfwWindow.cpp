@@ -333,16 +333,24 @@ namespace wgui
       GlLogger.trace("Mapping default font");
 
       struct nk_font_atlas* atlas;
-      nk_glfw3_font_stash_begin(nkGlfw, &atlas);
-      struct nk_font* font = nk_font_atlas_add_from_file(atlas, "res/fonts/OpenSans-Regular.ttf", 30, 0);
-      nk_glfw3_font_stash_end(nkGlfw);
+      int fontHeight = 16;
+      struct nk_font_config cfg = nk_font_config(fontHeight);
 
+      nk_glfw3_font_stash_begin(nkGlfw, &atlas);
+      struct nk_font* font = nk_font_atlas_add_from_file(atlas, 
+         "res/fonts/RockoFLF.ttf", fontHeight, &cfg);
+
+      font->config->oversample_h = 8;
+      font->config->oversample_v = 8;
+      font->config->pixel_snap = true;
+
+      nk_glfw3_font_stash_end(nkGlfw);
       nk_style_load_all_cursors(ctx, atlas->cursors);
       nk_style_set_font(ctx, &font->handle);
 
       SetStyle(ctx, eTheme::Dark);
 
-      glfwSwapInterval(0);
+      glfwSwapInterval(1);
 
       return true;
    }
