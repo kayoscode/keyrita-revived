@@ -47,13 +47,12 @@ add_executable(${EXE_NAME} "main.cpp")
 target_include_directories(${EXE_NAME} PUBLIC include)
 target_link_libraries(${EXE_NAME} wgui DebugLogger)
 
-set(SOURCE_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/res/gui)
-set(DESTINATION_RESOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/res/gui)
-
 file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+set(SOURCE_RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/res)
+set(DESTINATION_RESOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/res)
 add_custom_target(copy_resources_target
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SOURCE_RESOURCES_DIR} ${DESTINATION_RESOURCES_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SOURCE_RESOURCES_DIR}/gui ${DESTINATION_RESOURCES_DIR}/gui
     COMMENT "Copying gui resources to destination"
     VERBATIM
 )

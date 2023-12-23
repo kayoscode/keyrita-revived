@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 3.20)
 set(PROJ_NAME wgui)
 file (GLOB SRC
     "*.cpp"
+	"Shaders/*.cpp"
 )
 
 file (GLOB HEADER_FILES
     "include/*.h"    
+	"include/Shaders/*.h"
     "nk_include/*.h"
-    "include/*.hpp"
 )
 
 FetchContent_GetProperties(debug_logger)
@@ -41,6 +42,17 @@ FetchContent_GetProperties(xmllib)
 message(STATUS "xml lib loc:" ${xmllib_SOURCE_DIR})
 add_subdirectory(${xmllib_SOURCE_DIR} ${xmllib_BINARY_DIR} EXCLUDE_FROM_ALL)
 
+# Add GL Math library
+FetchContent_Declare(
+    glmath
+    GIT_REPOSITORY  https://github.com/youngbrycecode/GLMath.git
+)
+FetchContent_Populate(glmath)
+
+FetchContent_GetProperties(glmath)
+message(STATUS "xml lib loc:" ${glmath_SOURCE_DIR})
+add_subdirectory(${glmath_SOURCE_DIR} ${glmath_BINARY_DIR} EXCLUDE_FROM_ALL)
+
 add_library(${PROJ_NAME} ${SRC} ${HEADER_FILES})
 
 # Link glew
@@ -50,5 +62,6 @@ target_link_libraries(${PROJ_NAME} DebugLogger
 								   glfw 
 								   libglew_static 
 								   pugixml-static
+								   GLMath
 								   ${OPENGL_gl_LIBRARY})
 target_include_directories(${PROJ_NAME} PUBLIC include nk_include)

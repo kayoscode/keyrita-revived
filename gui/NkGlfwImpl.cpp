@@ -6,6 +6,8 @@
 #include "include_nuk.h"
 #include "nuklear_glfw_gl3.h"
 
+#include "Shaders/GuiShader.h"
+
 #ifndef NK_GLFW_DOUBLE_CLICK_LO
 #define NK_GLFW_DOUBLE_CLICK_LO 0.02
 #endif
@@ -13,102 +15,31 @@
 #define NK_GLFW_DOUBLE_CLICK_HI 0.2
 #endif
 
-struct nk_glfw_vertex {
+namespace 
+{
+   wgui::HighlightGuiShader ShaderProg;
+}
+
+struct nk_glfw_vertex
+{
    float position[2];
    float uv[2];
    nk_byte col[4];
 };
 
-GLuint mousePosLoc = 0;
 NK_API void
 nk_glfw3_device_create(struct nk_glfw* glfw)
 {
    GLint status;
-   static const GLchar* vertex_shader = R"(
-      #version 300 es
-      uniform mat4 ProjMtx;
-
-      in vec2 Position;
-      in vec2 TexCoord;
-      in vec4 Color;
-
-      out vec2 Frag_UV;
-      out vec4 Frag_Color;
-
-      void main() 
-      {
-         Frag_UV = TexCoord;
-         Frag_Color = Color;
-         gl_Position = ProjMtx * vec4(Position.xy, 0, 1);
-      }
-   )";
-
-   static const GLchar* fragment_shader = R"(
-      #version 300 es
-      precision mediump float;
-
-      uniform sampler2D Texture;
-      uniform vec2 MousePos;
-
-      const vec2 WindowDims = vec2(1600.0, 1200.0);
-      const vec4 HighlightColor = vec4(1.0, 1.0, 0.8, 1);
-      const float Sigma = 0.010;
-
-      in vec2 Frag_UV;
-      in vec4 Frag_Color;
-
-      out vec4 Out_Color;
-      void main()
-      {
-         vec2 newMousePos = vec2(MousePos.x, -MousePos.y);
-         newMousePos /= WindowDims;
-         newMousePos.y += 1.0;
-         float distanceToMouse = distance(gl_FragCoord.xy / WindowDims, newMousePos);
-         float gaussian = exp(-distanceToMouse * distanceToMouse / (2.0 * Sigma * Sigma));
-
-         Out_Color = Frag_Color * texture(Texture, Frag_UV.xy);
-         Out_Color.rgb = mix(Out_Color.rgb, HighlightColor.rgb, gaussian * 0.2);
-      }
-   )";
+   ShaderProg.LoadShaders("./res/gui/shaders/DefaultShader.vert", 
+                          "./res/gui/shaders/HighlightEffectShader.frag");
 
    struct nk_glfw_device* dev = &glfw->ogl;
    nk_buffer_init_default(&dev->cmds);
 
-   dev->prog = glCreateProgram();
-   dev->vert_shdr = glCreateShader(GL_VERTEX_SHADER);
-   dev->frag_shdr = glCreateShader(GL_FRAGMENT_SHADER);
-   glShaderSource(dev->vert_shdr, 1, &vertex_shader, 0);
-   glShaderSource(dev->frag_shdr, 1, &fragment_shader, 0);
-   glCompileShader(dev->vert_shdr);
-   glCompileShader(dev->frag_shdr);
-   glGetShaderiv(dev->vert_shdr, GL_COMPILE_STATUS, &status);
-   assert(status == GL_TRUE);
-   glGetShaderiv(dev->frag_shdr, GL_COMPILE_STATUS, &status);
-
-   if (status != GL_TRUE)
-   {
-      constexpr int maxLen = 1028;
-      int maxL = maxLen;
-      GLchar errorLog[maxLen];
-      glGetShaderInfoLog(dev->frag_shdr, maxLen, &maxL, &errorLog[0]);
-
-      std::cout << errorLog << "\n";
-      assert(false);
-   }
-
-   glAttachShader(dev->prog, dev->vert_shdr);
-   glAttachShader(dev->prog, dev->frag_shdr);
-   glLinkProgram(dev->prog);
-   glGetProgramiv(dev->prog, GL_LINK_STATUS, &status);
-   assert(status == GL_TRUE);
-
-   dev->uniform_tex = glGetUniformLocation(dev->prog, "Texture");
-   dev->uniform_proj = glGetUniformLocation(dev->prog, "ProjMtx");
-   mousePosLoc = glGetUniformLocation(dev->prog, "MousePos");
-
-   dev->attrib_pos = glGetAttribLocation(dev->prog, "Position");
-   dev->attrib_uv = glGetAttribLocation(dev->prog, "TexCoord");
-   dev->attrib_col = glGetAttribLocation(dev->prog, "Color");
+   dev->attrib_pos = ShaderProg.GetAttribLocation("Position");
+   dev->attrib_uv = ShaderProg.GetAttribLocation("TexCoord");
+   dev->attrib_col = ShaderProg.GetAttribLocation("Color");
 
    {
       /* buffer setup */
@@ -134,6 +65,9 @@ nk_glfw3_device_create(struct nk_glfw* glfw)
       glVertexAttribPointer((GLuint)dev->attrib_col, 4, GL_UNSIGNED_BYTE, GL_TRUE, vs, (void*)vc);
    }
 
+   ShaderBase::Bind(ShaderProg.GetShaderProgram());
+   ShaderProg.LoadTexture(0);
+
    glBindTexture(GL_TEXTURE_2D, 0);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -156,11 +90,6 @@ NK_API void
 nk_glfw3_device_destroy(struct nk_glfw* glfw)
 {
    struct nk_glfw_device* dev = &glfw->ogl;
-   glDetachShader(dev->prog, dev->vert_shdr);
-   glDetachShader(dev->prog, dev->frag_shdr);
-   glDeleteShader(dev->vert_shdr);
-   glDeleteShader(dev->frag_shdr);
-   glDeleteProgram(dev->prog);
    glDeleteTextures(1, &dev->font_tex);
    glDeleteBuffers(1, &dev->vbo);
    glDeleteBuffers(1, &dev->ebo);
@@ -172,14 +101,6 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
 {
    struct nk_glfw_device* dev = &glfw->ogl;
    struct nk_buffer vbuf, ebuf;
-   GLfloat ortho[4][4] = {
-       {2.0f, 0.0f, 0.0f, 0.0f},
-       {0.0f,-2.0f, 0.0f, 0.0f},
-       {0.0f, 0.0f,-1.0f, 0.0f},
-       {-1.0f,1.0f, 0.0f, 1.0f},
-   };
-   ortho[0][0] /= (GLfloat)glfw->width;
-   ortho[1][1] /= (GLfloat)glfw->height;
 
    /* setup global state */
    glEnable(GL_BLEND);
@@ -191,15 +112,18 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
    glActiveTexture(GL_TEXTURE0);
 
    /* setup program */
-   glUseProgram(dev->prog);
-   glUniform1i(dev->uniform_tex, 0);
-   glUniformMatrix4fv(dev->uniform_proj, 1, GL_FALSE, &ortho[0][0]);
+   ShaderBase::Bind(ShaderProg.GetShaderProgram());
 
-   // Load mouse pos
-   float mousePos[2];
-   mousePos[0] = glfw->ctx.input.mouse.pos.x;
-   mousePos[1] = glfw->ctx.input.mouse.pos.y;
-   glUniform2f(mousePosLoc, mousePos[0], mousePos[1]);
+   Matrix44f projMatrix(2.0, 0.0, 0.0, 0.0,
+                        0.0, -2.0, 0.0, 0.0,
+                        0.0, 0.0, -1.0, 0.0,
+                        -1.0, 1.0, 0.0, 1.0);
+
+   projMatrix.data[0][0] /= (GLfloat)glfw->width;
+   projMatrix.data[1][1] /= (GLfloat)glfw->height;
+
+   ShaderProg.LoadProjection(projMatrix);
+   ShaderProg.LoadMousePos(glfw->ctx.input.mouse.pos.x, glfw->ctx.input.mouse.pos.y);
 
    glViewport(0, 0, (GLsizei)glfw->display_width, (GLsizei)glfw->display_height);
    {
@@ -266,7 +190,7 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
    }
 
    /* default OpenGL state */
-   glUseProgram(0);
+   ShaderBase::Unbind();
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    glBindVertexArray(0);

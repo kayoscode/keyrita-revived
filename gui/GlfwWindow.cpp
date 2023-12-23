@@ -339,9 +339,9 @@ namespace wgui
 
       SetStyle(ctx, eTheme::Dark);
 
-      ctx->input.mouse.grabbed = 1;
+      ctx->input.mouse.grabbed = true;
 
-      glfwSwapInterval(1);
+      glfwSwapInterval(0);
 
       return true;
    }

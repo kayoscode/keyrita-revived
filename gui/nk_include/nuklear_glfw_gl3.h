@@ -14,6 +14,7 @@
 #define NK_GLFW_GL3_H_
 
 #include <GLFW/glfw3.h>
+#include "Shaders/ShaderBase.h"
 
 enum nk_glfw_init_state {
    NK_GLFW3_DEFAULT = 0,
@@ -24,22 +25,28 @@ enum nk_glfw_init_state {
 #define NK_GLFW_TEXT_MAX 256
 #endif
 
-struct nk_glfw_device {
+struct nk_glfw_device 
+{
    struct nk_buffer cmds;
    struct nk_draw_null_texture tex_null;
    GLuint vbo, vao, ebo;
+   GLuint font_tex;
+
+   /**
    GLuint prog;
    GLuint vert_shdr;
    GLuint frag_shdr;
+   GLint uniform_tex;
+   GLint uniform_proj;
+   */
+
    GLint attrib_pos;
    GLint attrib_uv;
    GLint attrib_col;
-   GLint uniform_tex;
-   GLint uniform_proj;
-   GLuint font_tex;
 };
 
-struct nk_glfw {
+struct nk_glfw 
+{
    GLFWwindow* win;
    int width, height;
    int display_width, display_height;

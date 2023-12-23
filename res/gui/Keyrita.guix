@@ -6,44 +6,67 @@
                               Width2="35"
                               Width3="75"
                               Width4="70">
-        <Menu Text="File" Width="200" Height="200">
-          <DynamicRow Height="40">
-            <MenuItem Text="Test"/>
+        <Menu Text="File" Width="200" Height="250">
+          <DynamicRow Height="30">
+            <MenuItem Text="New"/>
           </DynamicRow>
-          <DynamicRow Height="40">
-            <MenuItem Text="Test2"/>
+          <DynamicRow Height="30">
+            <MenuItem Text="Open"/>
           </DynamicRow>
-          <DynamicRow Height="40">
-            <MenuItem Text="Test2"/>
+          <DynamicRow Height="30">
+            <MenuItem Text="Save"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Export as KLC"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Load Dataset"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Clear Dataset"/>
           </DynamicRow>
         </Menu>
-        <Menu Text="Edit" Width="120" Height="200">
-          <Label Text="Test"/>
+        <Menu Text="Edit" Width="200" Height="250">
+          <DynamicRow Height="30">
+            <MenuItem Text="Undo"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Redo"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Reflect Vertical"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Reflect Horizontal"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Swap Characters"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Settings"/>
+          </DynamicRow>
         </Menu>
-        <Menu Text="Heatmap" Width="120" Height="200">
-          <Label Text="Test"/>
+        <Menu Text="Heatmap" Width="200" Height="200">
+          <DynamicRow Height="30">
+            <MenuItem Text="Heatmap Type"/>
+          </DynamicRow>
         </Menu>
-        <Menu Text="Analyze" Width="120" Height="200">
-          <Label Text="Test"/>
+        <Menu Text="Analyze" Width="300" Height="200">
+          <DynamicRow Height="30">
+            <MenuItem Text="Effort Map"/>
+            <MenuItem Text="Scissor Map"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Generate"/>
+          </DynamicRow>
+          <DynamicRow Height="30">
+            <MenuItem Text="Optimize 1"/>
+            <MenuItem Text="Optimize 2"/>
+            <MenuItem Text="Optimize 3"/>
+            <MenuItem Text="Optimize 4"/>
+          </DynamicRow>
         </Menu>
       </StaticGrid>
     </MenuBar>
-    
-    <DynamicSpace Height="500">
-      <Label Text="Keyrita" Space.Width="20%"
-                            Space.Height="50%"
-                            Space.PosX="0"
-                            Space.PosY="0"/>
- 
-      <Label Text="Space" Space.Width="20%"
-                          Space.Height="65%"
-                          Space.PosX="10%"
-                          Space.PosY="10%"/>
-
-      <Label Text="!" Space.Width="20%"
-                      Space.Height="80%"
-                      Space.PosX="20%"
-                      Space.PosY="20%"/>
-    </DynamicSpace>
   </Window>
 </GuiRoot>
