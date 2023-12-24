@@ -13,11 +13,15 @@ int main()
    XmlLoadedWindowRenderer renderer;
    renderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
 
+   mainWindow.SetRenderer(&renderer);
+
+   Application::Start(&mainWindow);
+
    Timer t;
    int frameCount = 0;
    while (!mainWindow.Closing())
    {
-      mainWindow.NewFrame(&renderer);
+      mainWindow.Update();
 
       if (t.milliseconds() >= 5000)
       {

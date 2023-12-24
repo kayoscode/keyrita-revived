@@ -6,7 +6,7 @@
                               Width2="35"
                               Width3="75"
                               Width4="70">
-        <Menu Text="File" Width="200" Height="250">
+        <Menu Text="File" Width="150" Height="250">
           <DynamicRow Height="30">
             <MenuItem Text="New"/>
           </DynamicRow>
@@ -46,7 +46,7 @@
             <MenuItem Text="Settings"/>
           </DynamicRow>
         </Menu>
-        <Menu Text="Heatmap" Width="200" Height="200">
+        <Menu Text="Heatmap" Width="150" Height="200">
           <DynamicRow Height="30">
             <MenuItem Text="Heatmap Type"/>
           </DynamicRow>

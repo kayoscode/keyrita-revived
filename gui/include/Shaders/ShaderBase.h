@@ -65,12 +65,7 @@ public:
    }
 
    virtual void SetUniformLocations() = 0;
-
-    /**
-     * Loads a vertex shader and a fragment shader from a file
-     * Returns false if the shader program failed to load.
-     * */
-   bool LoadShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+   virtual void LoadShader() = 0;
 
    GLuint GetVertexShader() const { return mVertexShader.GetShader(); }
    GLuint GetFragmentShader() const { return mFragmentShader.GetShader(); }
@@ -87,9 +82,19 @@ public:
    }
 
 protected:
-   /**
-    * Uniform loading functions
-    * */
+   /// <summary>
+   /// Loads the vertex and fragment shaders into this object.
+   /// </summary>
+   /// <param name="vertexShaderPath"></param>
+   /// <param name="fragmentShaderPath"></param>
+   /// <returns></returns>
+   bool LoadShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+
+   /// <summary>
+   /// Functions to load and set uniforms 
+   /// </summary>
+   /// <param name="location"></param>
+   /// <param name="value"></param>
    static inline void LoadUniformf(unsigned int location, float value)
    {
       glUniform1f(location, value);

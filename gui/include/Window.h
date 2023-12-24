@@ -1,6 +1,7 @@
 #pragma once
 #include "DebugLogger.h"
 #include "ContextManager.h"
+#include <thread>
 
 #include "include_nuk.h"
 
@@ -51,11 +52,16 @@ namespace wgui
       /// <summary>
       /// Renders the next frame to the screen.
       /// </summary>
-      virtual void NewFrame(WindowRenderer* renderer) = 0;
+      virtual void Render() = 0;
+      virtual void Update();
+
+      NuklearGlfwContextManager& GetGlfwContext() { return mNkContext; }
+
+      void SetRenderer(WindowRenderer* renderer) { mLastRenderer = renderer; }
+      WindowRenderer* GetRenderer() const { return mLastRenderer; }
 
    protected:
-      static constexpr int MaxVertexBuffer = 512 * 1024;
-      static constexpr int MaxElementBuffer = 128 * 1024;
+      WindowRenderer* mLastRenderer = nullptr;
 
       GLFWwindow* mWindow;
       std::string mWindowTitle;
@@ -79,7 +85,7 @@ namespace wgui
          bool resizable = true,
          bool visible = true, bool decorated = true, bool fullScreen = false) override;
 
-      void NewFrame(WindowRenderer* renderer) override;
+      void Render() override;
 
    private:
       static DebugLogger GlfwLogger;
@@ -123,5 +129,41 @@ namespace wgui
 
    private:
       const WindowBase* const mWindow;
+   };
+
+   static class Application
+   {
+   public:
+      static void AddWindow(wgui::WindowBase* window, GLFWwindow* gWin)
+      {
+         mWindows[gWin] = window;
+      }
+
+      /// <summary>
+      /// Returns window associated with the GLFWwindow* 
+      /// nullptr if it doesn't exist.
+      /// </summary>
+      /// <param name="gWin"></param>
+      /// <returns></returns>
+      static wgui::WindowBase* GetWindow(GLFWwindow* gWin)
+      {
+         auto itt = mWindows.find(gWin);
+
+         if (itt != mWindows.end())
+         {
+            return itt->second;
+         }
+
+         return nullptr;
+      }
+
+      static void Start(MainWindow* mainWindow);
+
+      //static void CreateDialog(wgui::WindowBase* window, GLFWwindow* gwin);
+      //static void CloseDialog(wgui::WindowBase* window);
+
+   private:
+      static std::map<GLFWwindow*, wgui::WindowBase*> mWindows;
+      static std::thread mMainWindowRenderThread;
    };
 }

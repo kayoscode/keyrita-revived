@@ -7,11 +7,42 @@
 #include "nuklear.h"
 #include "nuklear_glfw_gl3.h"
 
+std::map<GLFWwindow*, wgui::WindowBase*> wgui::Application::mWindows;
+std::thread wgui::Application::mMainWindowRenderThread;
+
 namespace
 {
+   static constexpr int MaxVertexBuffer = 512 * 1024;
+   static constexpr int MaxElementBuffer = 128 * 1024;
+
    void GlfwErrorCallback(int errCode, const char* msg)
    {
       //mGlfwLogger.critical("{int}: {str}", errCode, msg);
+   }
+
+   static void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
+   {
+      // Input
+      //nk_glfw3_new_frame(nkGlfw);
+      //layoutRenderer->RenderStart(window, &nkGlfw->ctx);
+      //layoutRenderer->Render(window, &nkGlfw->ctx);
+
+      // Draw
+      //glClear(GL_COLOR_BUFFER_BIT);
+      //nk_glfw3_render(nkGlfw, NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
+      //layoutRenderer->RenderFinish(window, &nkGlfw->ctx);
+
+      glfwSwapBuffers(gWin);
+   }
+
+   static void ExecuteRenderLoop(wgui::WindowBase* mainWindow, GLFWwindow* gWin)
+   {
+      glfwMakeContextCurrent(gWin);
+
+      while (!mainWindow->Closing())
+      {
+         mainWindow->Render();
+      }
    }
 
    enum class eTheme
@@ -201,8 +232,17 @@ namespace
 /// </summary>
 namespace wgui
 {
+   void Application::Start(MainWindow* mainWindow)
+   {
+      glfwMakeContextCurrent(nullptr);
+
+      mMainWindowRenderThread = std::thread(ExecuteRenderLoop, mainWindow, mainWindow->GetGlfwContext().GetGlfw()->win);
+      mMainWindowRenderThread.detach();
+   }
+
    NuklearGlfwContextManager::NuklearGlfwContextManager()
-      : mNkGlfw(std::make_unique<nk_glfw>())
+      : mNkGlfw(std::make_unique<nk_glfw>()),
+      mNkContext(nullptr)
    {
       memset(mNkGlfw.get(), 0, sizeof(nk_glfw));
    }
@@ -256,7 +296,6 @@ namespace wgui
          return false;
       }
 
-      glewExperimental = 1;
       return true;
    }
 }
@@ -343,29 +382,21 @@ namespace wgui
 
       glfwSwapInterval(0);
 
+      // Add the window to the application static data.
+      Application::AddWindow(this, mWindow);
+
       return true;
    }
 
-   void MainWindow::NewFrame(WindowRenderer* layoutRenderer)
+   void MainWindow::Render()
    {
-      int width, height;
-      GetWindowSize(width, height);
-
-      nk_context* ctx = mNkContext.GetContext();
       nk_glfw* nkGlfw = mNkContext.GetGlfw();
+      DrawFrame(this, mWindow, nkGlfw, mLastRenderer);
+   }
 
-      // Input
-      nk_glfw3_new_frame(nkGlfw);
-      float delta = mNkContext.GetContext()->delta_time_seconds;
-      layoutRenderer->RenderStart(this, ctx);
-      layoutRenderer->Render(this, ctx);
-
-      // Draw
-      glClear(GL_COLOR_BUFFER_BIT);
-      nk_glfw3_render(nkGlfw, NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
-      layoutRenderer->RenderFinish(this, ctx);
-
-      glfwSwapBuffers(mWindow);
+   void WindowBase::Update()
+   {
+      // TODO: does this need to change for multiple windows?
       glfwPollEvents();
    }
 

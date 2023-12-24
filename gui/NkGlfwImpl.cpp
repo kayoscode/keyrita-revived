@@ -17,7 +17,7 @@
 
 namespace 
 {
-   wgui::HighlightGuiShader ShaderProg;
+   wgui::DefaultGuiShader ShaderProg;
 }
 
 struct nk_glfw_vertex
@@ -30,9 +30,7 @@ struct nk_glfw_vertex
 NK_API void
 nk_glfw3_device_create(struct nk_glfw* glfw)
 {
-   GLint status;
-   ShaderProg.LoadShaders("./res/gui/shaders/DefaultShader.vert", 
-                          "./res/gui/shaders/HighlightEffectShader.frag");
+   ShaderProg.LoadShader();
 
    struct nk_glfw_device* dev = &glfw->ogl;
    nk_buffer_init_default(&dev->cmds);
@@ -123,16 +121,17 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
    projMatrix.data[1][1] /= (GLfloat)glfw->height;
 
    ShaderProg.LoadProjection(projMatrix);
-   ShaderProg.LoadMousePos(glfw->ctx.input.mouse.pos.x, glfw->ctx.input.mouse.pos.y);
+   //ShaderProg.LoadMousePos(glfw->ctx.input.mouse.pos.x, glfw->ctx.input.mouse.pos.y);
+   //ShaderProg.LoadWindowSize(glfw->width, glfw->height);
 
    glViewport(0, 0, (GLsizei)glfw->display_width, (GLsizei)glfw->display_height);
    {
-      /* convert from command queue into draw list and draw to screen */
+      // Draw command list to screen.
       const struct nk_draw_command* cmd;
       void* vertices, * elements;
       nk_size offset = 0;
 
-      /* allocate vertex and element buffer */
+      // Allocate buffers.
       glBindVertexArray(dev->vao);
       glBindBuffer(GL_ARRAY_BUFFER, dev->vbo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dev->ebo);
@@ -140,11 +139,11 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
       glBufferData(GL_ARRAY_BUFFER, max_vertex_buffer, NULL, GL_STREAM_DRAW);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_element_buffer, NULL, GL_STREAM_DRAW);
 
-      /* load draw vertices & elements directly into vertex + element buffer */
+      // Load draw vertices.
       vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
       elements = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
       {
-         /* fill convert configuration */
+         // Fill conversion config struct.
          struct nk_convert_config config;
          static const struct nk_draw_vertex_layout_element vertex_layout[] = {
              {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_glfw_vertex, position)},
@@ -164,7 +163,7 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
          config.shape_AA = AA;
          config.line_AA = AA;
 
-         /* setup buffers to load vertices and elements */
+         // Init buffers
          nk_buffer_init_fixed(&vbuf, vertices, (size_t)max_vertex_buffer);
          nk_buffer_init_fixed(&ebuf, elements, (size_t)max_element_buffer);
          nk_convert(&glfw->ctx, &dev->cmds, &vbuf, &ebuf, &config);
@@ -172,7 +171,7 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
       glUnmapBuffer(GL_ARRAY_BUFFER);
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
-      /* iterate over and execute each draw command */
+      // Execute each draw command.
       nk_draw_foreach(cmd, &glfw->ctx, &dev->cmds)
       {
          if (!cmd->elem_count) continue;

@@ -15,6 +15,12 @@ namespace wgui
       {
       }
 
+      void LoadShader() override
+      {
+         LoadShaders("./res/gui/shaders/DefaultShader.vert",
+                     "./res/gui/shaders/DefaultShader.frag");
+      }
+
       void SetUniformLocations() override
       {
          mLocationTexture = GetUniformLocation("Texture");
@@ -39,10 +45,21 @@ namespace wgui
    class HighlightGuiShader : public DefaultGuiShader
    {
    public:
+      HighlightGuiShader()
+      {
+      }
+
+      void LoadShader() override
+      {
+         LoadShaders("./res/gui/shaders/DefaultShader.vert",
+                     "./res/gui/shaders/HighlightEffectShader.frag");
+      }
+
       void SetUniformLocations() override
       {
          DefaultGuiShader::SetUniformLocations();
          mLocationMousePos = GetUniformLocation("MousePos");
+         mLocationWindowSize = GetUniformLocation("WindowDims");
       }
 
       void LoadMousePos(int posX, int posY)
@@ -50,7 +67,13 @@ namespace wgui
          LoadUniformVec2f(mLocationMousePos, Vector2f(posX, posY));
       }
 
+      void LoadWindowSize(int sizeX, int sizeY)
+      {
+         LoadUniformVec2f(mLocationWindowSize, Vector2f(sizeX, sizeY));
+      }
+
    protected:
       int mLocationMousePos = 0;
+      int mLocationWindowSize = 0;
    };
 }
