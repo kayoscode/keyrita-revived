@@ -69,6 +69,7 @@ namespace wgui
       NuklearGlfwContextManager mNkContext;
 
       friend class WindowInput;
+      friend class Application;
    };
 
    /// <summary>

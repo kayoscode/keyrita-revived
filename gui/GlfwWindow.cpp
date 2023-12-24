@@ -20,22 +20,24 @@ namespace
       //mGlfwLogger.critical("{int}: {str}", errCode, msg);
    }
 
-   static void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
+   void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
    {
+      glfwSwapInterval(1);
+
       // Input
-      //nk_glfw3_new_frame(nkGlfw);
-      //layoutRenderer->RenderStart(window, &nkGlfw->ctx);
-      //layoutRenderer->Render(window, &nkGlfw->ctx);
+      nk_glfw3_new_frame(nkGlfw);
+      layoutRenderer->RenderStart(window, &nkGlfw->ctx);
+      layoutRenderer->Render(window, &nkGlfw->ctx);
 
       // Draw
-      //glClear(GL_COLOR_BUFFER_BIT);
-      //nk_glfw3_render(nkGlfw, NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
-      //layoutRenderer->RenderFinish(window, &nkGlfw->ctx);
+      glClear(GL_COLOR_BUFFER_BIT);
+      nk_glfw3_render(nkGlfw, NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
+      layoutRenderer->RenderFinish(window, &nkGlfw->ctx);
 
       glfwSwapBuffers(gWin);
    }
 
-   static void ExecuteRenderLoop(wgui::WindowBase* mainWindow, GLFWwindow* gWin)
+   void ExecuteRenderLoop(wgui::WindowBase* mainWindow, GLFWwindow* gWin)
    {
       glfwMakeContextCurrent(gWin);
 
@@ -234,10 +236,16 @@ namespace wgui
 {
    void Application::Start(MainWindow* mainWindow)
    {
-      glfwMakeContextCurrent(nullptr);
+      glfwMakeContextCurrent(mainWindow->mWindow);
 
-      mMainWindowRenderThread = std::thread(ExecuteRenderLoop, mainWindow, mainWindow->GetGlfwContext().GetGlfw()->win);
-      mMainWindowRenderThread.detach();
+      //mMainWindowRenderThread = std::thread(ExecuteRenderLoop, mainWindow, mainWindow->mWindow);
+      //mMainWindowRenderThread.detach();
+
+      while (!mainWindow->Closing())
+      {
+         mainWindow->Render();
+         mainWindow->Update();
+      }
    }
 
    NuklearGlfwContextManager::NuklearGlfwContextManager()
