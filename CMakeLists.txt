@@ -40,7 +40,12 @@ find_package(OpenGL REQUIRED)
 
 add_subdirectory(gui)
 
-add_executable(${EXE_NAME} "main.cpp")
+file (GLOB SRC
+    "*.cpp"
+    "include/*.h"    
+)
+
+add_executable(${EXE_NAME} ${SRC})
 
 target_include_directories(${EXE_NAME} PUBLIC include)
 target_link_libraries(${EXE_NAME} 
