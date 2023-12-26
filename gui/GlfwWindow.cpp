@@ -8,7 +8,6 @@
 #include "nuklear_glfw_gl3.h"
 
 std::map<GLFWwindow*, wgui::WindowBase*> wgui::Application::mWindows;
-std::thread wgui::Application::mMainWindowRenderThread;
 
 namespace
 {
@@ -37,14 +36,10 @@ namespace
       glfwSwapBuffers(gWin);
    }
 
-   void ExecuteRenderLoop(wgui::WindowBase* mainWindow, GLFWwindow* gWin)
+   void WindowResizeCallback(GLFWwindow* window, int width, int height)
    {
-      glfwMakeContextCurrent(gWin);
-
-      while (!mainWindow->Closing())
-      {
-         mainWindow->Render();
-      }
+      wgui::WindowBase* win = wgui::Application::GetWindow(window);
+      DrawFrame(win, window, win->GetGlfwContext().GetGlfw(), win->GetRenderer());
    }
 
    enum class eTheme
@@ -234,20 +229,6 @@ namespace
 /// </summary>
 namespace wgui
 {
-   void Application::Start(MainWindow* mainWindow)
-   {
-      glfwMakeContextCurrent(mainWindow->mWindow);
-
-      //mMainWindowRenderThread = std::thread(ExecuteRenderLoop, mainWindow, mainWindow->mWindow);
-      //mMainWindowRenderThread.detach();
-
-      while (!mainWindow->Closing())
-      {
-         mainWindow->Render();
-         mainWindow->Update();
-      }
-   }
-
    NuklearGlfwContextManager::NuklearGlfwContextManager()
       : mNkGlfw(std::make_unique<nk_glfw>()),
       mNkContext(nullptr)
@@ -392,6 +373,7 @@ namespace wgui
 
       // Add the window to the application static data.
       Application::AddWindow(this, mWindow);
+      glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
 
       return true;
    }

@@ -27,7 +27,7 @@ namespace wgui
       void GetWindowSize(int& width, int& height) const;
       void SetWindowPos(int x, int y);
       void GetWindowPos(int& x, int& y) const;
-      void SetWindowSizeLimits(int minWidth, int minHeight, int maxWidth, int maxHeight);
+      void SetWindowSizeLimits(int minWidth, int minHeight, int maxWidth = GL_DONT_CARE, int = GL_DONT_CARE);
 
       void SetWindowTitle(const std::string& title);
       std::string GetWindowTitle() const { return mWindowTitle; }
@@ -132,7 +132,7 @@ namespace wgui
       const WindowBase* const mWindow;
    };
 
-   static class Application
+   class Application
    {
    public:
       static void AddWindow(wgui::WindowBase* window, GLFWwindow* gWin)
@@ -158,13 +158,7 @@ namespace wgui
          return nullptr;
       }
 
-      static void Start(MainWindow* mainWindow);
-
-      //static void CreateDialog(wgui::WindowBase* window, GLFWwindow* gwin);
-      //static void CloseDialog(wgui::WindowBase* window);
-
    private:
       static std::map<GLFWwindow*, wgui::WindowBase*> mWindows;
-      static std::thread mMainWindowRenderThread;
    };
 }
