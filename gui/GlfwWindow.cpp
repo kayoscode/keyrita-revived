@@ -370,7 +370,7 @@ namespace wgui
       Application::AddWindow(this, mWindow);
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
 
-      glfwSwapInterval(0);
+      glfwSwapInterval(1);
 
       return true;
    }
