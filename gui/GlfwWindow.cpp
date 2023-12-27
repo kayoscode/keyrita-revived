@@ -362,12 +362,9 @@ namespace wgui
       font->config->pixel_snap = true;
 
       nk_glfw3_font_stash_end(nkGlfw);
-      nk_style_load_all_cursors(ctx, atlas->cursors);
       nk_style_set_font(ctx, &font->handle);
 
-      SetStyle(ctx, eTheme::Dark);
-
-      ctx->input.mouse.grabbed = true;
+      SetStyle(ctx, eTheme::Black);
 
       glfwSwapInterval(0);
 

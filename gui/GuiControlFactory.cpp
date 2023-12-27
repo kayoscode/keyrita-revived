@@ -21,6 +21,12 @@ namespace
       { "DynamicSpace", []() { return std::make_unique<wgui::GuiLayoutDynamicSpace>(); }},
 
       { "Label", []() { return std::make_unique<wgui::GuiLabel>(); }},
+      { "Checkbox", []() { return std::make_unique<wgui::GuiCheckbox>(); }},
+      { "HorizontalSeparator", []() { return std::make_unique<wgui::GuiHorizontalSeparator>(); }},
+      { "RadioButtonGroup", []() { return std::make_unique<wgui::GuiRadioButtonGroup>(); }},
+      { "RadioButton", []() { return std::make_unique<wgui::GuiRadioButton>(); }},
+      { "Combobox", []() { return std::make_unique<wgui::GuiCombobox>(); }},
+      { "ComboboxItem", []() { return std::make_unique<wgui::GuiComboboxItem>(); }},
    };
 }
 

@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "Window.h"
 #include "NuklearWindowRenderer.h"
 
@@ -6,6 +8,14 @@
 
 namespace wgui
 {
+   void WindowRendererGui::Init()
+   {
+      for (int i = 0; i < mWindows.size(); i++)
+      {
+         mWindows[i]->Init();
+      }
+   }
+
    void WindowRendererGui::RenderStart(WindowBase* const window, nk_context* context)
    {
    }
@@ -25,7 +35,7 @@ namespace wgui
    void GuiLayoutWindow::Render(WindowBase* window, nk_context* context)
    {
       // 0 flags for now! We will have to fix that.
-      if (nk_begin_titled(context, mName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
+      if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
       {
          for (const auto& control : mControls)
          {
@@ -40,6 +50,77 @@ namespace wgui
    void GuiLabel::Render(WindowBase* const window, nk_context* context)
    {
       nk_label(context, mText.c_str(), static_cast<nk_flags>(mTextAlignment));
+   }
+
+   void GuiHorizontalSeparator::Render(WindowBase* const window, nk_context* context)
+   {
+      struct nk_rect bounds;
+      auto state = nk_widget_fitting(&bounds, context, nk_vec2(0, 0));
+
+      // Draw horizontal separator.
+      struct nk_window* win = context->current;
+      const struct nk_style* style = &context->style;
+
+      nk_stroke_line(&win->buffer,
+         bounds.x, bounds.y + (mThickness / 2.0), bounds.x + bounds.w, bounds.y + (mThickness / 2.0),
+         mThickness, nk_color(0, 0, 0, 255/3));
+   }
+
+   void GuiCheckbox::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_bool checked = mChecked;
+      nk_checkbox_label(context, mText.c_str(), &checked);
+      mChecked = checked;
+   }
+
+   void GuiRadioButton::Render(WindowBase* const window, nk_context* context)
+   {
+      assert(mRadioButtonSelection != nullptr);
+
+      if (nk_option_label(context, mText.c_str(), mButtonIndex == *mRadioButtonSelection))
+      {
+         *mRadioButtonSelection = mButtonIndex;
+      }
+   }
+
+   void GuiRadioButtonGroup::Render(WindowBase* const window, nk_context* context)
+   {
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         mControls[i]->Render(window, context);
+      }
+   }
+
+   void GuiComboboxItem::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_layout_row_dynamic(context, *mItemHeight, 1);
+
+      if (nk_combo_item_label(context, mText.c_str(), mTextAlignment))
+      {
+         *mComboboxSelectedItem = mItemIndex;
+      }
+   }
+
+   void GuiCombobox::Render(WindowBase* const window, nk_context* context)
+   {
+      std::string text = "";
+      assert(mComboboxItems.size() == mComboboxTexts.size());
+      assert(mSelectedItem <= mComboboxItems.size());
+
+      if (mComboboxTexts.size() > 0) 
+      {
+         text = *mComboboxTexts[mSelectedItem - 1];
+      }
+
+      if (nk_combo_begin_label(context, text.c_str(), nk_vec2(mWidth, mHeight)))
+      {
+         for (int i = 0; i < mControls.size(); i++)
+         {
+            mControls[i]->Render(window, context);
+         }
+
+         nk_combo_end(context);
+      }
    }
 
 #pragma endregion

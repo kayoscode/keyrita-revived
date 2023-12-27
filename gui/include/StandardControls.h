@@ -1,7 +1,9 @@
 #pragma once
+#include <concepts>
+#include <cassert>
+#include <functional>
 
 #include "Attributes.h"
-#include <concepts>
 
 struct nk_context;
 
@@ -31,6 +33,8 @@ namespace wgui
       GuiControlBase()
          : mAttributes(std::make_unique<AttributeSet>()) {}
 
+      virtual void Init() {}
+
       /// <summary>
       /// Renders the control to the screen.
       /// </summary>
@@ -39,6 +43,11 @@ namespace wgui
       virtual void Render(WindowBase* const window, nk_context* context) = 0;
       virtual eControlType GetControlType() const = 0;
       virtual bool AddChild(GuiControlBase* control) { return false; }
+
+      virtual void ForEachChild(std::function<void(GuiControlBase* control, int index)>)
+      {
+         assert(false);
+      }
 
       /// <summary>
       /// Whether elements can be placed inside it or not.
@@ -86,6 +95,36 @@ namespace wgui
          mAttributes->Get(attributeName)->As<AttrString>()->Set(value);
       }
 
+      void SetAttributeBool(const std::string& attributeName, bool value)
+      {
+         if (!AttributeExists(attributeName))
+         {
+            mAttributes->Add(attributeName, eAttributeType::Bool);
+         }
+
+         mAttributes->Get(attributeName)->As<AttrBool>()->Set(value);
+      }
+
+      int64_t GetAttributeInt(const std::string& attributeName)
+      {
+         return mAttributes->Get(attributeName)->As<AttrInt>()->Get();
+      }
+
+      double GetAttributeReal(const std::string& attributeName)
+      {
+         return mAttributes->Get(attributeName)->As<AttrReal>()->Get();
+      }
+
+      std::string GetAttributeString(const std::string& attributeName)
+      {
+         return mAttributes->Get(attributeName)->As<AttrString>()->Get();
+      }
+
+      bool GetAttributeBool(const std::string& attributeName)
+      {
+         return mAttributes->Get(attributeName)->As<AttrBool>()->Get();
+      }
+
       int64_t& GetOrCreateAttributeInt(const std::string& attrName)
       {
          return GetOrChooseAttributeBase<int64_t, AttrInt>(attrName, eAttributeType::Int);
@@ -101,19 +140,9 @@ namespace wgui
          return GetOrChooseAttributeBase<std::string, AttrString>(attrName, eAttributeType::String);
       }
 
-      int64_t GetAttributeInt(const std::string& attributeName, int64_t value)
+      bool& GetOrCreateAttributeBool(const std::string& attrName)
       {
-         return mAttributes->Get(attributeName)->As<AttrInt>()->Get();
-      }
-
-      double GetAttributeReal(const std::string& attributeName, double value)
-      {
-         return mAttributes->Get(attributeName)->As<AttrReal>()->Get();
-      }
-
-      std::string GetAttributeString(const std::string& attributeName, const std::string& value)
-      {
-         return mAttributes->Get(attributeName)->As<AttrString>()->Get();
+         return GetOrChooseAttributeBase<bool, AttrBool>(attrName, eAttributeType::Bool);
       }
 
       AttributeSet* const GetAttributes() { return mAttributes.get(); }
@@ -124,7 +153,10 @@ namespace wgui
    private:
       template <typename T, typename Q>
       T& GetOrChooseAttributeBase(const std::string& attrName, eAttributeType type)
-         requires (std::is_same_v<T, int64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string>) &&
+         requires (std::is_same_v<T, int64_t> || 
+                   std::is_same_v<T, double> || 
+                   std::is_same_v<T, std::string> ||
+                   std::is_same_v<T, bool>) &&
       (std::is_convertible_v<Q, CtrlAttribute>)
       {
          // Add a new scale property for the newly added control.
@@ -149,10 +181,31 @@ namespace wgui
       ChildSupportingGuiControlBase() : GuiControlBase() { }
       bool SupportsChildren() const override { return true; }
 
+      virtual void Init() override
+      {
+         // Initialize all children, then init ourselves.
+         for (int i = 0; i < mControls.size(); i++)
+         {
+            mControls[i]->Init();
+         }
+
+         SelfInit();
+      }
+
+      virtual void SelfInit() { }
+
       bool AddChild(GuiControlBase* newControl) override
       {
          mControls.push_back(newControl);
          return true;
+      }
+
+      virtual void ForEachChild(std::function<void(GuiControlBase* child, int index)> function) override
+      {
+         for (int i = 0; i < mControls.size(); i++)
+         {
+            function(mControls[i], i);
+         }
       }
 
    protected:
@@ -170,9 +223,9 @@ namespace wgui
       VerticalCenter = 0x10,
       Bottom = 0x20,
 
-      CenterLeft = Center | Left,
+      CenterLeft = VerticalCenter | Left,
       FullyCentered = VerticalCenter | Center,
-      CenterRight = Center | Right,
+      CenterRight = VerticalCenter | Right,
    };
 
    class GuiWidget : public GuiControlBase
@@ -182,6 +235,33 @@ namespace wgui
       {
          return eControlType::Widget;
       }
+   };
+
+   /// <summary>
+   /// Fills the horizontal space with a horizontal separator line.
+   /// </summary>
+   class GuiHorizontalSeparator : public GuiWidget
+   {
+   public:
+      static constexpr std::string_view ThicknessAttribute = "Thickness";
+
+      GuiHorizontalSeparator() 
+         : mThickness(mAttributes->Add((std::string)ThicknessAttribute, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+           GuiWidget() 
+      {
+         mThickness = 1;
+      }
+
+      GuiHorizontalSeparator(float thickness)
+         : GuiHorizontalSeparator()
+      {
+         mThickness = thickness;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      int64_t& mThickness;
    };
 
    class GuiLabel : public GuiWidget
@@ -196,7 +276,7 @@ namespace wgui
          mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
       {
          mText = "";
-         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
+         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
       }
 
       GuiLabel(const std::string& text, eTextAlignmentFlags alignment)
@@ -208,9 +288,241 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-   private:
+   protected:
       int64_t& mTextAlignment;
       std::string& mText;
+   };
+
+   class GuiCheckbox : public GuiLabel
+   {
+   public:
+      static constexpr std::string_view CheckedAttr = "Checked";
+      GuiCheckbox()
+         : mChecked(mAttributes->Add((std::string)CheckedAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef()),
+           GuiLabel()
+      {
+      }
+
+      GuiCheckbox(const std::string& text, 
+         eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered, bool checked = false)
+         : GuiCheckbox()
+      {
+         mChecked = checked;
+         mText = text;
+         mTextAlignment = static_cast<int64_t>(alignmentFlags);
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+          
+   protected:
+      bool& mChecked;
+   };
+
+   class GuiRadioButton : public GuiLabel
+   {
+   public:
+      GuiRadioButton()
+         : mButtonIndex(1), mRadioButtonSelection(nullptr), GuiLabel()
+      {
+      }
+
+      void SetRadioButtonGroupSelection(int64_t* selection, int buttonIndex)
+      {
+         mRadioButtonSelection = selection;
+         mButtonIndex = buttonIndex;
+      }
+
+      GuiRadioButton(const std::string& text,
+         eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered, bool checked = false)
+         : GuiRadioButton()
+      {
+         mText = text;
+         mTextAlignment = static_cast<int64_t>(alignmentFlags);
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      int64_t* mRadioButtonSelection;
+      int mButtonIndex;
+   };
+
+   /// <summary>
+   /// All the radio buttons directly within this group will be controlled together.
+   /// </summary>
+   class GuiRadioButtonGroup : public ChildSupportingGuiControlBase
+   {
+   public:
+      static constexpr std::string_view SelectedAttr = "Selection";
+
+      GuiRadioButtonGroup()
+         : mCurrentSelection(mAttributes->Add((std::string)SelectedAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+           ChildSupportingGuiControlBase()
+      {
+         mCurrentSelection = 1;
+      }
+
+      void SelfInit() override
+      {
+         mRadioButtons.clear();
+
+         auto* radioBtns = &mRadioButtons;
+         int64_t* currentSelection = &mCurrentSelection;
+         int buttonIndex = 1;
+
+         std::function<void(GuiControlBase*, int index)> func = 
+            [&func, radioBtns, currentSelection, &buttonIndex](GuiControlBase* control, int index) -> void
+            {
+               GuiRadioButton* rb = dynamic_cast<GuiRadioButton*>(control);
+               if (rb != nullptr)
+               {
+                  rb->SetRadioButtonGroupSelection(currentSelection, buttonIndex);
+                  buttonIndex++;
+                  radioBtns->push_back(rb);
+               }
+
+               if (control != nullptr && control->SupportsChildren())
+               {
+                  control->ForEachChild(func);
+               }
+            };
+
+         func(this, 0);
+      }
+
+      eControlType GetControlType() const override { return eControlType::Group; }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      std::vector<GuiRadioButton*> mRadioButtons;
+      int64_t& mCurrentSelection;
+   };
+
+   class GuiComboboxItemBase : public GuiWidget
+   {
+   public:
+      GuiComboboxItemBase()
+         : mComboboxSelectedItem(nullptr),
+         mItemHeight(nullptr)
+      {
+      }
+
+      void SetComboboxSelectedItem(int64_t* selectedItem, int64_t* itemHeight, int itemIndex)
+      {
+         mComboboxSelectedItem = selectedItem;
+         mItemIndex = itemIndex;
+         mItemHeight = itemHeight;
+      }
+
+   protected:
+      int64_t* mComboboxSelectedItem;
+      int64_t* mItemHeight;
+      int mItemIndex = 0;
+   };
+
+   class GuiComboboxItem : public GuiComboboxItemBase
+   {
+   public:
+      static constexpr std::string_view TextAlignAttr = "TextAlignment";
+      static constexpr std::string_view TextAttr = "Text";
+
+      GuiComboboxItem()
+         : GuiComboboxItemBase(),
+         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+      {
+         mText = "";
+         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
+      }
+
+      GuiComboboxItem(const std::string& text, eTextAlignmentFlags alignment)
+         : GuiComboboxItem()
+      {
+         mText = text;
+         mTextAlignment = static_cast<int64_t>(alignment);
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      int64_t& mTextAlignment;
+      std::string& mText;
+   };
+
+   class GuiCombobox : public ChildSupportingGuiControlBase
+   {
+   public:
+      static constexpr std::string_view WidthAttr = "Width";
+      static constexpr std::string_view HeightAttr = "Height";
+      static constexpr std::string_view ItemHeightAttr = "ItemHeight";
+
+      GuiCombobox()
+         : mSelectedItem(mAttributes->Add
+            ((std::string)GuiRadioButtonGroup::SelectedAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mItemHeight(mAttributes->Add((std::string)ItemHeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+      {
+         mSelectedItem = 1;
+         mWidth = 200;
+         mHeight = 200;
+         mItemHeight = 35;
+      }
+
+      GuiCombobox(int selectedItem, int width = 200, int height = 200, int itemHeight = 35)
+         : GuiCombobox()
+      {
+         mSelectedItem = selectedItem;
+         mWidth = width;
+         mHeight = height;
+         mItemHeight = 35;
+      }
+
+      eControlType GetControlType() const override { return eControlType::Group; }
+
+      void SelfInit() override
+      {
+         mComboboxItems.clear();
+         mComboboxTexts.clear();
+
+         auto* items = &mComboboxItems;
+         auto* texts = &mComboboxTexts;
+         int64_t* currentSelection = &mSelectedItem;
+         int64_t* itemHeight = &mItemHeight;
+         int itemIndex = 1;
+
+         std::function<void(GuiControlBase*, int index)> func =
+            [&func, items, texts, currentSelection, itemHeight, &itemIndex](GuiControlBase* control, int index) -> void
+            {
+               GuiComboboxItem* cb = dynamic_cast<GuiComboboxItem*>(control);
+               if (cb != nullptr)
+               {
+                  cb->SetComboboxSelectedItem(currentSelection, itemHeight, itemIndex);
+                  itemIndex++;
+                  items->push_back(cb);
+                  texts->push_back(&cb->GetOrCreateAttributeString((std::string)GuiComboboxItem::TextAttr));
+               }
+
+               if (control != nullptr && control->SupportsChildren())
+               {
+                  control->ForEachChild(func);
+               }
+            };
+
+         func(this, 0);
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      int64_t& mSelectedItem;
+      int64_t& mWidth;
+      int64_t& mHeight;
+      int64_t& mItemHeight;
+
+      std::vector<GuiComboboxItem*> mComboboxItems;
+      std::vector<std::string*> mComboboxTexts;
    };
 
 #pragma endregion
@@ -314,7 +626,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-   private:
+   protected:
       std::vector<double*> mScales;
    };
 
@@ -346,7 +658,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-   private:
+   protected:
       std::vector<int64_t*> mScales;
    };
 
@@ -373,7 +685,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-   private:
+   protected:
       std::vector<int64_t*> mScales;
    };
 
@@ -478,7 +790,7 @@ namespace wgui
    public:
    };
 
-   class GuiTree : public GuiControlBase
+   class GuiLayoutTree : public GuiControlBase
    {
    public:
    };
@@ -538,7 +850,7 @@ namespace wgui
       eControlType GetControlType() const override { return eControlType::Menu; }
       bool SupportsChildren() const override { return true; }
 
-   private:
+   protected:
       int64_t& mTextAlignment;
       std::string& mText;
       std::string& mImagePath;
@@ -559,7 +871,7 @@ namespace wgui
          mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
          mImagePath(mAttributes->Add((std::string)ImagePathAttr, eAttributeType::String)->As<AttrString>()->GetRef())
       {
-         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
+         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
          mText = "";
          mImagePath = "";
       }
@@ -577,7 +889,7 @@ namespace wgui
       void Render(WindowBase* const window, nk_context* context) override;
       eControlType GetControlType() const override { return eControlType::Widget; }
 
-   private:
+   protected:
       int64_t& mTextAlignment;
       std::string& mText;
       std::string& mImagePath;
@@ -595,7 +907,6 @@ namespace wgui
       static constexpr std::string_view YPosAttr = "YPos";
       static constexpr std::string_view WidthAttr = "Width";
       static constexpr std::string_view HeightAttr = "Height";
-      static constexpr std::string_view NameAttr = "Name";
       static constexpr std::string_view TitleAttr = "Title";
 
       GuiLayoutWindow()
@@ -604,7 +915,6 @@ namespace wgui
          mPosY(mAttributes->Add((std::string)YPosAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
          mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
          mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mName(mAttributes->Add((std::string)NameAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
          mTitle(mAttributes->Add((std::string)TitleAttr, eAttributeType::String)->As<AttrString>()->GetRef())
       {
          // Set to defaults.
@@ -612,21 +922,20 @@ namespace wgui
          mPosY = 0;
          mWidth = 100;
          mHeight = 100;
-         mName = "Unnamed";
          mTitle = "Untitled";
+
+         mWindowName = std::to_string(reinterpret_cast<int64_t>(this));
       }
 
       GuiLayoutWindow(const std::string& name,
          int posX, int posY, int width, int height,
-         const std::string& title = "")
+         const std::string& title)
          : GuiLayoutWindow()
       {
-         // TODO: do defaults with configuration files!!
          mPosX = posX;
          mPosY = posY;
          mWidth = width;
          mHeight = height;
-         mName = name;
          mTitle = title;
       }
 
@@ -637,14 +946,14 @@ namespace wgui
          return eControlType::Window;
       }
 
-   private:
+   protected:
       int64_t& mPosX;
       int64_t& mPosY;
 
       int64_t& mWidth;
       int64_t& mHeight;
 
-      std::string& mName;
       std::string& mTitle;
+      std::string mWindowName;
    };
 }

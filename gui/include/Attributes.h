@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -12,7 +13,8 @@ namespace wgui
     {
         Int,
         Real,
-        String
+        String,
+        Bool
     };
 
     struct CaseInsensitiveStrCompare
@@ -127,6 +129,35 @@ namespace wgui
         std::string mValue;
     };
 
+    class AttrBool : public CtrlAttribute
+    {
+    public:
+       AttrBool()
+          : mValue(false), CtrlAttribute(eAttributeType::Bool)
+       {
+       }
+
+       bool Get() const { return mValue; }
+       operator bool() const { return mValue; }
+
+       AttrBool Set(bool value)
+       {
+          mValue = value;
+          return *this;
+       }
+
+       AttrBool operator = (bool value)
+       {
+          mValue = value;
+          return *this;
+       }
+
+       bool& GetRef() { return mValue; }
+
+    private:
+       bool mValue;
+    };
+
     class Attribute
     {
     public:
@@ -173,6 +204,9 @@ namespace wgui
                 break;
             case eAttributeType::String:
                 mValue = std::make_unique<AttrString>();
+                break;
+            case eAttributeType::Bool:
+                mValue = std::make_unique<AttrBool>();
                 break;
             }
         }

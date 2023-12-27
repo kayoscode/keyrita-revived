@@ -26,6 +26,7 @@ int main()
 
    XmlLoadedWindowRenderer renderer;
    renderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
+   renderer.Init();
 
    mainWindow.SetRenderer(&renderer);
 
