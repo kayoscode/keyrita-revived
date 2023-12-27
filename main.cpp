@@ -19,8 +19,8 @@ int main()
    platform->Initialize();
 
    MainWindow mainWindow;
-   mainWindow.CreateWindow("Keyrita", 1600, 1200, false, true, true, false);
-   mainWindow.SetWindowSizeLimits(1200, 900);
+   mainWindow.CreateWindow("Keyrita", 1920, 1080, false, true, true, false);
+   mainWindow.SetWindowSizeLimits(1920, 1080);
 
    bool resiable = false;
 

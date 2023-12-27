@@ -21,8 +21,6 @@ namespace
 
    void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
    {
-      glfwSwapInterval(0);
-
       // Input
       nk_glfw3_new_frame(nkGlfw);
       layoutRenderer->RenderStart(window, &nkGlfw->ctx);
@@ -371,6 +369,8 @@ namespace wgui
       // Add the window to the application static data.
       Application::AddWindow(this, mWindow);
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
+
+      glfwSwapInterval(0);
 
       return true;
    }
