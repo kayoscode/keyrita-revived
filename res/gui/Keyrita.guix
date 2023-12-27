@@ -342,7 +342,7 @@
       </Group>
     </DynamicGrid>
   </Window>
-  <Window Title="Keyrita" XPos="600" YPos="0" Width="500" Height="600">
+  <Window Title="Keyrita" XPos="1200" YPos="0" Width="500" Height="600">
     <MenuBar>
       <StaticGrid Height="20" Width1="35"
                               Width2="35"
@@ -513,7 +513,7 @@
       </Group>
     </DynamicGrid>
   </Window>
-  <Window Title="Keyrita" XPos="600" YPos="0" Width="500" Height="600">
+  <Window Title="Keyrita" XPos="600" YPos="700" Width="500" Height="600">
     <MenuBar>
       <StaticGrid Height="20" Width1="35"
                               Width2="35"

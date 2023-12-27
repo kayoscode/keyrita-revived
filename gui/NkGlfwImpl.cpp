@@ -17,7 +17,7 @@
 
 namespace 
 {
-   wgui::DefaultGuiShader ShaderProg;
+   wgui::HighlightGuiShader ShaderProg;
 }
 
 struct nk_glfw_vertex
@@ -121,8 +121,8 @@ nk_glfw3_render(struct nk_glfw* glfw, enum nk_anti_aliasing AA, int max_vertex_b
    projMatrix.data[1][1] /= (GLfloat)glfw->height;
 
    ShaderProg.LoadProjection(projMatrix);
-   //ShaderProg.LoadMousePos(glfw->ctx.input.mouse.pos.x, glfw->ctx.input.mouse.pos.y);
-   //ShaderProg.LoadWindowSize(glfw->width, glfw->height);
+   ShaderProg.LoadMousePos(glfw->ctx.input.mouse.pos.x, glfw->ctx.input.mouse.pos.y);
+   ShaderProg.LoadWindowSize(glfw->width, glfw->height);
 
    glViewport(0, 0, (GLsizei)glfw->display_width, (GLsizei)glfw->display_height);
    {
