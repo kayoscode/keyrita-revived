@@ -21,7 +21,7 @@ namespace
 
    void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
    {
-      glfwSwapInterval(1);
+      glfwSwapInterval(0);
 
       // Input
       nk_glfw3_new_frame(nkGlfw);
@@ -366,7 +366,7 @@ namespace wgui
 
       SetStyle(ctx, eTheme::Black);
 
-      glfwSwapInterval(0);
+      ctx->style.window.group_padding = nk_vec2(0, 0);
 
       // Add the window to the application static data.
       Application::AddWindow(this, mWindow);

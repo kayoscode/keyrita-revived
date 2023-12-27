@@ -63,7 +63,12 @@ namespace wgui
 
       nk_stroke_line(&win->buffer,
          bounds.x, bounds.y + (mThickness / 2.0), bounds.x + bounds.w, bounds.y + (mThickness / 2.0),
-         mThickness, nk_color(0, 0, 0, 255/3));
+         mThickness, nk_color(0, 0, 0, 255 / 3));
+   }
+
+   void GuiButton::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_button_label(context, mText.c_str());
    }
 
    void GuiCheckbox::Render(WindowBase* const window, nk_context* context)
@@ -107,7 +112,7 @@ namespace wgui
       assert(mComboboxItems.size() == mComboboxTexts.size());
       assert(mSelectedItem <= mComboboxItems.size());
 
-      if (mComboboxTexts.size() > 0) 
+      if (mComboboxTexts.size() > 0)
       {
          text = *mComboboxTexts[mSelectedItem - 1];
       }
@@ -121,6 +126,48 @@ namespace wgui
 
          nk_combo_end(context);
       }
+   }
+
+   void GuiSliderInt::Render(WindowBase* const window, nk_context* context)
+   {
+      int value = mValue;
+      nk_slider_int(context, mMinValue, &value, mMaxValue, mStep);
+      mValue = value;
+   }
+
+   void GuiSliderReal::Render(WindowBase* const window, nk_context* context)
+   {
+      float value = mValue;
+      nk_slider_float(context, mMinValue, &value, mMaxValue, mStep);
+      mValue = value;
+
+   }
+
+   void GuiProgressBar::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_size current = static_cast<nk_size>(mValue);
+      nk_size max = static_cast<nk_size>(mMaxValue);
+      nk_progress(context, &current, max, mModifiable);
+      mValue = static_cast<int64_t>(current);
+   }
+
+   void GuiInputInt::Render(WindowBase* const window, nk_context* context)
+   {
+      mValue = nk_propertyi(context, ("#" + mName).c_str(),
+         mMinValue, mValue, mMaxValue, mStep, mStepPerPx);
+   }
+
+   void GuiInputReal::Render(WindowBase* const window, nk_context* context)
+   {
+      mValue = nk_propertyd(context, ("#" + mName).c_str(),
+         mMinValue, mValue, mMaxValue, mStep, mStepPerPx);
+   }
+
+   void GuiSelectableLabel::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_bool selected = static_cast<nk_bool>(mSelected);
+      nk_selectable_label(context, mText.c_str(), mTextAlignment, &selected);
+      mSelected = static_cast<bool>(selected);
    }
 
 #pragma endregion
@@ -259,6 +306,53 @@ namespace wgui
       nk_layout_space_end(context);
    }
 
+   void GuiLayoutGroup::Render(WindowBase* const window, nk_context* context)
+   {
+      int64_t flags = (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
+
+      if (nk_group_begin_titled(context, mName.c_str(), mTitle.c_str(), flags))
+      {
+         for (int i = 0; i < mControls.size(); i++)
+         {
+            mControls[i]->Render(window, context);
+         }
+
+         nk_group_end(context);
+      }
+   }
+
+   void GuiLayoutTreeNode::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
+                                                  nk_collapse_states::NK_MINIMIZED;
+
+      if (nk_tree_push_hashed(context, NK_TREE_NODE, mText.c_str(), state, mName.c_str(), mName.size(), 0))
+      {
+         for (int i = 0; i < mControls.size(); i++)
+         {
+            mControls[i]->Render(window, context);
+         }
+
+         nk_tree_pop(context);
+      }
+   }
+
+   void GuiLayoutTreeTab::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
+                                                  nk_collapse_states::NK_MINIMIZED;
+
+      if (nk_tree_push_hashed(context, NK_TREE_TAB, mText.c_str(), state, mName.c_str(), mName.size(), 0))
+      {
+         for (int i = 0; i < mControls.size(); i++)
+         {
+            mControls[i]->Render(window, context);
+         }
+
+         nk_tree_pop(context);
+      }
+   }
+
 #pragma endregion
 
 #pragma region Menu
@@ -289,6 +383,7 @@ namespace wgui
             nk_menu_end(context);
          }
       }
+
    }
 
    void GuiMenuItem::Render(WindowBase* const window, nk_context* context)

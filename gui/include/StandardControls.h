@@ -318,6 +318,26 @@ namespace wgui
       bool& mChecked;
    };
 
+   class GuiButton : public GuiWidget
+   {
+   public:
+      GuiButton()
+         : mText(mAttributes->Add((std::string)GuiLabel::TextAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+      {
+         mText = "";
+      }
+
+      GuiButton(const std::string& text, eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered)
+         : GuiButton()
+      {
+         mText = text;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+   private:
+      std::string& mText;
+   };
+
    class GuiRadioButton : public GuiLabel
    {
    public:
@@ -523,6 +543,196 @@ namespace wgui
 
       std::vector<GuiComboboxItem*> mComboboxItems;
       std::vector<std::string*> mComboboxTexts;
+   };
+
+   class GuiSlider : public GuiWidget
+   {
+   public:
+      static constexpr std::string_view ValueAttr = "Value";
+      static constexpr std::string_view MaxValueAttr = "Max";
+      static constexpr std::string_view MinValueAttr = "Min";
+      static constexpr std::string_view StepAttr = "Step";
+   };
+
+   class GuiSliderInt : public GuiSlider
+   {
+   public:
+      GuiSliderInt()
+         : mValue(mAttributes->Add((std::string)ValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+           mMinValue(mAttributes->Add((std::string)MinValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+           mMaxValue(mAttributes->Add((std::string)MaxValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+           mStep(mAttributes->Add((std::string)StepAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+      {
+         mMinValue = 0;
+         mMaxValue = 100;
+         mValue = (mMinValue + mMaxValue) / 2;
+         mStep = 1;
+      }
+
+      GuiSliderInt(int64_t min, int64_t max, int64_t value, int64_t step = 1)
+         : GuiSliderInt()
+      {
+         mValue = value;
+         mMinValue = min;
+         mMaxValue = max;
+         mStep = step;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+      
+   protected:
+      int64_t& mValue;
+      int64_t& mMinValue;
+      int64_t& mMaxValue;
+      int64_t& mStep;
+   };
+
+   class GuiSliderReal : public GuiSlider
+   {
+   public:
+      GuiSliderReal()
+         : mValue(mAttributes->Add((std::string)ValueAttr, eAttributeType::Real)->As<AttrReal>()->GetRef()),
+           mMinValue(mAttributes->Add((std::string)MinValueAttr, eAttributeType::Real)->As<AttrReal>()->GetRef()),
+           mMaxValue(mAttributes->Add((std::string)MaxValueAttr, eAttributeType::Real)->As<AttrReal>()->GetRef()),
+           mStep(mAttributes->Add((std::string)StepAttr, eAttributeType::Real)->As<AttrReal>()->GetRef())
+      {
+         mMinValue = 0;
+         mMaxValue = 1;
+         mValue = (mMinValue + mMaxValue) / 2.0;
+         mStep = 0.01;
+      }
+
+      GuiSliderReal(double min, double max, double value, double step = 1)
+         : GuiSliderReal()
+      {
+         mValue = value;
+         mMinValue = min;
+         mMaxValue = max;
+         mStep = step;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      double& mValue;
+      double& mMinValue;
+      double& mMaxValue;
+      double& mStep;
+   };
+
+   class GuiProgressBar : public GuiWidget
+   {
+   public:
+      static constexpr std::string_view ValueAttr = "Value";
+      static constexpr std::string_view MaxValueAttr = "Max";
+      static constexpr std::string_view ModifableAttr = "Modifiable";
+
+      GuiProgressBar()
+         : mValue(mAttributes->Add((std::string)ValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mMaxValue(mAttributes->Add((std::string)MaxValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         mModifiable(mAttributes->Add((std::string)ModifableAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef())
+      {
+         mValue = 0;
+         mMaxValue = 100;
+         mModifiable = false;
+      }
+
+      GuiProgressBar(int64_t value, int64_t maxValue, bool modifiable = false)
+         : GuiProgressBar()
+      {
+         mValue = value;
+         mMaxValue = maxValue;
+         mModifiable = modifiable;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      int64_t& mValue;
+      int64_t& mMaxValue;
+      bool& mModifiable;
+   };
+
+   class GuiInputInt : public GuiSliderInt
+   {
+   public:
+      static constexpr std::string_view NameAttr = "Name";
+      static constexpr std::string_view StepPerPxAttr = "StepPerPixel";
+      
+      GuiInputInt()
+         : mName(mAttributes->Add((std::string)NameAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+           mStepPerPx(mAttributes->Add((std::string)StepPerPxAttr, eAttributeType::Real)->As<AttrReal>()->GetRef())
+      {
+         mName = "Unnamed";
+         mStepPerPx = 1.0;
+      }
+
+      GuiInputInt(const std::string& name, int64_t min, int64_t max, int64_t value, int64_t step, double stepPerPixel)
+         : GuiInputInt()
+      {
+         mMinValue = min;
+         mMaxValue = max;
+         mValue = value;
+         mStep = step;
+         mName = name;
+         mStepPerPx = stepPerPixel;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      std::string& mName;
+      double& mStepPerPx;
+   };
+
+   class GuiInputReal : public GuiSliderReal
+   {
+   public:
+      static constexpr std::string_view NameAttr = "Name";
+      static constexpr std::string_view StepPerPxAttr = "StepPerPixel";
+
+      GuiInputReal()
+         : mName(mAttributes->Add((std::string)NameAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+         mStepPerPx(mAttributes->Add((std::string)StepPerPxAttr, eAttributeType::Real)->As<AttrReal>()->GetRef())
+      {
+         mName = "Unnamed";
+         mStepPerPx = 1.0;
+      }
+
+      GuiInputReal(const std::string& name, int64_t min, int64_t max, int64_t value, int64_t step, double stepPerPixel)
+         : GuiInputReal()
+      {
+         mMinValue = min;
+         mMaxValue = max;
+         mValue = value;
+         mStep = step;
+         mName = name;
+         mStepPerPx = stepPerPixel;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      std::string& mName;
+      double& mStepPerPx;
+   };
+
+   class GuiSelectableLabel : public GuiLabel
+   {
+   public:
+      static constexpr std::string_view SelectedAttr = "Selected";
+
+      GuiSelectableLabel(bool selected = false)
+         : mSelected(mAttributes->Add((std::string)SelectedAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef()),
+           GuiLabel()
+      {
+         mSelected = selected;
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+
+   protected:
+      bool& mSelected;
    };
 
 #pragma endregion
@@ -785,14 +995,94 @@ namespace wgui
       std::vector<double*> mPositionsY;
    };
 
-   class GuiLayoutGroup : public GuiControlBase
+   class GuiLayoutGroup : public ChildSupportingGuiControlBase
    {
    public:
+      static constexpr std::string_view TitleAttr = "Title";
+      static constexpr std::string_view ScrollXAttr = "ScrollX";
+      static constexpr std::string_view ScrollYAttr = "ScrollY";
+      static constexpr std::string_view Scrollable = "Scrollable";
+
+      GuiLayoutGroup()
+         : mTitle(mAttributes->Add((std::string)TitleAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
+         mScrollable(mAttributes->Add((std::string)Scrollable, eAttributeType::Bool)->As<AttrBool>()->GetRef())
+      {
+         mTitle = "";
+         mName = std::to_string(reinterpret_cast<int64_t>(this));
+         mScrollable = false;
+      }
+
+      GuiLayoutGroup(const std::string& title, bool scrollable = false)
+         : GuiLayoutGroup()
+      {
+         mTitle = title;
+         mScrollable = scrollable;
+      }
+
+      eControlType GetControlType() const override { return eControlType::Group; }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+   protected:
+      std::string& mTitle;
+      std::string mName;
+      bool& mScrollable;
    };
 
-   class GuiLayoutTree : public GuiControlBase
+   class GuiLayoutTreeBase : public ChildSupportingGuiControlBase
    {
    public:
+      static constexpr std::string_view InitiallyOpenAttr = "InitiallyOpen";
+
+      GuiLayoutTreeBase()
+         : mInitiallyOpen(mAttributes->Add((std::string)InitiallyOpenAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef()),
+         mText(mAttributes->Add((std::string)GuiLabel::TextAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+      {
+         mText = "";
+         mInitiallyOpen = false;
+         mName = std::to_string(reinterpret_cast<int64_t>(this));
+      }
+
+      GuiLayoutTreeBase(const std::string& text, bool initiallyOpen = false)
+         : GuiLayoutTreeBase()
+      {
+         mInitiallyOpen = initiallyOpen;
+         mText = text;
+      }
+
+      eControlType GetControlType() const override { return eControlType::Tree; }
+
+   protected:
+      bool& mInitiallyOpen;
+      std::string& mText;
+      std::string mName;
+   };
+
+   /// <summary>
+   /// A tree with a highlighted header to mark collapsable ui sections.
+   /// </summary>
+   class GuiLayoutTreeNode : public GuiLayoutTreeBase
+   {
+   public:
+      GuiLayoutTreeNode()
+         : GuiLayoutTreeBase() { }
+      GuiLayoutTreeNode(const std::string& text, bool initiallyOpen = false)
+         : GuiLayoutTreeBase(text, initiallyOpen) { }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+   };
+
+   /// <summary>
+   /// A tree with a non-highlighted header to mark collapsable ui sections.
+   /// </summary>
+   class GuiLayoutTreeTab : public GuiLayoutTreeBase
+   {
+   public:
+      GuiLayoutTreeTab()
+         : GuiLayoutTreeBase() { }
+      GuiLayoutTreeTab(const std::string& text, bool initiallyOpen = false)
+         : GuiLayoutTreeBase(text, initiallyOpen) { }
+
+      void Render(WindowBase* const window, nk_context* context) override;
    };
 
 #pragma endregion
