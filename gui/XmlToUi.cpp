@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "NuklearWindowRenderer.h"
 
 using namespace pugi;
@@ -65,6 +67,26 @@ namespace wgui
       return false;
    }
 
+   bool ParseToBool(const std::string& value, bool& bValue)
+   {
+      size_t idx = 0;
+      std::string cpy(value);
+      std::transform(cpy.begin(), cpy.end(), cpy.begin(), ::toupper);
+
+      if (cpy == "TRUE")
+      {
+         bValue = true;
+         return true;
+      }
+      else if (cpy == "FALSE")
+      {
+         bValue = false;
+         return true;
+      }
+
+      return false;
+   }
+
    void SetAttributes(const xml_node_iterator& ctrl, GuiControlBase* pCtrl)
    {
       for (xml_attribute_iterator attr = ctrl->attributes_begin(); attr != ctrl->attributes_end(); ++attr)
@@ -81,8 +103,14 @@ namespace wgui
          // Figure out the best type to parse it from.
          int64_t iValue;
          double dValue;
+         bool bValue;
 
-         if (ParseToInt(attr->value(), iValue))
+         if (ParseToBool(attr->value(), bValue))
+         {
+            pCtrl->SetAttributeBool(attr->name(), bValue);
+            eAttributeType parsedType = eAttributeType::Bool;
+         }
+         else if (ParseToInt(attr->value(), iValue))
          {
             pCtrl->SetAttributeInt(attr->name(), iValue);
             eAttributeType parsedType = eAttributeType::Int;
@@ -132,6 +160,7 @@ namespace wgui
          else
          {
             // TODO: error case.
+            assert(false);
          }
       }
    }
@@ -155,6 +184,7 @@ namespace wgui
          else
          {
             // TODO: error case.
+            assert(false);
          }
       }
    }
@@ -173,6 +203,7 @@ namespace wgui
       if (doc.empty() || doc.first_child().name() != "GuiRoot")
       {
          // TODO: throw error telling user they should use GuiRoot;
+         assert(false);
       }
 
       if (doc.empty())
@@ -195,9 +226,10 @@ namespace wgui
          return false;
       }
 
-      if (doc.empty() || doc.first_child().name() != "GuiRoot")
+      if (doc.empty() || std::string(doc.first_child().name()) != "GuiRoot")
       {
          // TODO: throw error telling user they should use GuiRoot;
+         assert(false);
       }
 
       if (doc.empty())

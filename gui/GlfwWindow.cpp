@@ -21,8 +21,6 @@ namespace
 
    void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
    {
-      glfwSwapInterval(1);
-
       // Input
       nk_glfw3_new_frame(nkGlfw);
       layoutRenderer->RenderStart(window, &nkGlfw->ctx);
@@ -362,18 +360,17 @@ namespace wgui
       font->config->pixel_snap = true;
 
       nk_glfw3_font_stash_end(nkGlfw);
-      nk_style_load_all_cursors(ctx, atlas->cursors);
       nk_style_set_font(ctx, &font->handle);
 
-      SetStyle(ctx, eTheme::Dark);
+      SetStyle(ctx, eTheme::Black);
 
-      ctx->input.mouse.grabbed = true;
-
-      glfwSwapInterval(0);
+      ctx->style.window.group_padding = nk_vec2(0, 0);
 
       // Add the window to the application static data.
       Application::AddWindow(this, mWindow);
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
+
+      glfwSwapInterval(1);
 
       return true;
    }

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
-  <Window name="w1" Title="Keyrita" XPos="0" YPos="0" Width="1600" Height="1200">
+  <Window Title="Keyrita" XPos="0" YPos="0" Width="1600" Height="1200">
     <MenuBar>
       <StaticGrid Height="20" Width1="35"
                               Width2="35"
                               Width3="75"
                               Width4="70">
-        <Menu Text="File" Width="150" Height="250">
+        <Menu Text="File" Width="150" Height="500">
           <DynamicRow Height="30">
             <MenuItem Text="New"/>
           </DynamicRow>
@@ -15,6 +15,9 @@
           </DynamicRow>
           <DynamicRow Height="30">
             <MenuItem Text="Save"/>
+          </DynamicRow>
+          <DynamicRow Height="2">
+            <HorizontalSeparator Thickness="1"/>
           </DynamicRow>
           <DynamicRow Height="30">
             <MenuItem Text="Export as KLC"/>

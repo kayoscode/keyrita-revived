@@ -19,8 +19,24 @@ namespace
       { "VariableGrid", []() { return std::make_unique<wgui::GuiLayoutRowVariableGrid>(); }},
       { "StaticSpace", []() { return std::make_unique<wgui::GuiLayoutStaticSpace>(); }},
       { "DynamicSpace", []() { return std::make_unique<wgui::GuiLayoutDynamicSpace>(); }},
+      { "Group", []() { return std::make_unique<wgui::GuiLayoutGroup>(); }},
+      { "TreeNode", []() { return std::make_unique<wgui::GuiLayoutTreeNode>(); }},
+      { "TreeTab", []() { return std::make_unique<wgui::GuiLayoutTreeTab>(); }},
 
       { "Label", []() { return std::make_unique<wgui::GuiLabel>(); }},
+      { "SelectableLabel", []() { return std::make_unique<wgui::GuiSelectableLabel>(); }},
+      { "Button", []() { return std::make_unique<wgui::GuiButton>(); }},
+      { "Checkbox", []() { return std::make_unique<wgui::GuiCheckbox>(); }},
+      { "HorizontalSeparator", []() { return std::make_unique<wgui::GuiHorizontalSeparator>(); }},
+      { "RadioButtonGroup", []() { return std::make_unique<wgui::GuiRadioButtonGroup>(); }},
+      { "RadioButton", []() { return std::make_unique<wgui::GuiRadioButton>(); }},
+      { "Combobox", []() { return std::make_unique<wgui::GuiCombobox>(); }},
+      { "ComboboxItem", []() { return std::make_unique<wgui::GuiComboboxItem>(); }},
+      { "SliderInt", []() { return std::make_unique<wgui::GuiSliderInt>(); }},
+      { "SliderReal", []() { return std::make_unique<wgui::GuiSliderReal>(); }},
+      { "ProgressBar", []() { return std::make_unique<wgui::GuiProgressBar>(); }},
+      { "InputInt", []() { return std::make_unique<wgui::GuiInputInt>(); }},
+      { "InputReal", []() { return std::make_unique<wgui::GuiInputReal>(); }},
    };
 }
 

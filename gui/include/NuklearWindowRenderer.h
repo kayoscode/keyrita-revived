@@ -41,6 +41,7 @@ namespace wgui
    class WindowRenderer
    {
    public:
+      virtual void Init() = 0;
       virtual void RenderStart(WindowBase* const window, nk_context* context) = 0;
       virtual void Render(WindowBase* const window, nk_context* context) = 0;
       virtual void RenderFinish(WindowBase* const window, nk_context* context) = 0;
@@ -64,6 +65,7 @@ namespace wgui
       {
       }
 
+      void Init() override;
       void RenderStart(WindowBase* const window, nk_context* context) override;
       void Render(WindowBase* const window, nk_context* context) override;
       void RenderFinish(WindowBase* const window, nk_context* delta) override;
