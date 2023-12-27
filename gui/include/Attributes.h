@@ -8,6 +8,8 @@
 #include <exception>
 #include <cassert>
 #include <functional>
+#include <cstdint>
+#include <memory>
 
 namespace wgui
 {
