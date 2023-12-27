@@ -2,7 +2,6 @@
 #include "Window.h"
 #include "OperatingSystem.h"
 
-#define NK_GLFW_GL3_IMPLEMENTATION
 #define NK_IMPLEMENTATION
 #include "nuklear.h"
 #include "nuklear_glfw_gl3.h"

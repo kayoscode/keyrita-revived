@@ -6,130 +6,52 @@ using namespace pugi;
 
 namespace wgui
 {
-   bool ParseToInt(const std::string& value, int64_t& intVal)
-   {
-      size_t idx = 0;
-      try 
-      {
-         intVal = std::stoll(value, &idx, 10);
-      }
-      catch (std::exception)
-      {
-         return false;
-      }
-
-      // Make sure the value in the quotes was an integer.
-      if (idx != value.size())
-      {
-         intVal = 0ll;
-         // TODO: warning here
-         return false;
-      }
-
-      return true;
-   }
-
-   bool ParseToReal(const std::string& value, double& dVal)
-   {
-      size_t idx = 0;
-
-      try
-      {
-         dVal = std::stod(value, &idx);
-      }
-      catch (std::exception)
-      {
-         return false;
-      }
-
-      // Make sure the value in the quotes was an integer.
-      if (idx != value.size())
-      {
-         dVal = 0.0;
-         // TODO: warning here
-         return false;
-      }
-
-      return true;
-   }
-
-   bool ParseToPercent(const std::string& value, double& dVal)
-   {
-      if (value[value.size() - 1] == '%')
-      {
-         if (ParseToReal(value.substr(0, value.size() - 1), dVal))
-         {
-            dVal /= 100;
-            return true;
-         }
-      }
-
-      return false;
-   }
-
-   bool ParseToBool(const std::string& value, bool& bValue)
-   {
-      size_t idx = 0;
-      std::string cpy(value);
-      std::transform(cpy.begin(), cpy.end(), cpy.begin(), ::toupper);
-
-      if (cpy == "TRUE")
-      {
-         bValue = true;
-         return true;
-      }
-      else if (cpy == "FALSE")
-      {
-         bValue = false;
-         return true;
-      }
-
-      return false;
-   }
-
-   void SetAttributes(const xml_node_iterator& ctrl, GuiControlBase* pCtrl)
+   void SetAttributes(const xml_node_iterator& ctrl, GuiControlBase* pCtrl, AttributeParser& attributeParser)
    {
       for (xml_attribute_iterator attr = ctrl->attributes_begin(); attr != ctrl->attributes_end(); ++attr)
       {
          bool attrExists = pCtrl->AttributeExists(attr->name());
-         eAttributeType parsedType = eAttributeType::Int;
-         eAttributeType type = parsedType;
+         attr_type_id_t typeHint = AttributeTypeManager::NotAType;
 
          if (attrExists)
          {
-            type = pCtrl->GetAttributeType(attr->name());
+            // Try to parse it using the hinted attribute type.
+            typeHint = pCtrl->GetAttributeType(attr->name());
          }
 
-         // Figure out the best type to parse it from.
-         int64_t iValue;
-         double dValue;
-         bool bValue;
+         std::unique_ptr<Attribute> parsedAttr = nullptr;
 
-         if (ParseToBool(attr->value(), bValue))
+         // If we aren't expecting it to be a string, make it an int.
+         if (typeHint != AttrTypes::Str())
          {
-            pCtrl->SetAttributeBool(attr->name(), bValue);
-            eAttributeType parsedType = eAttributeType::Bool;
-         }
-         else if (ParseToInt(attr->value(), iValue))
-         {
-            pCtrl->SetAttributeInt(attr->name(), iValue);
-            eAttributeType parsedType = eAttributeType::Int;
-         }
-         else if (ParseToReal(attr->value(), dValue) ||
-                  ParseToPercent(attr->value(), dValue))
-         {
-            pCtrl->SetAttributeReal(attr->name(), dValue);
-            eAttributeType parsedType = eAttributeType::Real;
-         }
-         else 
-         {
-            pCtrl->SetAttributeString(attr->name(), attr->value());
-            eAttributeType parsedType = eAttributeType::String;
+             parsedAttr = attributeParser.ParseAttribute(attr->value(), typeHint);
          }
 
-         if (attrExists && type != parsedType)
+         // Default to string if we couldn't parse it.
+         if (parsedAttr == nullptr)
          {
-            // TODO: add warning, the type written to the file doesn't match the expected type.
+            parsedAttr = std::make_unique<Attribute>();
+            parsedAttr->SetType<AttrString>();
+            parsedAttr->As<AttrString>()->Set(attr->value());
+         }
+
+         // Hopefully we parsed the attribute into the hinted type. If we didn't throw a warning here.
+         // Set the attribute to this value reguardless. If the program crashes later on, the warning should indicate why.
+         if (parsedAttr->GetType() != typeHint)
+         {
+            // TODO: use the logger.
+            if (attrExists)
+            {
+               std::cout << "Error: Type specified was incorrect: " << attr->name() << " : " << attr->value() << "\n";
+            }
+            else
+            {
+               pCtrl->GetAttributes()->Set(attr->name(), std::move(parsedAttr));
+            }
+         }
+         else
+         {
+            pCtrl->GetAttributes()->Get(attr->name())->SetValue(std::move(parsedAttr));
          }
       }
    }
@@ -153,9 +75,9 @@ namespace wgui
             GuiControlBase* pCtrl = control.get();
             mOwnedControls.push_back(std::move(control));
             parent->AddChild(pCtrl);
-            SetAttributes(ctrl, pCtrl);
 
             ConstructComponents(ctrl->children(), pCtrl);
+            SetAttributes(ctrl, pCtrl, mAttributeParser);
          }
          else
          {
@@ -178,7 +100,7 @@ namespace wgui
             mOwnedControls.push_back(std::move(control));
 
             WindowRendererGui::AddChild(pWindow);
-            SetAttributes(ctrl, pWindow);
+            SetAttributes(ctrl, pWindow, mAttributeParser);
             ConstructComponents(ctrl->children(), pWindow);
          }
          else

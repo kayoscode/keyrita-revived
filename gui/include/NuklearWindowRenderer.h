@@ -49,7 +49,7 @@ namespace wgui
    private:
    };
 
-   class GuiControlFactory
+   class GuiControlFactoryBase
    {
    public:
       virtual std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlType) = 0;
@@ -86,7 +86,7 @@ namespace wgui
    class XmlLoadedWindowRenderer : public WindowRendererGui
    {
    private:
-      class StandardControlFactory : public GuiControlFactory
+      class StandardControlFactory : public GuiControlFactoryBase
       {
       public:
          std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlType);
@@ -102,7 +102,8 @@ namespace wgui
       bool ConstructLayoutFromXmlFile(const std::string& fileName);
 
       template <class T>
-      void AddControlFactory() requires std::is_convertible_v<T, StandardControlFactory>
+      void AddControlFactory() 
+         requires std::is_base_of_v<GuiControlFactoryBase, T>
       {
          mControlFactories.push_back(std::make_unique<T>());
       }
@@ -116,7 +117,8 @@ namespace wgui
 
    private:
       std::vector<std::unique_ptr<GuiControlBase>> mOwnedControls;
-      std::vector<std::unique_ptr<GuiControlFactory>> mControlFactories;
+      std::vector<std::unique_ptr<GuiControlFactoryBase>> mControlFactories;
+      AttributeParser mAttributeParser;
 
       void ConstructWindows(const pugi::xml_object_range<pugi::xml_node_iterator>& document);
       void ConstructComponents(const pugi::xml_object_range<pugi::xml_node_iterator>& document,

@@ -60,119 +60,34 @@ namespace wgui
          return mAttributes->AttributeExists(attribute);
       }
 
-      eAttributeType GetAttributeType(const std::string& attribute)
+      attr_type_id_t GetAttributeType(const std::string& attribute)
       {
          return mAttributes->Get(attribute)->GetType();
       }
 
-      void SetAttributeInt(const std::string& attributeName, int64_t value)
+      template <typename T, typename Q>
+      T& GetOrCreateAttribute(const std::string& attrName)
+         requires std::is_base_of_v<CtrlAttribute, Q>
       {
-         if (!AttributeExists(attributeName))
+         // Add a new scale property for the newly added control.
+         if (!mAttributes->AttributeExists(attrName))
          {
-            mAttributes->Add(attributeName, eAttributeType::Int);
+            return mAttributes->Add<Q>(attrName)->GetRef();
          }
 
-         mAttributes->Get(attributeName)->As<AttrInt>()->Set(value);
-      }
-
-      void SetAttributeReal(const std::string& attributeName, double value)
-      {
-         if (!AttributeExists(attributeName))
+         if (!mAttributes->Get(attrName)->Is<Q>())
          {
-            mAttributes->Add(attributeName, eAttributeType::Real);
+            // TODO: warning case here.
+            mAttributes->Get(attrName)->SetType<Q>();
          }
 
-         mAttributes->Get(attributeName)->As<AttrReal>()->Set(value);
-      }
-
-      void SetAttributeString(const std::string& attributeName, const std::string& value)
-      {
-         if (!AttributeExists(attributeName))
-         {
-            mAttributes->Add(attributeName, eAttributeType::String);
-         }
-
-         mAttributes->Get(attributeName)->As<AttrString>()->Set(value);
-      }
-
-      void SetAttributeBool(const std::string& attributeName, bool value)
-      {
-         if (!AttributeExists(attributeName))
-         {
-            mAttributes->Add(attributeName, eAttributeType::Bool);
-         }
-
-         mAttributes->Get(attributeName)->As<AttrBool>()->Set(value);
-      }
-
-      int64_t GetAttributeInt(const std::string& attributeName)
-      {
-         return mAttributes->Get(attributeName)->As<AttrInt>()->Get();
-      }
-
-      double GetAttributeReal(const std::string& attributeName)
-      {
-         return mAttributes->Get(attributeName)->As<AttrReal>()->Get();
-      }
-
-      std::string GetAttributeString(const std::string& attributeName)
-      {
-         return mAttributes->Get(attributeName)->As<AttrString>()->Get();
-      }
-
-      bool GetAttributeBool(const std::string& attributeName)
-      {
-         return mAttributes->Get(attributeName)->As<AttrBool>()->Get();
-      }
-
-      int64_t& GetOrCreateAttributeInt(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<int64_t, AttrInt>(attrName, eAttributeType::Int);
-      }
-
-      double& GetOrCreateAttributeReal(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<double, AttrReal>(attrName, eAttributeType::Real);
-      }
-
-      std::string& GetOrCreateAttributeString(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<std::string, AttrString>(attrName, eAttributeType::String);
-      }
-
-      bool& GetOrCreateAttributeBool(const std::string& attrName)
-      {
-         return GetOrChooseAttributeBase<bool, AttrBool>(attrName, eAttributeType::Bool);
+         return mAttributes->Get(attrName)->As<Q>()->GetRef();
       }
 
       AttributeSet* const GetAttributes() { return mAttributes.get(); }
 
    protected:
       std::unique_ptr<AttributeSet> mAttributes;
-
-   private:
-      template <typename T, typename Q>
-      T& GetOrChooseAttributeBase(const std::string& attrName, eAttributeType type)
-         requires (std::is_same_v<T, int64_t> || 
-                   std::is_same_v<T, double> || 
-                   std::is_same_v<T, std::string> ||
-                   std::is_same_v<T, bool>) &&
-      (std::is_convertible_v<Q, CtrlAttribute>)
-      {
-         // Add a new scale property for the newly added control.
-         if (!mAttributes->AttributeExists(attrName))
-         {
-            return mAttributes->Add(attrName, type)->As<Q>()->GetRef();
-         }
-
-         if (GetAttributeType(attrName) != type)
-         {
-            // TODO: warning case here.
-            mAttributes->Get(attrName)->SetType(type);
-         }
-
-         return mAttributes->Get(attrName)->As<Q>()->GetRef();
-      }
    };
 
    class ChildSupportingGuiControlBase : public GuiControlBase
@@ -246,7 +161,7 @@ namespace wgui
       static constexpr std::string_view ThicknessAttribute = "Thickness";
 
       GuiHorizontalSeparator() 
-         : mThickness(mAttributes->Add((std::string)ThicknessAttribute, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         : mThickness(mAttributes->Add<AttrInt>((std::string)ThicknessAttribute)->GetRef()),
            GuiWidget() 
       {
          mThickness = 1;
@@ -272,8 +187,8 @@ namespace wgui
 
       GuiLabel()
          : GuiWidget(),
-         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
+         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef())
       {
          mText = "";
          mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
@@ -298,7 +213,7 @@ namespace wgui
    public:
       static constexpr std::string_view CheckedAttr = "Checked";
       GuiCheckbox()
-         : mChecked(mAttributes->Add((std::string)CheckedAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef()),
+        :  mChecked(mAttributes->Add<AttrBool>((std::string)CheckedAttr)->GetRef()),
            GuiLabel()
       {
       }
@@ -322,7 +237,7 @@ namespace wgui
    {
    public:
       GuiButton()
-         : mText(mAttributes->Add((std::string)GuiLabel::TextAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+         : mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef())
       {
          mText = "";
       }
@@ -376,7 +291,7 @@ namespace wgui
       static constexpr std::string_view SelectedAttr = "Selection";
 
       GuiRadioButtonGroup()
-         : mCurrentSelection(mAttributes->Add((std::string)SelectedAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         : mCurrentSelection(mAttributes->Add<AttrInt>((std::string)SelectedAttr)->GetRef()),
            ChildSupportingGuiControlBase()
       {
          mCurrentSelection = 1;
@@ -449,8 +364,8 @@ namespace wgui
 
       GuiComboboxItem()
          : GuiComboboxItemBase(),
-         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
+         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef())
       {
          mText = "";
          mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
@@ -478,11 +393,10 @@ namespace wgui
       static constexpr std::string_view ItemHeightAttr = "ItemHeight";
 
       GuiCombobox()
-         : mSelectedItem(mAttributes->Add
-            ((std::string)GuiRadioButtonGroup::SelectedAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mItemHeight(mAttributes->Add((std::string)ItemHeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         : mSelectedItem(mAttributes->Add<AttrInt>((std::string)GuiRadioButtonGroup::SelectedAttr)->GetRef()),
+         mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
+         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
+         mItemHeight(mAttributes->Add<AttrInt>((std::string)ItemHeightAttr)->GetRef())
       {
          mSelectedItem = 1;
          mWidth = 200;
@@ -521,7 +435,8 @@ namespace wgui
                   cb->SetComboboxSelectedItem(currentSelection, itemHeight, itemIndex);
                   itemIndex++;
                   items->push_back(cb);
-                  texts->push_back(&cb->GetOrCreateAttributeString((std::string)GuiComboboxItem::TextAttr));
+
+                  texts->push_back(&cb->GetOrCreateAttribute<std::string, AttrString>((std::string)GuiComboboxItem::TextAttr));
                }
 
                if (control != nullptr && control->SupportsChildren())
@@ -558,10 +473,10 @@ namespace wgui
    {
    public:
       GuiSliderInt()
-         : mValue(mAttributes->Add((std::string)ValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-           mMinValue(mAttributes->Add((std::string)MinValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-           mMaxValue(mAttributes->Add((std::string)MaxValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-           mStep(mAttributes->Add((std::string)StepAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         : mValue(mAttributes->Add<AttrInt>((std::string)ValueAttr)->GetRef()),
+           mMinValue(mAttributes->Add<AttrInt>((std::string)MinValueAttr)->GetRef()),
+           mMaxValue(mAttributes->Add<AttrInt>((std::string)MaxValueAttr)->GetRef()),
+           mStep(mAttributes->Add<AttrInt>((std::string)StepAttr)->GetRef())
       {
          mMinValue = 0;
          mMaxValue = 100;
@@ -591,10 +506,10 @@ namespace wgui
    {
    public:
       GuiSliderReal()
-         : mValue(mAttributes->Add((std::string)ValueAttr, eAttributeType::Real)->As<AttrReal>()->GetRef()),
-           mMinValue(mAttributes->Add((std::string)MinValueAttr, eAttributeType::Real)->As<AttrReal>()->GetRef()),
-           mMaxValue(mAttributes->Add((std::string)MaxValueAttr, eAttributeType::Real)->As<AttrReal>()->GetRef()),
-           mStep(mAttributes->Add((std::string)StepAttr, eAttributeType::Real)->As<AttrReal>()->GetRef())
+         : mValue(mAttributes->Add<AttrReal>((std::string)ValueAttr)->GetRef()),
+           mMinValue(mAttributes->Add<AttrReal>((std::string)MinValueAttr)->GetRef()),
+           mMaxValue(mAttributes->Add<AttrReal>((std::string)MaxValueAttr)->GetRef()),
+           mStep(mAttributes->Add<AttrReal>((std::string)StepAttr)->GetRef())
       {
          mMinValue = 0;
          mMaxValue = 1;
@@ -628,9 +543,9 @@ namespace wgui
       static constexpr std::string_view ModifableAttr = "Modifiable";
 
       GuiProgressBar()
-         : mValue(mAttributes->Add((std::string)ValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mMaxValue(mAttributes->Add((std::string)MaxValueAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mModifiable(mAttributes->Add((std::string)ModifableAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef())
+         : mValue(mAttributes->Add<AttrInt>((std::string)ValueAttr)->GetRef()),
+         mMaxValue(mAttributes->Add<AttrInt>((std::string)MaxValueAttr)->GetRef()),
+         mModifiable(mAttributes->Add<AttrBool>((std::string)ModifableAttr)->GetRef())
       {
          mValue = 0;
          mMaxValue = 100;
@@ -660,8 +575,8 @@ namespace wgui
       static constexpr std::string_view StepPerPxAttr = "StepPerPixel";
       
       GuiInputInt()
-         : mName(mAttributes->Add((std::string)NameAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-           mStepPerPx(mAttributes->Add((std::string)StepPerPxAttr, eAttributeType::Real)->As<AttrReal>()->GetRef())
+         : mName(mAttributes->Add<AttrString>((std::string)NameAttr)->GetRef()),
+           mStepPerPx(mAttributes->Add<AttrReal>((std::string)StepPerPxAttr)->GetRef())
       {
          mName = "Unnamed";
          mStepPerPx = 1.0;
@@ -692,8 +607,8 @@ namespace wgui
       static constexpr std::string_view StepPerPxAttr = "StepPerPixel";
 
       GuiInputReal()
-         : mName(mAttributes->Add((std::string)NameAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mStepPerPx(mAttributes->Add((std::string)StepPerPxAttr, eAttributeType::Real)->As<AttrReal>()->GetRef())
+         : mName(mAttributes->Add<AttrString>((std::string)NameAttr)->GetRef()),
+         mStepPerPx(mAttributes->Add<AttrReal>((std::string)StepPerPxAttr)->GetRef())
       {
          mName = "Unnamed";
          mStepPerPx = 1.0;
@@ -723,7 +638,7 @@ namespace wgui
       static constexpr std::string_view SelectedAttr = "Selected";
 
       GuiSelectableLabel(bool selected = false)
-         : mSelected(mAttributes->Add((std::string)SelectedAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef()),
+         : mSelected(mAttributes->Add<AttrBool>((std::string)SelectedAttr)->GetRef()),
            GuiLabel()
       {
          mSelected = selected;
@@ -752,7 +667,7 @@ namespace wgui
 
       GuiLayoutRowBase()
          : ChildSupportingGuiControlBase(),
-         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef())
       {
          mHeight = 50;
       }
@@ -793,7 +708,7 @@ namespace wgui
       }
 
       GuiLayoutRowStatic()
-         : mColWidth(mAttributes->Add((std::string)ColWidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
+         : mColWidth(mAttributes->Add<AttrInt>((std::string)ColWidthAttr)->GetRef()),
          GuiLayoutRowBase()
       {
          mColWidth = 100;
@@ -828,7 +743,7 @@ namespace wgui
          {
             // Add a new scale property for the newly added control.
             std::string attrName = (std::string)WidthAttr + (std::to_string(mScales.size() + 1));
-            mScales.push_back(&GetOrCreateAttributeReal(attrName));
+            mScales.push_back(&GetOrCreateAttribute<double, AttrReal>(attrName));
          }
 
          return true;
@@ -860,7 +775,7 @@ namespace wgui
          if (GuiLayoutRowBase::AddChild(newControl))
          {
             std::string attrName = (std::string)WidthAttr + (std::to_string(mScales.size() + 1));
-            mScales.push_back(&GetOrCreateAttributeInt(attrName));
+            mScales.push_back(&GetOrCreateAttribute<int64_t, AttrInt>(attrName));
          }
 
          return true;
@@ -887,7 +802,7 @@ namespace wgui
          {
             // Add a new scale property for the newly added control.
             std::string attrName = "MinWidth" + (std::to_string(mScales.size() + 1));
-            mScales.push_back(&GetOrCreateAttributeInt(attrName));
+            mScales.push_back(&GetOrCreateAttribute<int64_t, AttrInt>(attrName));
          }
 
          return true;
@@ -931,13 +846,13 @@ namespace wgui
       {
          if (GuiLayoutRowBase::AddChild(newControl))
          {
-            mWidths.push_back(&newControl->GetOrCreateAttributeInt
+            mWidths.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
                ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
-            mHeights.push_back(&newControl->GetOrCreateAttributeInt
+            mHeights.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
                ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
-            mPositionsX.push_back(&newControl->GetOrCreateAttributeInt
+            mPositionsX.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
                ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
-            mPositionsY.push_back(&newControl->GetOrCreateAttributeInt
+            mPositionsY.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
                ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
          }
 
@@ -971,13 +886,13 @@ namespace wgui
       {
          if (GuiLayoutRowBase::AddChild(newControl))
          {
-            mWidths.push_back(&newControl->GetOrCreateAttributeReal
+            mWidths.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
                ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
-            mHeights.push_back(&newControl->GetOrCreateAttributeReal
+            mHeights.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
                ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
-            mPositionsX.push_back(&newControl->GetOrCreateAttributeReal
+            mPositionsX.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
                ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
-            mPositionsY.push_back(&newControl->GetOrCreateAttributeReal
+            mPositionsY.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
                ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
          }
 
@@ -1004,8 +919,8 @@ namespace wgui
       static constexpr std::string_view Scrollable = "Scrollable";
 
       GuiLayoutGroup()
-         : mTitle(mAttributes->Add((std::string)TitleAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mScrollable(mAttributes->Add((std::string)Scrollable, eAttributeType::Bool)->As<AttrBool>()->GetRef())
+         : mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef()),
+         mScrollable(mAttributes->Add<AttrBool>((std::string)Scrollable)->GetRef())
       {
          mTitle = "";
          mName = std::to_string(reinterpret_cast<int64_t>(this));
@@ -1034,8 +949,8 @@ namespace wgui
       static constexpr std::string_view InitiallyOpenAttr = "InitiallyOpen";
 
       GuiLayoutTreeBase()
-         : mInitiallyOpen(mAttributes->Add((std::string)InitiallyOpenAttr, eAttributeType::Bool)->As<AttrBool>()->GetRef()),
-         mText(mAttributes->Add((std::string)GuiLabel::TextAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+         : mInitiallyOpen(mAttributes->Add<AttrBool>((std::string)InitiallyOpenAttr)->GetRef()),
+         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef())
       {
          mText = "";
          mInitiallyOpen = false;
@@ -1108,11 +1023,11 @@ namespace wgui
 
       GuiMenu()
          : ChildSupportingGuiControlBase(),
-         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mImagePath(mAttributes->Add((std::string)ImagePathAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef())
+         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef()),
+         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
+         mImagePath(mAttributes->Add<AttrString>((std::string)ImagePathAttr)->GetRef()),
+         mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
+         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef())
       {
          mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
          mText = "";
@@ -1157,9 +1072,9 @@ namespace wgui
 
       GuiMenuItem()
          : GuiWidget(),
-         mTextAlignment(mAttributes->Add((std::string)TextAlignAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mText(mAttributes->Add((std::string)TextAttr, eAttributeType::String)->As<AttrString>()->GetRef()),
-         mImagePath(mAttributes->Add((std::string)ImagePathAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef()),
+         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
+         mImagePath(mAttributes->Add<AttrString>((std::string)ImagePathAttr)->GetRef())
       {
          mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
          mText = "";
@@ -1201,11 +1116,11 @@ namespace wgui
 
       GuiLayoutWindow()
          : ChildSupportingGuiControlBase(),
-         mPosX(mAttributes->Add((std::string)XPosAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mPosY(mAttributes->Add((std::string)YPosAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mWidth(mAttributes->Add((std::string)WidthAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mHeight(mAttributes->Add((std::string)HeightAttr, eAttributeType::Int)->As<AttrInt>()->GetRef()),
-         mTitle(mAttributes->Add((std::string)TitleAttr, eAttributeType::String)->As<AttrString>()->GetRef())
+         mPosX(mAttributes->Add<AttrInt>((std::string)XPosAttr)->GetRef()),
+         mPosY(mAttributes->Add<AttrInt>((std::string)YPosAttr)->GetRef()),
+         mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
+         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
+         mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef())
       {
          // Set to defaults.
          mPosX = 0;
