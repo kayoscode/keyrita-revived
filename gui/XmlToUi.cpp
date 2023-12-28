@@ -131,7 +131,7 @@ namespace wgui
       if (doc.empty() || doc.first_child().name() != "GuiRoot")
       {
          Application::Logger.error("Expected a root of 'GuiRoot' -> will not parse");
-         return;
+         return false;
       }
 
       if (doc.empty())
@@ -157,7 +157,7 @@ namespace wgui
       if (doc.empty() || std::string(doc.first_child().name()) != "GuiRoot")
       {
          Application::Logger.error("Expected a root of 'GuiRoot' -> will not parse");
-         assert(false);
+         return false;
       }
 
       if (doc.empty())
