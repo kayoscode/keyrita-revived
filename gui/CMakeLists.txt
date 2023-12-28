@@ -26,7 +26,7 @@ if(NOT glew_POPULATED)
 	FetchContent_Populate(glew)
 	option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
 	set(glew-cmake_BUILD_SHARED OFF)
-	add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
+	add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
 endif()
 message("GLEW include " ${glew_SOURCE_DIR}/include)
 message("GLEW bin " ${glew_BINARY_DIR}/include)
@@ -40,7 +40,7 @@ FetchContent_Populate(xmllib)
 
 FetchContent_GetProperties(xmllib)
 message(STATUS "xml lib loc:" ${xmllib_SOURCE_DIR})
-add_subdirectory(${xmllib_SOURCE_DIR} ${xmllib_BINARY_DIR} EXCLUDE_FROM_ALL)
+add_subdirectory(${xmllib_SOURCE_DIR} ${xmllib_BINARY_DIR})
 
 # Add GL Math library
 FetchContent_Declare(
@@ -50,8 +50,8 @@ FetchContent_Declare(
 FetchContent_Populate(glmath)
 
 FetchContent_GetProperties(glmath)
-message(STATUS "xml lib loc:" ${glmath_SOURCE_DIR})
-add_subdirectory(${glmath_SOURCE_DIR} ${glmath_BINARY_DIR} EXCLUDE_FROM_ALL)
+message(STATUS "glmath lib loc:" ${glmath_SOURCE_DIR})
+add_subdirectory(${glmath_SOURCE_DIR} ${glmath_BINARY_DIR})
 
 add_library(${PROJ_NAME} ${SRC} ${HEADER_FILES})
 
