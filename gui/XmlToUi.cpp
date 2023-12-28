@@ -39,10 +39,13 @@ namespace wgui
          // Set the attribute to this value reguardless. If the program crashes later on, the warning should indicate why.
          if (parsedAttr->GetType() != typeHint)
          {
-            // TODO: use the logger.
             if (attrExists)
             {
-               std::cout << "Error: Type specified was incorrect: " << attr->name() << " : " << attr->value() << "\n";
+               Application::Logger.error("Overwriting attribute {str} - incorrect type {str}!={str} value='{str}'",
+                  attr->name(),
+                  attributeParser.GetTypeManager().GetTypeName(parsedAttr->GetType()),
+                  attributeParser.GetTypeManager().GetTypeName(typeHint),
+                  attr->value());
             }
             else
             {
@@ -61,7 +64,8 @@ namespace wgui
    {
       if (!parent->SupportsChildren() && !doc.empty())
       {
-         // Add error here.
+         Application::Logger.error("Control of type: '{str}' does not support child controls",
+            parent->GetLabel());
          return;
       }
 
@@ -81,7 +85,8 @@ namespace wgui
          }
          else
          {
-            // TODO: error case.
+            Application::Logger.error("No factory definition to build a control of type '{str}'",
+               ctrl->name());
             assert(false);
          }
       }
@@ -105,7 +110,8 @@ namespace wgui
          }
          else
          {
-            // TODO: error case.
+            Application::Logger.error("No factory definition to build a control of type '{str}'",
+               ctrl->name());
             assert(false);
          }
       }
@@ -124,8 +130,8 @@ namespace wgui
 
       if (doc.empty() || doc.first_child().name() != "GuiRoot")
       {
-         // TODO: throw error telling user they should use GuiRoot;
-         assert(false);
+         Application::Logger.error("Expected a root of 'GuiRoot' -> will not parse");
+         return false;
       }
 
       if (doc.empty())
@@ -150,8 +156,8 @@ namespace wgui
 
       if (doc.empty() || std::string(doc.first_child().name()) != "GuiRoot")
       {
-         // TODO: throw error telling user they should use GuiRoot;
-         assert(false);
+         Application::Logger.error("Expected a root of 'GuiRoot' -> will not parse");
+         return false;
       }
 
       if (doc.empty())

@@ -52,7 +52,37 @@ namespace wgui
    class GuiControlFactoryBase
    {
    public:
-      virtual std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlType) = 0;
+      std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlType)
+      {
+         if (mFactory.find(controlType) != mFactory.end())
+         {
+            return mFactory[controlType]();
+         }
+
+         return nullptr;
+      }
+
+      /// <summary>
+      /// Register all the controls this factory can build to the system.
+      /// </summary>
+      virtual void Init() = 0;
+
+   protected:
+      template<typename T>
+      void RegisterControl() 
+         requires std::is_base_of_v<GuiControlBase, T>
+      {
+         std::unique_ptr<T> ctrl = std::make_unique<T>();
+         mFactory.emplace(ctrl->GetLabel(), 
+            []() -> std::unique_ptr<GuiControlBase>
+            {
+               return std::make_unique<T>();
+            });
+      }
+
+   private:
+      std::map<std::string, std::function<std::unique_ptr
+         <wgui::GuiControlBase>()>, CaseInsensitiveStrCompare> mFactory;
    };
 
    /// <summary>
@@ -89,13 +119,14 @@ namespace wgui
       class StandardControlFactory : public GuiControlFactoryBase
       {
       public:
-         std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlType);
+         void Init() override;
       };
 
    public:
       XmlLoadedWindowRenderer()
       {
          AddControlFactory<StandardControlFactory>();
+         mControlFactories[mControlFactories.size() - 1]->Init();
       }
 
       bool ConstructLayoutFromXml(const std::string& xml);

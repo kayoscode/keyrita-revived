@@ -293,6 +293,7 @@ namespace wgui
 {
    DebugLogger MainWindow::GlfwLogger("GLFW");
    DebugLogger MainWindow::GlLogger("GL");
+   DebugLogger Application::Logger("Log");
 
    MainWindow::MainWindow()
       : WindowBase()
