@@ -1142,6 +1142,24 @@ namespace wgui
       std::string& mImagePath;
    };
 
+   /// <summary>
+   /// Class which owns its own controls.
+   /// Can be parsed from an object, or created raw via the SelfInit method.
+   /// </summary>
+   class GuiAbstractControl : public ChildSupportingGuiControlBase
+   {
+   public:
+      GuiAbstractControl()
+         : mOwnedControls() { }
+
+      eControlType GetControlType() const override { return eControlType::Group; }
+
+   protected:
+      // All controls created by this class must be owned. Store them here.
+      // All children must get raw pointers to objects stored and owned here.
+      std::vector<std::unique_ptr<GuiControlBase>> mOwnedControls;
+   };
+
 #pragma endregion
 
    /// <summary>
@@ -1155,6 +1173,7 @@ namespace wgui
       static constexpr std::string_view WidthAttr = "Width";
       static constexpr std::string_view HeightAttr = "Height";
       static constexpr std::string_view TitleAttr = "Title";
+      static constexpr std::string_view TrackParentAttr = "TrackWinScale";
 
       GuiLayoutWindow()
          : ChildSupportingGuiControlBase(),
@@ -1162,7 +1181,8 @@ namespace wgui
          mPosY(mAttributes->Add<AttrInt>((std::string)YPosAttr)->GetRef()),
          mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
          mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
-         mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef())
+         mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef()),
+         mTrackParentWindowSize(mAttributes->Add<AttrBool>((std::string)TrackParentAttr)->GetRef())
       {
          // Set to defaults.
          mPosX = 0;
@@ -1203,6 +1223,7 @@ namespace wgui
       int64_t& mHeight;
 
       std::string& mTitle;
+      bool& mTrackParentWindowSize;
       std::string mWindowName;
    };
 }

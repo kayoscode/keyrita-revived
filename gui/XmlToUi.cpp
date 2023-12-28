@@ -1,11 +1,15 @@
 #include <algorithm>
 
+#include "XmlToUi.h"
 #include "NuklearWindowRenderer.h"
 
 using namespace pugi;
 
 namespace wgui
 {
+   std::vector<std::unique_ptr<GuiControlFactoryBase>> XmlToUiUtil::mControlFactories;
+   AttributeParser XmlToUiUtil::mAttributeParser;
+
    void SetAttributes(const xml_node_iterator& ctrl, GuiControlBase* pCtrl, AttributeParser& attributeParser)
    {
       for (xml_attribute_iterator attr = ctrl->attributes_begin(); attr != ctrl->attributes_end(); ++attr)
@@ -59,14 +63,19 @@ namespace wgui
       }
    }
 
-   void XmlLoadedWindowRenderer::ConstructComponents
-      (const xml_object_range<xml_node_iterator>& doc, GuiControlBase* parent)
+   void XmlToUiUtil::ConstructControls
+      (const xml_object_range<xml_node_iterator>& doc, GuiControlBase* parent,
+         std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
+         std::vector<GuiControlBase*>& resultControls)
    {
-      if (!parent->SupportsChildren() && !doc.empty())
+      if (parent != nullptr)
       {
-         Application::Logger.error("Control of type: '{str}' does not support child controls",
-            parent->GetLabel());
-         return;
+         if (!parent->SupportsChildren() && !doc.empty())
+         {
+            Application::Logger.error("Control of type: '{str}' does not support child controls",
+               parent->GetLabel());
+            return;
+         }
       }
 
       for (xml_node_iterator ctrl = doc.begin(); ctrl != doc.end(); ++ctrl)
@@ -77,10 +86,18 @@ namespace wgui
          if (control != nullptr)
          {
             GuiControlBase* pCtrl = control.get();
-            mOwnedControls.push_back(std::move(control));
-            parent->AddChild(pCtrl);
+            ownedControls.push_back(std::move(control));
 
-            ConstructComponents(ctrl->children(), pCtrl);
+            if (parent != nullptr)
+            {
+               parent->AddChild(pCtrl);
+            }
+            else
+            {
+               resultControls.push_back(pCtrl);
+            }
+
+            ConstructControls(ctrl->children(), pCtrl, ownedControls, resultControls);
             SetAttributes(ctrl, pCtrl, mAttributeParser);
          }
          else
@@ -92,60 +109,11 @@ namespace wgui
       }
    }
 
-   void XmlLoadedWindowRenderer::ConstructWindows(const xml_object_range<xml_node_iterator>& doc)
+   bool XmlToUiUtil::ConstructLayoutFromXmlFile(const std::string& fileName, 
+      std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
+      std::vector<GuiControlBase*>& controlTree)
    {
-      for (xml_node_iterator ctrl = doc.begin(); ctrl != doc.end(); ++ctrl)
-      {
-         // Create the control.
-         std::unique_ptr<GuiControlBase> control = CreateControl(ctrl->name());
-
-         if (control != nullptr)
-         {
-            GuiControlBase* pWindow = control.get();
-            mOwnedControls.push_back(std::move(control));
-
-            WindowRendererGui::AddChild(pWindow);
-            SetAttributes(ctrl, pWindow, mAttributeParser);
-            ConstructComponents(ctrl->children(), pWindow);
-         }
-         else
-         {
-            Application::Logger.error("No factory definition to build a control of type '{str}'",
-               ctrl->name());
-            assert(false);
-         }
-      }
-   }
-
-   bool XmlLoadedWindowRenderer::ConstructLayoutFromXml(const std::string& xmlString)
-   {
-      mOwnedControls.clear();
-      xml_document doc;
-      xml_parse_result parseResult = doc.load_string(xmlString.c_str());
-
-      if (parseResult == -1)
-      {
-         return false;
-      }
-
-      if (doc.empty() || doc.first_child().name() != "GuiRoot")
-      {
-         Application::Logger.error("Expected a root of 'GuiRoot' -> will not parse");
-         return false;
-      }
-
-      if (doc.empty())
-      {
-         return false;
-      }
-
-      ConstructWindows(doc.first_child().children());
-      return true;
-   }
-
-   bool XmlLoadedWindowRenderer::ConstructLayoutFromXmlFile(const std::string& fileName)
-   {
-      mOwnedControls.clear();
+      ownedControls.clear();
       xml_document doc;
       xml_parse_result parseResult = doc.load_file(fileName.c_str());
 
@@ -166,8 +134,13 @@ namespace wgui
       }
 
       // Here, we will only work within the window tags. Ignore everything else.
-      ConstructWindows(doc.first_child().children());
+      ConstructControls(doc.first_child().children(), nullptr, ownedControls, controlTree);
 
       return true;
+   }
+
+   bool XmlRenderer::ConstructLayoutFromXmlFile(const std::string& fileName)
+   {
+      return XmlToUiUtil::ConstructLayoutFromXmlFile(fileName, mOwnedControls, mControls);
    }
 }

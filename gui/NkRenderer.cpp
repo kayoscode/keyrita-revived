@@ -2,38 +2,84 @@
 
 #include "Window.h"
 #include "NuklearWindowRenderer.h"
+#include "XmlToUi.h"
 
 #include "GL/glew.h"
 #include "include_nuk.h"
 
 namespace wgui
 {
-   void WindowRendererGui::Init()
+   void XmlToUiUtil::StandardControlFactory::StandardControlFactory::Init()
    {
-      for (int i = 0; i < mWindows.size(); i++)
+      RegisterControl<GuiLayoutWindow>();
+
+      RegisterControl<GuiMenuBar>();
+      RegisterControl<GuiMenu>();
+      RegisterControl<GuiMenuItem>();
+
+      RegisterControl<GuiLayoutRowDynamic>();
+      RegisterControl<GuiLayoutRowStatic>();
+      RegisterControl<GuiLayoutRowDynamicGrid>();
+      RegisterControl<GuiLayoutRowStaticGrid>();
+      RegisterControl<GuiLayoutRowVariableGrid>();
+      RegisterControl<GuiLayoutStaticSpace>();
+      RegisterControl<GuiLayoutDynamicSpace>();
+      RegisterControl<GuiLayoutGroup>();
+      RegisterControl<GuiLayoutTreeNode>();
+      RegisterControl<GuiLayoutTreeTab>();
+
+      RegisterControl<GuiLabel>();
+      RegisterControl<GuiSelectableLabel>();
+      RegisterControl<GuiButton>();
+      RegisterControl<GuiCheckbox>();
+      RegisterControl<GuiHorizontalSeparator>();
+      RegisterControl<GuiRadioButtonGroup>();
+      RegisterControl<GuiRadioButton>();
+      RegisterControl<GuiCombobox>();
+      RegisterControl<GuiComboboxItem>();
+      RegisterControl<GuiSliderInt>();
+      RegisterControl<GuiSliderReal>();
+      RegisterControl<GuiProgressBar>();
+      RegisterControl<GuiInputInt>();
+      RegisterControl<GuiInputReal>();
+   }
+
+   void StandardGuiRenderer::Init()
+   {
+      for (int i = 0; i < mControls.size(); i++)
       {
-         mWindows[i]->Init();
+         mControls[i]->Init();
       }
    }
 
-   void WindowRendererGui::RenderStart(WindowBase* const window, nk_context* context)
+   void StandardGuiRenderer::RenderStart(WindowBase* const window, nk_context* context)
    {
    }
 
-   void WindowRendererGui::Render(WindowBase* const window, nk_context* context)
+   void StandardGuiRenderer::Render(WindowBase* const window, nk_context* context)
    {
-      for (const auto& nextWindow : mWindows)
+      for (const auto& nextWindow : mControls)
       {
          nextWindow->Render(window, context);
       }
    }
 
-   void WindowRendererGui::RenderFinish(WindowBase* const window, nk_context* context)
+   void StandardGuiRenderer::RenderFinish(WindowBase* const window, nk_context* context)
    {
    }
 
    void GuiLayoutWindow::Render(WindowBase* window, nk_context* context)
    {
+      if (mTrackParentWindowSize)
+      {
+         int w, h;
+         window->GetWindowSize(w, h);
+         mWidth = w;
+         mHeight = h;
+         mPosX = 0;
+         mPosY = 0;
+      }
+
       // 0 flags for now! We will have to fix that.
       if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
       {
