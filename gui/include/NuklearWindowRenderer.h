@@ -62,6 +62,18 @@ namespace wgui
          return nullptr;
       }
 
+      std::vector<std::string> ListRegisteredControls()
+      {
+         std::vector<std::string> registeredControls;
+
+         for (auto& ctrl : mFactory)
+         {
+            registeredControls.push_back(ctrl.first);
+         }
+
+         return registeredControls;
+      }
+
       /// <summary>
       /// Register all the controls this factory can build to the system.
       /// </summary>
@@ -80,7 +92,6 @@ namespace wgui
             });
       }
 
-   private:
       std::map<std::string, std::function<std::unique_ptr
          <wgui::GuiControlBase>()>, CaseInsensitiveStrCompare> mFactory;
    };
@@ -126,7 +137,6 @@ namespace wgui
       XmlLoadedWindowRenderer()
       {
          AddControlFactory<StandardControlFactory>();
-         mControlFactories[mControlFactories.size() - 1]->Init();
       }
 
       bool ConstructLayoutFromXml(const std::string& xml);
@@ -136,7 +146,19 @@ namespace wgui
       void AddControlFactory() 
          requires std::is_base_of_v<GuiControlFactoryBase, T>
       {
+         Application::Logger.trace("Initializing new control factory");
+
          mControlFactories.push_back(std::make_unique<T>());
+         mControlFactories[mControlFactories.size() - 1]->Init();
+
+         std::vector<std::string> newControls = mControlFactories[mControlFactories.size() - 1]->ListRegisteredControls();
+         std::string ctrls;
+         for (int i = 0; i < newControls.size(); i++)
+         {
+            ctrls += newControls[i] + ((i < newControls.size() - 1) ? ", " : " ");
+         }
+
+         Application::Logger.trace("Added controls {str}", ctrls.c_str());
       }
 
       void AddControl(std::unique_ptr<GuiControlBase> window)
