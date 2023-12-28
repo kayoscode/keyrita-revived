@@ -1,11 +1,14 @@
 #include "NuklearWindowRenderer.h"
 #include "OperatingSystem.h"
 #include "PlatformModules.h"
+#include "App.h"
 
 using namespace wgui;
 
 int main()
 {
+   Application::Start();
+
    std::unique_ptr<PlatformBase> platform;
 
    if (OperatingSystem::GetOperatingSystem() == eOsType::Windows)

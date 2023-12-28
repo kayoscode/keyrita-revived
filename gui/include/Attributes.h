@@ -50,6 +50,7 @@ namespace wgui
          {
             mNextType++;
             mAttributeTypes[typeName] = mNextType;
+            mAttributeTypeNames[mNextType] = typeName;
             mTypePriorities.push_back(typePriority);
             return mNextType;
          }
@@ -79,8 +80,20 @@ namespace wgui
          return -1;
       }
 
+      std::string GetTypeName(attr_type_id_t id)
+      {
+         if (mAttributeTypeNames.find(id) != mAttributeTypeNames.end())
+         {
+            return mAttributeTypeNames[id];
+         }
+
+         assert(false);
+         return "Invalid type: " + std::to_string(id);
+      }
+
    private:
       std::map<std::string, attr_type_id_t, CaseInsensitiveStrCompare> mAttributeTypes;
+      std::map<attr_type_id_t, std::string> mAttributeTypeNames;
       std::vector<uint32_t> mTypePriorities;
 
       attr_type_id_t mNextType = NotAType;
@@ -302,7 +315,7 @@ namespace wgui
       {
          if (!mValue)
          {
-            throw std::runtime_error("Attribute not intialized to a value");
+            assert(false);
          }
 
          return reinterpret_cast<T*>(mValue.get());
@@ -314,7 +327,7 @@ namespace wgui
       {
          if (!mValue)
          {
-            throw std::runtime_error("Attribute not intialized to a value");
+            assert(false);
          }
 
          return reinterpret_cast<T* const>(mValue.get());
@@ -650,6 +663,8 @@ namespace wgui
 
          return std::move(lastAttribute);
       }
+
+      AttributeTypeManager& GetTypeManager() { return mTypeManager; }
 
    private:
       std::vector<std::unique_ptr<AttributeParseFactoryBase>> mAttributeFactories;
