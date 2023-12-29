@@ -15,7 +15,6 @@ namespace wgui
    /// <summary>
    /// Abstract class for handling basic operations a window can do.
    /// Used for the main window and pop up dialogs.
-   /// TODO: handle refresh rate?
    /// </summary>
    class WindowBase
    {
