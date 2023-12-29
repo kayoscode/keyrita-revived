@@ -1,6 +1,7 @@
 #include "NuklearWindowRenderer.h"
 #include "Window.h"
 #include "OperatingSystem.h"
+#include "App.h"
 
 #define NK_IMPLEMENTATION
 #include "nuklear.h"
@@ -36,7 +37,15 @@ namespace
    void WindowResizeCallback(GLFWwindow* window, int width, int height)
    {
       wgui::WindowBase* win = wgui::Application::GetWindow(window);
-      DrawFrame(win, window, win->GetGlfwContext().GetGlfw(), win->GetRenderer());
+      if (win->GetRenderer())
+      {
+         DrawFrame(win, window, win->GetGlfwContext().GetGlfw(), win->GetRenderer());
+      }
+   }
+
+   void WindowMoveCallback(GLFWwindow* window, int width, int height)
+   {
+      wgui::Application::GetWindow(window)->SetContentScale();
    }
 
    enum class eTheme
@@ -272,7 +281,15 @@ namespace wgui
          glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
       }
 
-      return glfwInit() == GLFW_TRUE;
+      auto result = glfwInit() == GLFW_TRUE;
+      if (result)
+      {
+         // Scale to monitor must be set after calling glfwInit()
+         glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+         return true;
+      }
+
+      return false;
    }
 
    bool GlewContextManager::InitContext()
@@ -347,20 +364,25 @@ namespace wgui
       // Setup fonts
       GlLogger.trace("Mapping default font");
 
-      struct nk_font_atlas* atlas;
-      int fontHeight = 15;
+
+      // DPI settings
+      float scaleX, scaleY;
+      glfwGetWindowContentScale(mWindow, &scaleX, &scaleY);
+
+      int fontHeight = mFontSize * scaleY;
       struct nk_font_config cfg = nk_font_config(fontHeight);
+      struct nk_font_atlas* fontAtlas;
 
-      nk_glfw3_font_stash_begin(nkGlfw, &atlas);
-      struct nk_font* font = nk_font_atlas_add_from_file(atlas, 
-         "res/fonts/RockoFLF.ttf", fontHeight, &cfg);
+      nk_glfw3_font_stash_begin(nkGlfw, &fontAtlas);
+      mFont = nk_font_atlas_add_from_file(fontAtlas, 
+         "res/fonts/Segoe UI.ttf", fontHeight, &cfg);
 
-      font->config->oversample_h = 8;
-      font->config->oversample_v = 8;
-      font->config->pixel_snap = true;
+      mFont->config->oversample_h = 8;
+      mFont->config->oversample_v = 8;
+      mFont->config->pixel_snap = true;
 
       nk_glfw3_font_stash_end(nkGlfw);
-      nk_style_set_font(ctx, &font->handle);
+      nk_style_set_font(ctx, &mFont->handle);
 
       SetStyle(ctx, eTheme::Black);
 
@@ -369,10 +391,25 @@ namespace wgui
       // Add the window to the application static data.
       Application::AddWindow(this, mWindow);
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
+      glfwSetWindowPosCallback(mWindow, WindowMoveCallback);
 
       glfwSwapInterval(1);
 
+      SetContentScale();
       return true;
+   }
+
+   void WindowBase::SetContentScale()
+   {
+      float scaleX, scaleY;
+      glfwGetWindowContentScale(mWindow, &scaleX, &scaleY);
+
+      if (scaleX != mContentScaleX || scaleY != mContentScaleY)
+      {
+         mContentScaleX = scaleX;
+         mContentScaleY = scaleY;
+         mFont->handle.height = mContentScaleY * mFontSize;
+      }
    }
 
    void MainWindow::Render()

@@ -70,6 +70,8 @@ namespace wgui
 
    void GuiLayoutWindow::Render(WindowBase* window, nk_context* context)
    {
+      int width, height, posX, posY;
+
       if (mTrackParentWindowSize)
       {
          int w, h;
@@ -78,10 +80,23 @@ namespace wgui
          mHeight = h;
          mPosX = 0;
          mPosY = 0;
+
+         width = mWidth;
+         height = mHeight;
+         posX = mPosX;
+         posY = mPosY;
+      }
+      else
+      {
+         height = mHeight * window->GetContentScaleY();
+         width = mWidth * window->GetContentScaleX();
+         posX = mPosX * window->GetContentScaleX();
+         posY = mPosY * window->GetContentScaleY();
       }
 
       // 0 flags for now! We will have to fix that.
-      if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), nk_rect(mPosX, mPosY, mWidth, mHeight), 0))
+      if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), 
+         nk_rect(posX, posY, width, height), 0))
       {
          for (const auto& control : mControls)
          {
@@ -144,7 +159,8 @@ namespace wgui
 
    void GuiComboboxItem::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_dynamic(context, *mItemHeight, 1);
+      int itemHeight = *mItemHeight * window->GetContentScaleY();
+      nk_layout_row_dynamic(context, itemHeight, 1);
 
       if (nk_combo_item_label(context, mText.c_str(), mTextAlignment))
       {
@@ -163,7 +179,9 @@ namespace wgui
          text = *mComboboxTexts[mSelectedItem - 1];
       }
 
-      if (nk_combo_begin_label(context, text.c_str(), nk_vec2(mWidth, mHeight)))
+      int width = mWidth * window->GetContentScaleX();
+      int height = mHeight * window->GetContentScaleY();
+      if (nk_combo_begin_label(context, text.c_str(), nk_vec2(width, height)))
       {
          for (int i = 0; i < mControls.size(); i++)
          {
@@ -199,14 +217,18 @@ namespace wgui
 
    void GuiInputInt::Render(WindowBase* const window, nk_context* context)
    {
+      double stepPerPixel = mStepPerPx / window->GetContentScaleX();
+
       mValue = nk_propertyi(context, ("#" + mName).c_str(),
-         mMinValue, mValue, mMaxValue, mStep, mStepPerPx);
+         mMinValue, mValue, mMaxValue, mStep, stepPerPixel);
    }
 
    void GuiInputReal::Render(WindowBase* const window, nk_context* context)
    {
+      double stepPerPixel = mStepPerPx / window->GetContentScaleX();
+
       mValue = nk_propertyd(context, ("#" + mName).c_str(),
-         mMinValue, mValue, mMaxValue, mStep, mStepPerPx);
+         mMinValue, mValue, mMaxValue, mStep, stepPerPixel);
    }
 
    void GuiSelectableLabel::Render(WindowBase* const window, nk_context* context)
@@ -222,7 +244,9 @@ namespace wgui
 
    void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_dynamic(context, mHeight, mControls.size());
+      int height = mHeight * window->GetContentScaleY();
+      
+      nk_layout_row_dynamic(context, height, mControls.size());
       for (int i = 0; i < mControls.size(); i++)
       {
          mControls[i]->Render(window, context);
@@ -231,7 +255,10 @@ namespace wgui
 
    void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
    {
-      nk_layout_row_static(context, mHeight, mColWidth, mControls.size());
+      int height = mHeight * window->GetContentScaleY();
+      int width = mColWidth * window->GetContentScaleX();
+
+      nk_layout_row_static(context, height, width, mControls.size());
       for (int i = 0; i < mControls.size(); i++)
       {
          mControls[i]->Render(window, context);
@@ -245,8 +272,8 @@ namespace wgui
          throw std::runtime_error("More controls exist than scales.");
       }
 
-      // Min cols is ignored here.
-      nk_layout_row_begin(context, NK_DYNAMIC, mHeight, mControls.size());
+      int height = mHeight * window->GetContentScaleY();
+      nk_layout_row_begin(context, NK_DYNAMIC, height, mControls.size());
 
       // There's guaranteed to be one scale for every control.
       // There might be more scales set, but we can safely ignore those.
@@ -267,13 +294,15 @@ namespace wgui
       }
 
       // Min cols is ignored here.
-      nk_layout_row_begin(context, NK_STATIC, mHeight, mControls.size());
+      int height = mHeight * window->GetContentScaleY();
+      nk_layout_row_begin(context, NK_STATIC, height, mControls.size());
 
       // There's guaranteed to be one scale for every control.
       // There might be more scales set, but we can safely ignore those.
       for (int i = 0; i < mControls.size(); i++)
       {
-         nk_layout_row_push(context, (int)*mScales[i]);
+         int scale = static_cast<int>(*mScales[i]) * window->GetContentScaleX();
+         nk_layout_row_push(context, scale);
          mControls[i]->Render(window, context);
       }
 
@@ -288,11 +317,13 @@ namespace wgui
       }
 
       // Min cols is ignored here.
-      nk_layout_row_template_begin(context, mHeight);
+      int height = mHeight * window->GetContentScaleY();
+      nk_layout_row_template_begin(context, height);
 
       for (int i = 0; i < mControls.size(); i++)
       {
-         nk_layout_row_template_push_variable(context, *mScales[i]);
+         int scale = *mScales[i] * window->GetContentScaleX();
+         nk_layout_row_template_push_variable(context, scale);
       }
 
       nk_layout_row_template_end(context);
@@ -305,15 +336,6 @@ namespace wgui
       }
    }
 
-   void GuiLayoutSpace::GetBounds(nk_context* context, int& posX, int& posY, int& width, int& height)
-   {
-      struct nk_rect b = nk_layout_space_bounds(context);
-      posX = b.x;
-      posY = b.y;
-      width = b.w;
-      height = b.h;
-   }
-
    void GuiLayoutStaticSpace::Render(WindowBase* const window, nk_context* context)
    {
       if (mControls.size() > mWidths.size())
@@ -322,11 +344,14 @@ namespace wgui
       }
 
       // Min cols is ignored here.
-      nk_layout_space_begin(context, NK_STATIC, mHeight, mControls.size());
+      int height = mHeight * window->GetContentScaleY();
+      nk_layout_space_begin(context, NK_STATIC, height, mControls.size());
 
       for (int i = 0; i < mControls.size(); i++)
       {
-         nk_layout_space_push(context, nk_rect(*mPositionsX[i], *mPositionsY[i], *mWidths[i], *mHeights[i]));
+         nk_layout_space_push(context, nk_rect(
+            *mPositionsX[i] * window->GetContentScaleX(), *mPositionsY[i] * window->GetContentScaleY(),
+            *mWidths[i] * window->GetContentScaleX(), *mHeights[i] * window->GetContentScaleY()));
          mControls[i]->Render(window, context);
       }
 
@@ -341,7 +366,8 @@ namespace wgui
       }
 
       // Min cols is ignored here.
-      nk_layout_space_begin(context, NK_DYNAMIC, mHeight, mControls.size());
+      int height = mHeight * window->GetContentScaleY();
+      nk_layout_space_begin(context, NK_DYNAMIC, height, mControls.size());
 
       for (int i = 0; i < mControls.size(); i++)
       {
@@ -419,7 +445,10 @@ namespace wgui
    {
       if (mImagePath.empty())
       {
-         if (nk_menu_begin_label(context, mText.c_str(), mTextAlignment, nk_vec2(mWidth, mHeight)))
+         int width = mWidth * window->GetContentScaleX();
+         int height = mHeight * window->GetContentScaleY();
+         if (nk_menu_begin_label(context, mText.c_str(), mTextAlignment, 
+             nk_vec2(width, height)))
          {
             for (int i = 0; i < mControls.size(); i++)
             {

@@ -855,8 +855,6 @@ namespace wgui
       static constexpr std::string_view HeightGridAttr = "Height";
       static constexpr std::string_view PosXGridAttr = "PosY";
       static constexpr std::string_view PosYGridAttr = "PosX";
-
-      void GetBounds(nk_context* context, int& posX, int& posY, int& width, int& height);
    };
 
    /// <summary>

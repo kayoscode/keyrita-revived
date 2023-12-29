@@ -60,11 +60,20 @@ namespace wgui
       void SetRenderer(WindowRenderer* renderer) { mLastRenderer = renderer; }
       WindowRenderer* GetRenderer() const { return mLastRenderer; }
 
+      void SetFontSize(int fontSize) { mFontSize = fontSize; }
+      void SetContentScale();
+      double GetContentScaleX() { return mContentScaleX; }
+      double GetContentScaleY() { return mContentScaleY; }
+
    protected:
       WindowRenderer* mLastRenderer = nullptr;
 
       GLFWwindow* mWindow;
       std::string mWindowTitle;
+      int mFontSize = 17;
+      double mContentScaleX = 1;
+      double mContentScaleY = 1;
+      struct nk_font* mFont;
 
       NuklearGlfwContextManager mNkContext;
 
