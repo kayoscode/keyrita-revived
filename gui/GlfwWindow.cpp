@@ -375,7 +375,7 @@ namespace wgui
 
       nk_glfw3_font_stash_begin(nkGlfw, &fontAtlas);
       mFont = nk_font_atlas_add_from_file(fontAtlas, 
-         "res/fonts/Segoe UI.ttf", fontHeight, &cfg);
+         "res/fonts/RockoFLF.ttf", fontHeight, &cfg);
 
       mFont->config->oversample_h = 8;
       mFont->config->oversample_v = 8;

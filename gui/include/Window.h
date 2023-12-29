@@ -70,7 +70,7 @@ namespace wgui
 
       GLFWwindow* mWindow;
       std::string mWindowTitle;
-      int mFontSize = 17;
+      int mFontSize = 16;
       double mContentScaleX = 1;
       double mContentScaleY = 1;
       struct nk_font* mFont;
