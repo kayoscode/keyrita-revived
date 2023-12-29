@@ -14,6 +14,15 @@ public:
    KeyritaMenu();
    void Render(wgui::WindowBase* const window, nk_context* context);
 
-   std::string GetLabel() override { return "KeyritaMenu"; }
+   std::string GetLabel() const override { return "KeyritaMenu"; }
+};
+
+class ExampleUi : public wgui::GuiAbstractControl
+{
+public:
+   ExampleUi();
+   void Render(wgui::WindowBase* const window, nk_context* context);
+
+   std::string GetLabel() const override { return "ExampleUi"; }
 };
 

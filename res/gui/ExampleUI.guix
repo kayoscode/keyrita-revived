@@ -1,0 +1,102 @@
+<GuiRoot>
+  <Group Scrollable="False">
+    <DynamicRow>
+      <Checkbox Text="Checkbox1" Checked="True"/>
+      <Checkbox Text="Checkbox2" Checked="False"/>
+      <Checkbox Text="Checkbox3" Checked="True"/>
+    </DynamicRow>
+    <RadioButtonGroup Selection="2">
+      <DynamicRow>
+        <RadioButton Text="RB 1"/>
+        <RadioButton Text="RB 2"/>
+      </DynamicRow>
+    </RadioButtonGroup>
+
+    <DynamicGrid Width1="50%" Width2="50%" Height="400">
+      <Group Scrollable="True">
+        <TreeTab Text="Tree" InitiallyOpen="True">
+          <TreeTab Text="Controls1">
+            <DynamicGrid Height="25" Width1="0.2"
+                                     Width2="0.2"
+                                     Width3="0.2"
+                                     Width4="0.2">
+              <Combobox Selection="4" Width="200"
+                                      Height="200"
+                                      ItemHeight="25">
+                <ComboboxItem Text="Test"/>
+                <ComboboxItem Text="Test2"/>
+                <DynamicRow Height="2">
+                  <HorizontalSeparator/>
+                </DynamicRow>
+                <ComboboxItem Text="Test3"/>
+                <ComboboxItem Text="Test4"/>
+              </Combobox>
+              <Button Text="Test Button1"/>
+              <Button Text="Test Button2"/>
+              <Button Text="Test Button3"/>
+            </DynamicGrid>
+          </TreeTab>
+          <TreeNode Text="Difficulty">
+            <DynamicGrid Height="25" Width1="0.5" Width2="0.1" Width3="0.4">
+              <Group Title="Grp1" Scrollable="False">
+                <RadioButtonGroup Selection="2">
+                  <DynamicRow Height="25">
+                    <RadioButton Text="Easy"/>
+                    <RadioButton Text="Medium"/>
+                    <RadioButton Text="Hard"/>
+                  </DynamicRow>
+                </RadioButtonGroup>
+              </Group>
+              <Button Text="Ok"/>
+              <ProgressBar Modifiable="False" Max="1000" Value="300"/>
+            </DynamicGrid>
+          </TreeNode>
+        </TreeTab>
+
+        <DynamicGrid Height="40" Width1="50%" Width2="50%">
+          <Group>
+            <DynamicRow>
+              <Label Text="Integers"/>
+              <SliderInt Step="20" />
+            </DynamicRow>
+          </Group>
+          <Group>
+            <DynamicRow>
+              <Label Text="Floats"/>
+              <SliderReal Step="0.01"/>
+            </DynamicRow>
+          </Group>
+        </DynamicGrid>
+
+      </Group>
+      <Group>
+        <DynamicRow Height="25">
+          <Button Text="Lmao"/>
+          <Button Text="XD"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <InputInt Name="Compression Ratio"
+                    StepPerPixel="0.5"
+                    Step="5"
+                    Value="44"
+                    Min="0"
+                    Max="100"/>
+
+          <InputReal Name="Compression Ratio"
+                    StepPerPixel="0.5"
+                    Step="5.0"
+                    Value="12.255"
+                    Min="0"
+                    Max="100.0"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <SelectableLabel Text="Selectable 1" Selected="False"/>
+          <SelectableLabel Text="Selectable 2" Selected="True"/>
+          <SelectableLabel Text="Selectable 3" Selected="True"/>
+          <SelectableLabel Text="Selectable 4" Selected="False"/>
+          <SelectableLabel Text="Selectable 5" Selected="False"/>
+        </DynamicRow>
+      </Group>
+    </DynamicGrid>
+  </Group>
+</GuiRoot>

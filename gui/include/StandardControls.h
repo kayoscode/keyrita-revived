@@ -2,8 +2,8 @@
 #include <concepts>
 #include <cassert>
 #include <functional>
-#include "App.h"
 
+#include "App.h"
 #include "Attributes.h"
 
 struct nk_context;
@@ -35,7 +35,15 @@ namespace wgui
          : mAttributes(std::make_unique<AttributeSet>()) {}
 
       virtual void Init() {}
-      virtual std::string GetLabel() = 0;
+
+      /// <summary>
+      /// Called after init is called on the entire tree.
+      /// When inside the function, one can assume the entire tree has all their
+      /// attributes set.
+      /// </summary>
+      virtual void OnInitialized() {}
+
+      virtual std::string GetLabel() const = 0;
 
       /// <summary>
       /// Renders the control to the screen.
@@ -99,18 +107,10 @@ namespace wgui
       ChildSupportingGuiControlBase() : GuiControlBase() { }
       bool SupportsChildren() const override { return true; }
 
-      virtual void Init() override
-      {
-         // Initialize all children, then init ourselves.
-         for (int i = 0; i < mControls.size(); i++)
-         {
-            mControls[i]->Init();
-         }
-
-         SelfInit();
-      }
-
+      virtual void Init() override;
+      virtual void OnInitialized() override;
       virtual void SelfInit() { }
+      virtual void SelfOnInitalized() { }
 
       bool AddChild(GuiControlBase* newControl) override
       {
@@ -118,13 +118,7 @@ namespace wgui
          return true;
       }
 
-      virtual void ForEachChild(std::function<void(GuiControlBase* child, int index)> function) override
-      {
-         for (int i = 0; i < mControls.size(); i++)
-         {
-            function(mControls[i], i);
-         }
-      }
+      virtual void ForEachChild(std::function<void(GuiControlBase* child, int index)> function) override;
 
    protected:
       std::vector<GuiControlBase*> mControls;
@@ -177,8 +171,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-
-      std::string GetLabel() override { return "HorizontalSeparator"; }
+      std::string GetLabel() const override { return "HorizontalSeparator"; }
 
    protected:
       int64_t& mThickness;
@@ -208,7 +201,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      std::string GetLabel() override { return "Label"; }
+      std::string GetLabel() const override { return "Label"; }
 
    protected:
       int64_t& mTextAlignment;
@@ -236,8 +229,8 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      std::string GetLabel() override { return "Checkbox"; }
-          
+      std::string GetLabel() const override { return "Checkbox"; }
+
    protected:
       bool& mChecked;
    };
@@ -259,7 +252,8 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      std::string GetLabel() override { return "Button"; }
+      std::string GetLabel() const override { return "Button"; }
+
    private:
       std::string& mText;
    };
@@ -288,7 +282,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      std::string GetLabel() override { return "RadioButton"; }
+      std::string GetLabel() const override { return "RadioButton"; }
 
    protected:
       int64_t* mRadioButtonSelection;
@@ -310,39 +304,11 @@ namespace wgui
          mCurrentSelection = 1;
       }
 
-      void SelfInit() override
-      {
-         mRadioButtons.clear();
-
-         auto* radioBtns = &mRadioButtons;
-         int64_t* currentSelection = &mCurrentSelection;
-         int buttonIndex = 1;
-
-         std::function<void(GuiControlBase*, int index)> func = 
-            [&func, radioBtns, currentSelection, &buttonIndex](GuiControlBase* control, int index) -> void
-            {
-               GuiRadioButton* rb = dynamic_cast<GuiRadioButton*>(control);
-               if (rb != nullptr)
-               {
-                  rb->SetRadioButtonGroupSelection(currentSelection, buttonIndex);
-                  buttonIndex++;
-                  radioBtns->push_back(rb);
-               }
-
-               if (control != nullptr && control->SupportsChildren())
-               {
-                  control->ForEachChild(func);
-               }
-            };
-
-         func(this, 0);
-      }
+      void SelfInit() override;
 
       eControlType GetControlType() const override { return eControlType::Group; }
-
       void Render(WindowBase* const window, nk_context* context) override;
-
-      std::string GetLabel() override { return "RadioButtonGroup"; }
+      std::string GetLabel() const override { return "RadioButtonGroup"; }
 
    protected:
       std::vector<GuiRadioButton*> mRadioButtons;
@@ -395,7 +361,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      std::string GetLabel() override { return "ComboboxItem"; }
+      std::string GetLabel() const override { return "ComboboxItem"; }
 
    protected:
       int64_t& mTextAlignment;
@@ -431,42 +397,10 @@ namespace wgui
       }
 
       eControlType GetControlType() const override { return eControlType::Group; }
-
-      void SelfInit() override
-      {
-         mComboboxItems.clear();
-         mComboboxTexts.clear();
-
-         auto* items = &mComboboxItems;
-         auto* texts = &mComboboxTexts;
-         int64_t* currentSelection = &mSelectedItem;
-         int64_t* itemHeight = &mItemHeight;
-         int itemIndex = 1;
-
-         std::function<void(GuiControlBase*, int index)> func =
-            [&func, items, texts, currentSelection, itemHeight, &itemIndex](GuiControlBase* control, int index) -> void
-            {
-               GuiComboboxItem* cb = dynamic_cast<GuiComboboxItem*>(control);
-               if (cb != nullptr)
-               {
-                  cb->SetComboboxSelectedItem(currentSelection, itemHeight, itemIndex);
-                  itemIndex++;
-                  items->push_back(cb);
-
-                  texts->push_back(&cb->GetOrCreateAttribute<std::string, AttrString>((std::string)GuiComboboxItem::TextAttr));
-               }
-
-               if (control != nullptr && control->SupportsChildren())
-               {
-                  control->ForEachChild(func);
-               }
-            };
-
-         func(this, 0);
-      }
+      void SelfInit() override;
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "Combobox"; }
+      std::string GetLabel() const override { return "Combobox"; }
 
    protected:
       int64_t& mSelectedItem;
@@ -512,7 +446,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "SliderInt"; }
+      std::string GetLabel() const override { return "SliderInt"; }
       
    protected:
       int64_t& mValue;
@@ -546,7 +480,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "SliderReal"; }
+      std::string GetLabel() const override { return "SliderReal"; }
 
    protected:
       double& mValue;
@@ -581,7 +515,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "ProgressBar"; }
+      std::string GetLabel() const override { return "ProgressBar"; }
 
    protected:
       int64_t& mValue;
@@ -615,7 +549,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "InputInt"; }
+      std::string GetLabel() const override { return "InputInt"; }
 
    protected:
       std::string& mName;
@@ -648,7 +582,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "InputReal"; }
+      std::string GetLabel() const override { return "InputReal"; }
 
    protected:
       std::string& mName;
@@ -668,7 +602,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "SelectableLabel"; }
+      std::string GetLabel() const override { return "SelectableLabel"; }
 
    protected:
       bool& mSelected;
@@ -683,7 +617,7 @@ namespace wgui
    public:
       static constexpr std::string_view HeightAttr = "Height";
 
-      GuiLayoutRowBase(int height)
+      GuiLayoutRowBase(int height, bool autoHeight = false)
          :GuiLayoutRowBase()
       {
          mHeight = height;
@@ -714,7 +648,7 @@ namespace wgui
       GuiLayoutRowDynamic(int height) : GuiLayoutRowBase(height) { }
       GuiLayoutRowDynamic() : GuiLayoutRowBase() { }
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "DynamicRow"; }
+      std::string GetLabel() const override { return "DynamicRow"; }
    };
 
    /// <summary>
@@ -740,7 +674,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "StaticRow"; }
+      std::string GetLabel() const override { return "StaticRow"; }
 
    protected:
       int64_t& mColWidth;
@@ -776,7 +710,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "DynamicGrid"; }
+      std::string GetLabel() const override { return "DynamicGrid"; }
 
    protected:
       std::vector<double*> mScales;
@@ -809,7 +743,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "StaticGrid"; }
+      std::string GetLabel() const override { return "StaticGrid"; }
 
    protected:
       std::vector<int64_t*> mScales;
@@ -837,7 +771,7 @@ namespace wgui
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "VariableGrid"; }
+      std::string GetLabel() const override { return "VariableGrid"; }
 
    protected:
       std::vector<int64_t*> mScales;
@@ -869,24 +803,8 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      bool AddChild(GuiControlBase* newControl) override
-      {
-         if (GuiLayoutRowBase::AddChild(newControl))
-         {
-            mWidths.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
-               ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
-            mHeights.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
-               ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
-            mPositionsX.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
-               ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
-            mPositionsY.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
-               ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
-         }
-
-         return true;
-      }
-
-      std::string GetLabel() override { return "StaticSpace"; }
+      bool AddChild(GuiControlBase* newControl) override;
+      std::string GetLabel() const override { return "StaticSpace"; }
 
    protected:
       /// <summary>
@@ -911,24 +829,8 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
 
-      bool AddChild(GuiControlBase* newControl) override
-      {
-         if (GuiLayoutRowBase::AddChild(newControl))
-         {
-            mWidths.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
-               ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
-            mHeights.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
-               ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
-            mPositionsX.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
-               ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
-            mPositionsY.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
-               ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
-         }
-
-         return true;
-      }
-
-      std::string GetLabel() override { return "DynamicSpace"; }
+      bool AddChild(GuiControlBase* newControl) override;
+      std::string GetLabel() const override { return "DynamicSpace"; }
 
    protected:
       /// <summary>
@@ -947,11 +849,11 @@ namespace wgui
       static constexpr std::string_view TitleAttr = "Title";
       static constexpr std::string_view ScrollXAttr = "ScrollX";
       static constexpr std::string_view ScrollYAttr = "ScrollY";
-      static constexpr std::string_view Scrollable = "Scrollable";
+      static constexpr std::string_view ScrollableAttr = "Scrollable";
 
       GuiLayoutGroup()
          : mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef()),
-         mScrollable(mAttributes->Add<AttrBool>((std::string)Scrollable)->GetRef())
+         mScrollable(mAttributes->Add<AttrBool>((std::string)ScrollableAttr)->GetRef())
       {
          mTitle = "";
          mName = std::to_string(reinterpret_cast<int64_t>(this));
@@ -966,10 +868,8 @@ namespace wgui
       }
 
       eControlType GetControlType() const override { return eControlType::Group; }
-
       void Render(WindowBase* const window, nk_context* context) override;
-
-      std::string GetLabel() override { return "Group"; }
+      std::string GetLabel() const override { return "Group"; }
 
    protected:
       std::string& mTitle;
@@ -984,17 +884,19 @@ namespace wgui
 
       GuiLayoutTreeBase()
          : mInitiallyOpen(mAttributes->Add<AttrBool>((std::string)InitiallyOpenAttr)->GetRef()),
-         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef())
+         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef()),
+         mName(),
+         mExpanded(false)
       {
          mText = "";
-         mInitiallyOpen = false;
+         mExpanded = mInitiallyOpen = false;
          mName = std::to_string(reinterpret_cast<int64_t>(this));
       }
 
       GuiLayoutTreeBase(const std::string& text, bool initiallyOpen = false)
          : GuiLayoutTreeBase()
       {
-         mInitiallyOpen = initiallyOpen;
+         mExpanded = mInitiallyOpen = initiallyOpen;
          mText = text;
       }
 
@@ -1004,6 +906,7 @@ namespace wgui
       bool& mInitiallyOpen;
       std::string& mText;
       std::string mName;
+      bool mExpanded;
    };
 
    /// <summary>
@@ -1018,7 +921,7 @@ namespace wgui
          : GuiLayoutTreeBase(text, initiallyOpen) { }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "TreeNode"; }
+      std::string GetLabel() const override { return "TreeNode"; }
    };
 
    /// <summary>
@@ -1033,7 +936,7 @@ namespace wgui
          : GuiLayoutTreeBase(text, initiallyOpen) { }
 
       void Render(WindowBase* const window, nk_context* context) override;
-      std::string GetLabel() override { return "TreeTab"; }
+      std::string GetLabel() const override { return "TreeTab"; }
    };
 
 #pragma endregion
@@ -1046,7 +949,7 @@ namespace wgui
       GuiMenuBar() : ChildSupportingGuiControlBase() { }
       void Render(WindowBase* const window, nk_context* context) override;
       eControlType GetControlType() const override { return eControlType::Menu; }
-      std::string GetLabel() override { return "MenuBar"; }
+      std::string GetLabel() const override { return "MenuBar"; }
    };
 
    class GuiMenu : public ChildSupportingGuiControlBase
@@ -1092,7 +995,7 @@ namespace wgui
       eControlType GetControlType() const override { return eControlType::Menu; }
       bool SupportsChildren() const override { return true; }
 
-      std::string GetLabel() override { return "Menu"; }
+      std::string GetLabel() const override { return "Menu"; }
 
    protected:
       int64_t& mTextAlignment;
@@ -1132,7 +1035,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
       eControlType GetControlType() const override { return eControlType::Widget; }
-      std::string GetLabel() override { return "MenuItem"; }
+      std::string GetLabel() const override { return "MenuItem"; }
 
    protected:
       int64_t& mTextAlignment;
@@ -1171,7 +1074,7 @@ namespace wgui
       static constexpr std::string_view WidthAttr = "Width";
       static constexpr std::string_view HeightAttr = "Height";
       static constexpr std::string_view TitleAttr = "Title";
-      static constexpr std::string_view TrackParentAttr = "TrackWinScale";
+      static constexpr std::string_view TrackParentAttr = "TrackWin";
 
       GuiLayoutWindow()
          : ChildSupportingGuiControlBase(),
@@ -1211,7 +1114,7 @@ namespace wgui
          return eControlType::Window;
       }
 
-      std::string GetLabel() override { return "Window"; }
+      std::string GetLabel() const override { return "Window"; }
 
    protected:
       int64_t& mPosX;

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
-  <Window Title="Keyrita" TrackWinScale="True">
+  <Window Title="Keyrita" TrackWin="True">
     <KeyritaMenu/>
+    <DynamicRow Height="400">
+      <ExampleUi/>
+    </DynamicRow>
+    <DynamicRow>
+      <Button Text="Hello!"></Button>
+    </DynamicRow>
   </Window>
 </GuiRoot>

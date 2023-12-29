@@ -6,6 +6,7 @@ using namespace wgui;
 void KeyritaControlsFactory::Init()
 {
    RegisterControl<KeyritaMenu>();
+   RegisterControl<ExampleUi>();
 }
 
 KeyritaMenu::KeyritaMenu()
@@ -14,6 +15,19 @@ KeyritaMenu::KeyritaMenu()
 }
 
 void KeyritaMenu::Render(WindowBase* const window, nk_context* context)
+{
+   for (int i = 0; i < mControls.size(); i++)
+   {
+      mControls[i]->Render(window, context);
+   }
+}
+
+ExampleUi::ExampleUi()
+{
+   XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/ExampleUi.guix", mOwnedControls, mControls);
+}
+
+void ExampleUi::Render(WindowBase* const window, nk_context* context)
 {
    for (int i = 0; i < mControls.size(); i++)
    {

@@ -47,8 +47,8 @@ namespace wgui
             {
                Application::Logger.error("Overwriting attribute {str} - incorrect type {str}!={str} value='{str}'",
                   attr->name(),
-                  attributeParser.GetTypeManager().GetTypeName(parsedAttr->GetType()),
-                  attributeParser.GetTypeManager().GetTypeName(typeHint),
+                  attributeParser.GetTypeManager().GetTypeName(parsedAttr->GetType()).c_str(),
+                  attributeParser.GetTypeManager().GetTypeName(typeHint).c_str(),
                   attr->value());
             }
             else

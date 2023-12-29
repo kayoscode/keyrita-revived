@@ -54,7 +54,7 @@ namespace wgui
       virtual void Render() = 0;
       virtual void Update();
 
-      NuklearGlfwContextManager& GetGlfwContext() { return mNkContext; }
+      NuklearGlfwContextManager& GetContext() { return mNkContext; }
 
       void SetRenderer(WindowRenderer* renderer) { mLastRenderer = renderer; }
       WindowRenderer* GetRenderer() const { return mLastRenderer; }

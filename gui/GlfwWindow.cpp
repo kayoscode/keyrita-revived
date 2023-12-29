@@ -16,12 +16,12 @@ namespace
 
    void GlfwErrorCallback(int errCode, const char* msg)
    {
-      //mGlfwLogger.critical("{int}: {str}", errCode, msg);
+      wgui::Application::Logger.error("{int}: {str}", errCode, msg);
    }
 
    void DrawFrame(wgui::WindowBase* window, GLFWwindow* gWin, nk_glfw* nkGlfw, wgui::WindowRenderer* layoutRenderer)
    {
-      // Input
+      // Render  
       nk_glfw3_new_frame(nkGlfw);
       layoutRenderer->RenderStart(window, &nkGlfw->ctx);
       layoutRenderer->Render(window, &nkGlfw->ctx);
@@ -39,13 +39,19 @@ namespace
       wgui::WindowBase* win = wgui::Application::GetWindow(window);
       if (win->GetRenderer())
       {
-         DrawFrame(win, window, win->GetGlfwContext().GetGlfw(), win->GetRenderer());
+         DrawFrame(win, window, win->GetContext().GetGlfw(), win->GetRenderer());
       }
    }
 
    void WindowMoveCallback(GLFWwindow* window, int width, int height)
    {
-      wgui::Application::GetWindow(window)->SetContentScale();
+      wgui::WindowBase* win = wgui::Application::GetWindow(window);
+
+      win->SetContentScale();
+      if (win->GetRenderer())
+      {
+         DrawFrame(win, window, win->GetContext().GetGlfw(), win->GetRenderer());
+      }
    }
 
    enum class eTheme
@@ -272,18 +278,18 @@ namespace wgui
    {
       glfwSetErrorCallback(GlfwErrorCallback);
 
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, std::get<0>(GlfwVersion));
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, std::get<1>(GlfwVersion));
-      glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-      if (OperatingSystem::GetOperatingSystem() == eOsType::MacOS)
-      {
-         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-      }
-
       auto result = glfwInit() == GLFW_TRUE;
       if (result)
       {
+         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, std::get<0>(GlfwVersion));
+         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, std::get<1>(GlfwVersion));
+         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+         if (OperatingSystem::GetOperatingSystem() == eOsType::MacOS)
+         {
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+         }
+
          // Scale to monitor must be set after calling glfwInit()
          glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
          return true;

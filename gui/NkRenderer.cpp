@@ -50,6 +50,11 @@ namespace wgui
       {
          mControls[i]->Init();
       }
+
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         mControls[i]->OnInitialized();
+      }
    }
 
    void StandardGuiRenderer::RenderStart(WindowBase* const window, nk_context* context)
@@ -66,6 +71,36 @@ namespace wgui
 
    void StandardGuiRenderer::RenderFinish(WindowBase* const window, nk_context* context)
    {
+   }
+
+   void ChildSupportingGuiControlBase::Init()
+   {
+      // Initialize all children, then init ourselves.
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         mControls[i]->Init();
+      }
+
+      SelfInit();
+   }
+
+   void ChildSupportingGuiControlBase::OnInitialized()
+   {
+      // Initialize all children, then init ourselves.
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         mControls[i]->OnInitialized();
+      }
+
+      SelfOnInitalized();
+   }
+
+   void ChildSupportingGuiControlBase::ForEachChild(std::function<void(GuiControlBase* child, int index)> function) 
+   {
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         function(mControls[i], i);
+      }
    }
 
    void GuiLayoutWindow::Render(WindowBase* window, nk_context* context)
@@ -149,12 +184,73 @@ namespace wgui
       }
    }
 
+   void GuiRadioButtonGroup::SelfInit()
+   {
+      mRadioButtons.clear();
+
+      auto* radioBtns = &mRadioButtons;
+      int64_t* currentSelection = &mCurrentSelection;
+      int buttonIndex = 1;
+
+      std::function<void(GuiControlBase*, int index)> func = 
+         [&func, radioBtns, currentSelection, &buttonIndex](GuiControlBase* control, int index) -> void
+         {
+            GuiRadioButton* rb = dynamic_cast<GuiRadioButton*>(control);
+            if (rb != nullptr)
+            {
+               rb->SetRadioButtonGroupSelection(currentSelection, buttonIndex);
+               buttonIndex++;
+               radioBtns->push_back(rb);
+            }
+
+            if (control != nullptr && control->SupportsChildren())
+            {
+               control->ForEachChild(func);
+            }
+         };
+
+      func(this, 0);
+   }
+
    void GuiRadioButtonGroup::Render(WindowBase* const window, nk_context* context)
    {
       for (int i = 0; i < mControls.size(); i++)
       {
          mControls[i]->Render(window, context);
       }
+   }
+
+   void GuiCombobox::SelfInit()
+   {
+      mComboboxItems.clear();
+      mComboboxTexts.clear();
+
+      auto* items = &mComboboxItems;
+      auto* texts = &mComboboxTexts;
+      int64_t* currentSelection = &mSelectedItem;
+      int64_t* itemHeight = &mItemHeight;
+      int itemIndex = 1;
+
+      std::function<void(GuiControlBase*, int index)> func =
+         [&func, items, texts, currentSelection, itemHeight, &itemIndex](GuiControlBase* control, int index) -> void
+         {
+            GuiComboboxItem* cb = dynamic_cast<GuiComboboxItem*>(control);
+            if (cb != nullptr)
+            {
+               cb->SetComboboxSelectedItem(currentSelection, itemHeight, itemIndex);
+               itemIndex++;
+               items->push_back(cb);
+
+               texts->push_back(&cb->GetOrCreateAttribute<std::string, AttrString>((std::string)GuiComboboxItem::TextAttr));
+            }
+
+            if (control != nullptr && control->SupportsChildren())
+            {
+               control->ForEachChild(func);
+            }
+         };
+
+      func(this, 0);
    }
 
    void GuiComboboxItem::Render(WindowBase* const window, nk_context* context)
@@ -245,7 +341,7 @@ namespace wgui
    void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
    {
       int height = mHeight * window->GetContentScaleY();
-      
+
       nk_layout_row_dynamic(context, height, mControls.size());
       for (int i = 0; i < mControls.size(); i++)
       {
@@ -336,6 +432,23 @@ namespace wgui
       }
    }
 
+   bool GuiLayoutStaticSpace::AddChild(GuiControlBase* newControl)
+   {
+      if (GuiLayoutRowBase::AddChild(newControl))
+      {
+         mWidths.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
+            ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
+         mHeights.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
+            ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
+         mPositionsX.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
+            ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
+         mPositionsY.push_back(&newControl->GetOrCreateAttribute<int64_t, AttrInt>
+            ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
+      }
+
+      return true;
+   }
+
    void GuiLayoutStaticSpace::Render(WindowBase* const window, nk_context* context)
    {
       if (mControls.size() > mWidths.size())
@@ -356,6 +469,23 @@ namespace wgui
       }
 
       nk_layout_space_end(context);
+   }
+
+   bool GuiLayoutDynamicSpace::AddChild(GuiControlBase* newControl)
+   {
+      if (GuiLayoutRowBase::AddChild(newControl))
+      {
+         mWidths.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
+            ((std::string)RootAttrName + "." + (std::string)WidthGridAttr));
+         mHeights.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
+            ((std::string)RootAttrName + "." + (std::string)HeightGridAttr));
+         mPositionsX.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
+            ((std::string)RootAttrName + "." + (std::string)PosXGridAttr));
+         mPositionsY.push_back(&newControl->GetOrCreateAttribute<double, AttrReal>
+            ((std::string)RootAttrName + "." + (std::string)PosYGridAttr));
+      }
+
+      return true;
    }
 
    void GuiLayoutDynamicSpace::Render(WindowBase* const window, nk_context* context)
@@ -396,9 +526,11 @@ namespace wgui
    void GuiLayoutTreeNode::Render(WindowBase* const window, nk_context* context)
    {
       nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
-                                                  nk_collapse_states::NK_MINIMIZED;
+         nk_collapse_states::NK_MINIMIZED;
 
-      if (nk_tree_push_hashed(context, NK_TREE_NODE, mText.c_str(), state, mName.c_str(), mName.size(), 0))
+      mExpanded = nk_tree_push_hashed(context, NK_TREE_NODE, mText.c_str(), state, mName.c_str(), mName.size(), 0);
+
+      if (mExpanded)
       {
          for (int i = 0; i < mControls.size(); i++)
          {
@@ -412,9 +544,11 @@ namespace wgui
    void GuiLayoutTreeTab::Render(WindowBase* const window, nk_context* context)
    {
       nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
-                                                  nk_collapse_states::NK_MINIMIZED;
+         nk_collapse_states::NK_MINIMIZED;
 
-      if (nk_tree_push_hashed(context, NK_TREE_TAB, mText.c_str(), state, mName.c_str(), mName.size(), 0))
+      mExpanded = nk_tree_push_hashed(context, NK_TREE_TAB, mText.c_str(), state, mName.c_str(), mName.size(), 0);
+
+      if (mExpanded)
       {
          for (int i = 0; i < mControls.size(); i++)
          {
@@ -447,8 +581,8 @@ namespace wgui
       {
          int width = mWidth * window->GetContentScaleX();
          int height = mHeight * window->GetContentScaleY();
-         if (nk_menu_begin_label(context, mText.c_str(), mTextAlignment, 
-             nk_vec2(width, height)))
+         if (nk_menu_begin_label(context, mText.c_str(), mTextAlignment,
+            nk_vec2(width, height)))
          {
             for (int i = 0; i < mControls.size(); i++)
             {
