@@ -9,7 +9,7 @@ void KeyritaControlsFactory::Init()
    RegisterControl<ExampleUi>();
 }
 
-KeyritaMenu::KeyritaMenu()
+void KeyritaMenu::Init()
 {
    XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/KeyritaMenu.guix", mOwnedControls, mControls);
 }
@@ -22,7 +22,7 @@ void KeyritaMenu::Render(WindowBase* const window, nk_context* context)
    }
 }
 
-ExampleUi::ExampleUi()
+void ExampleUi::Init()
 {
    XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/ExampleUI.guix", mOwnedControls, mControls);
 }

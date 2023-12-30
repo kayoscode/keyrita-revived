@@ -2,6 +2,7 @@
 #include <concepts>
 #include <cassert>
 #include <functional>
+#include <stack>
 
 #include "App.h"
 #include "Attributes.h"
@@ -71,7 +72,6 @@ namespace wgui
 
       virtual void ForEachChild(std::function<void(GuiControlBase* control, int index)>)
       {
-         assert(false);
       }
 
       /// <summary>
@@ -121,11 +121,6 @@ namespace wgui
    public:
       ChildSupportingGuiControlBase() : GuiControlBase() { }
       bool SupportsChildren() const override { return true; }
-
-      virtual void Init() override;
-      virtual void OnInitialized() override;
-      virtual void SelfInit() { }
-      virtual void SelfOnInitalized() { }
 
       bool AddChild(GuiControlBase* newControl) override
       {
@@ -329,7 +324,7 @@ namespace wgui
          mCurrentSelection = 1;
       }
 
-      void SelfInit() override;
+      virtual void OnInitialized() override;
 
       eControlType GetControlType() const override { return eControlType::Group; }
       void Render(WindowBase* const window, nk_context* context) override;
@@ -408,6 +403,8 @@ namespace wgui
       static constexpr std::string_view HeightAttr = "Height";
       static constexpr std::string_view ItemHeightAttr = "ItemHeight";
 
+      virtual void OnInitialized() override;
+
       GuiCombobox()
          : mSelectedItem(mAttributes->Add<AttrInt>((std::string)GuiRadioButtonGroup::SelectedAttr)->GetRef()),
          mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
@@ -430,7 +427,6 @@ namespace wgui
       }
 
       eControlType GetControlType() const override { return eControlType::Group; }
-      void SelfInit() override;
 
       void Render(WindowBase* const window, nk_context* context) override;
       std::string GetLabel() const override { return "Combobox"; }
@@ -1180,13 +1176,13 @@ namespace wgui
 
       GuiLayoutWindow()
          : GuiLayoutGroup(),
-         mPosX(mAttributes->Add<AttrInt>((std::string)XPosAttr)->GetRef()),
-         mPosY(mAttributes->Add<AttrInt>((std::string)YPosAttr)->GetRef()),
-         mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
-         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
-         mTrackParentWindowSize(mAttributes->Add<AttrBool>((std::string)TrackParentAttr)->GetRef())
+           mPosX(mAttributes->Add<AttrInt>((std::string)XPosAttr)->GetRef()),
+           mPosY(mAttributes->Add<AttrInt>((std::string)YPosAttr)->GetRef()),
+           mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
+           mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
+           mTrackParentWindowSize(mAttributes->Add<AttrBool>((std::string)TrackParentAttr)->GetRef())
       {
-         // Set to defaults.
+            // Set to defaults.
          mPosX = 0;
          mPosY = 0;
          mWidth = 100;

@@ -1,4 +1,5 @@
 #include <cassert>
+#include <functional>
 
 #include "Window.h"
 #include "NuklearWindowRenderer.h"
@@ -46,14 +47,17 @@ namespace wgui
 
    void StandardGuiRenderer::Init()
    {
-      for (int i = 0; i < mControls.size(); i++)
-      {
-         mControls[i]->Init();
-      }
+      std::function<void(GuiControlBase* control, int index)> childrenOnInitialized = 
+         [&childrenOnInitialized](GuiControlBase* control, int index)
+         {
+            control->OnInitialized();
+            control->ForEachChild(childrenOnInitialized);
+         };
 
       for (int i = 0; i < mControls.size(); i++)
       {
          mControls[i]->OnInitialized();
+         mControls[i]->ForEachChild(childrenOnInitialized);
       }
    }
 
@@ -71,28 +75,6 @@ namespace wgui
 
    void StandardGuiRenderer::RenderFinish(WindowBase* const window, nk_context* context)
    {
-   }
-
-   void ChildSupportingGuiControlBase::Init()
-   {
-      // Initialize all children, then init ourselves.
-      for (int i = 0; i < mControls.size(); i++)
-      {
-         mControls[i]->Init();
-      }
-
-      SelfInit();
-   }
-
-   void ChildSupportingGuiControlBase::OnInitialized()
-   {
-      // Initialize all children, then init ourselves.
-      for (int i = 0; i < mControls.size(); i++)
-      {
-         mControls[i]->OnInitialized();
-      }
-
-      SelfOnInitalized();
    }
 
    float ChildSupportingGuiControlBase::GetMaxChildHeight(WindowBase* const window, nk_context* context) const
@@ -219,7 +201,7 @@ namespace wgui
       }
    }
 
-   void GuiRadioButtonGroup::SelfInit()
+   void GuiRadioButtonGroup::OnInitialized()
    {
       mRadioButtons.clear();
 
@@ -255,7 +237,7 @@ namespace wgui
       }
    }
 
-   void GuiCombobox::SelfInit()
+   void GuiCombobox::OnInitialized()
    {
       mComboboxItems.clear();
       mComboboxTexts.clear();

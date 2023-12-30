@@ -97,8 +97,8 @@ namespace wgui
                resultControls.push_back(pCtrl);
             }
 
-            ConstructControls(ctrl->children(), pCtrl, ownedControls, resultControls);
             SetAttributes(ctrl, pCtrl, mAttributeParser);
+            ConstructControls(ctrl->children(), pCtrl, ownedControls, resultControls);
          }
          else
          {
@@ -113,12 +113,15 @@ namespace wgui
       std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
       std::vector<GuiControlBase*>& controlTree)
    {
+      controlTree.clear();
       ownedControls.clear();
+
       xml_document doc;
       xml_parse_result parseResult = doc.load_file(fileName.c_str());
 
-      if (parseResult == -1)
+      if (parseResult.status == -1)
       {
+         Application::Logger.error("Unable to load file: {str}", fileName.c_str());
          return false;
       }
 

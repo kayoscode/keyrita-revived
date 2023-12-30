@@ -84,7 +84,9 @@ namespace wgui
          mFactory.emplace(ctrl->GetLabel(), 
             []() -> std::unique_ptr<GuiControlBase>
             {
-               return std::make_unique<T>();
+               std::unique_ptr<GuiControlBase> ctrl = std::make_unique<T>();
+               ctrl->Init();
+               return ctrl;
             });
       }
 
