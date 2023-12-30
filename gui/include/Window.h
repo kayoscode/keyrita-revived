@@ -10,12 +10,33 @@ class GLFWmonitor;
 
 namespace wgui
 {
+   class WindowStyle
+   {
+   public:
+      WindowStyle(nk_style* copyFrom, int fontSize = 16)
+         : mFontSize(fontSize)
+      {
+         std::memcpy(&mStyle, copyFrom, sizeof(nk_style));
+      }
+
+      int GetFontSize() { return mFontSize; }
+      void SetFontSize(int fontSize)
+      {
+         mFontSize = fontSize;
+      }
+
+      void Scale(nk_style* style, nk_font* font, float scaleX, float scaleY);
+
+   private:
+      nk_style mStyle;
+      int mFontSize;
+   };
+
    class WindowRenderer;
 
    /// <summary>
    /// Abstract class for handling basic operations a window can do.
    /// Used for the main window and pop up dialogs.
-   /// TODO: handle refresh rate?
    /// </summary>
    class WindowBase
    {
@@ -55,18 +76,27 @@ namespace wgui
       virtual void Render() = 0;
       virtual void Update();
 
-      NuklearGlfwContextManager& GetGlfwContext() { return mNkContext; }
+      NuklearGlfwContextManager& GetContext() { return mNkContext; }
 
       void SetRenderer(WindowRenderer* renderer) { mLastRenderer = renderer; }
       WindowRenderer* GetRenderer() const { return mLastRenderer; }
+
+      void SetContentScale();
+      double GetContentScaleX() { return mContentScaleX; }
+      double GetContentScaleY() { return mContentScaleY; }
+      WindowStyle* GetStyle() { return mWindowStyle.get(); }
 
    protected:
       WindowRenderer* mLastRenderer = nullptr;
 
       GLFWwindow* mWindow;
       std::string mWindowTitle;
+      double mContentScaleX = 0.0;
+      double mContentScaleY = 0.0;
+      struct nk_font* mFont;
 
       NuklearGlfwContextManager mNkContext;
+      std::unique_ptr<WindowStyle> mWindowStyle;
 
       friend class WindowInput;
       friend class Application;

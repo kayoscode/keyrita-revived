@@ -2,6 +2,8 @@
 #include "OperatingSystem.h"
 #include "PlatformModules.h"
 #include "App.h"
+#include "XmlToUi.h"
+#include "KeyritaControls.h"
 
 using namespace wgui;
 
@@ -20,6 +22,8 @@ int main()
       platform = std::make_unique<PlatformLinux>();
    }
    platform->Initialize();
+   XmlToUiUtil::Init();
+   XmlToUiUtil::AddControlFactory<KeyritaControlsFactory>();
 
    MainWindow mainWindow;
    mainWindow.CreateWindow("Keyrita", 1600, 1200, false, true, true, false);
@@ -27,7 +31,7 @@ int main()
 
    bool resiable = false;
 
-   XmlLoadedWindowRenderer renderer;
+   XmlRenderer renderer;
    renderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
    renderer.Init();
 

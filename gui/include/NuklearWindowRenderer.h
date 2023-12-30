@@ -10,11 +10,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "pugixml.hpp"
-#include "Attributes.h"
 #include "StandardControls.h"
-
-#include "Window.h"
 
 namespace wgui
 {
@@ -62,6 +58,18 @@ namespace wgui
          return nullptr;
       }
 
+      std::vector<std::string> ListRegisteredControls()
+      {
+         std::vector<std::string> registeredControls;
+
+         for (auto& ctrl : mFactory)
+         {
+            registeredControls.push_back(ctrl.first);
+         }
+
+         return registeredControls;
+      }
+
       /// <summary>
       /// Register all the controls this factory can build to the system.
       /// </summary>
@@ -80,7 +88,6 @@ namespace wgui
             });
       }
 
-   private:
       std::map<std::string, std::function<std::unique_ptr
          <wgui::GuiControlBase>()>, CaseInsensitiveStrCompare> mFactory;
    };
@@ -88,10 +95,10 @@ namespace wgui
    /// <summary>
    /// Renders the gui based on the controls and layouts given by the developer.
    /// </summary>
-   class WindowRendererGui : public WindowRenderer
+   class StandardGuiRenderer : public WindowRenderer
    {
    public:
-      WindowRendererGui()
+      StandardGuiRenderer()
       {
       }
 
@@ -102,72 +109,30 @@ namespace wgui
 
       bool AddChild(GuiControlBase* window)
       {
-         mWindows.push_back(window);
+         mControls.push_back(window);
          return true;
       }
 
-   private:
-      std::vector<GuiControlBase*> mWindows;
+   protected:
+      std::vector<GuiControlBase*> mControls;
    };
 
    /// <summary>
    /// A window renderer that loads its controls from an XML file.
    /// </summary>
-   class XmlLoadedWindowRenderer : public WindowRendererGui
+   class XmlRenderer : public StandardGuiRenderer
    {
-   private:
-      class StandardControlFactory : public GuiControlFactoryBase
-      {
-      public:
-         void Init() override;
-      };
-
    public:
-      XmlLoadedWindowRenderer()
-      {
-         AddControlFactory<StandardControlFactory>();
-         mControlFactories[mControlFactories.size() - 1]->Init();
-      }
-
-      bool ConstructLayoutFromXml(const std::string& xml);
       bool ConstructLayoutFromXmlFile(const std::string& fileName);
-
-      template <class T>
-      void AddControlFactory() 
-         requires std::is_base_of_v<GuiControlFactoryBase, T>
-      {
-         mControlFactories.push_back(std::make_unique<T>());
-      }
 
       void AddControl(std::unique_ptr<GuiControlBase> window)
       {
          GuiControlBase* pWin = window.get();
          mOwnedControls.push_back(std::move(window));
-         WindowRendererGui::AddChild(pWin);
+         StandardGuiRenderer::AddChild(pWin);
       }
 
    private:
       std::vector<std::unique_ptr<GuiControlBase>> mOwnedControls;
-      std::vector<std::unique_ptr<GuiControlFactoryBase>> mControlFactories;
-      AttributeParser mAttributeParser;
-
-      void ConstructWindows(const pugi::xml_object_range<pugi::xml_node_iterator>& document);
-      void ConstructComponents(const pugi::xml_object_range<pugi::xml_node_iterator>& document,
-         GuiControlBase* parent);
-
-      std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlName)
-      {
-         for (const auto& factory : mControlFactories)
-         {
-            std::unique_ptr<GuiControlBase> newControl = factory->CreateControl(controlName);
-
-            if (newControl != nullptr)
-            {
-               return std::move(newControl);
-            }
-         }
-
-         return nullptr;
-      }
    };
 }

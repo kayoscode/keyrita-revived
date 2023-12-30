@@ -1,0 +1,72 @@
+<GuiRoot>
+  <MenuBar>
+    <StaticGrid Height="24" Width1="35"
+                            Width2="35"
+                            Width3="75"
+                            Width4="70">
+      <Menu Text="File" Width="150" Height="500">
+        <DynamicRow Height="30">
+          <MenuItem Text="New"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Open"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Save"/>
+        </DynamicRow>
+        <DynamicRow Height="2">
+          <HorizontalSeparator Thickness="1"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Export as KLC"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Load Dataset"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Clear Dataset"/>
+        </DynamicRow>
+      </Menu>
+      <Menu Text="Edit" Width="200" Height="250">
+        <DynamicRow Height="30">
+          <MenuItem Text="Undo"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Redo"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Reflect Vertical"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Reflect Horizontal"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Swap Characters"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Settings"/>
+        </DynamicRow>
+      </Menu>
+      <Menu Text="Heatmap" Width="150" Height="200">
+        <DynamicRow Height="30">
+          <MenuItem Text="Heatmap Type"/>
+        </DynamicRow>
+      </Menu>
+      <Menu Text="Analyze" Width="300" Height="200">
+        <DynamicRow Height="30">
+          <MenuItem Text="Effort Map"/>
+          <MenuItem Text="Scissor Map"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Generate"/>
+        </DynamicRow>
+        <DynamicRow Height="30">
+          <MenuItem Text="Optimize 1"/>
+          <MenuItem Text="Optimize 2"/>
+          <MenuItem Text="Optimize 3"/>
+          <MenuItem Text="Optimize 4"/>
+        </DynamicRow>
+      </Menu>
+    </StaticGrid>
+  </MenuBar>
+</GuiRoot>
