@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
   <Window Title="Keyrita" Width="500" Height="500"
-          TrackWin="true" Scrollable="false" Border="false">
-    <KeyritaMenu/>
-    <DynamicRow AutoHeight="true">
-      <ExampleUi/>
+          TrackWin="True" Scrollable="False" Border="False">
+    <DynamicRow AutoHeight="True" height="50" Width="200">
+      <Group Scrollable="False" Border="False">
+        <KeyritaMenu/>
+      </Group>
     </DynamicRow>
 
     <DynamicRow Height="50" Width="100">

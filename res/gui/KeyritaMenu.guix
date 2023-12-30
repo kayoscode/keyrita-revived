@@ -1,6 +1,6 @@
 <GuiRoot>
   <MenuBar>
-    <StaticGrid Height="30" Width1="35"
+    <StaticGrid Height="24" Width1="35"
                             Width2="35"
                             Width3="75"
                             Width4="70">

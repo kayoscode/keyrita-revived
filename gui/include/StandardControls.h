@@ -1031,6 +1031,17 @@ namespace wgui
       void Render(WindowBase* const window, nk_context* context) override;
       eControlType GetControlType() const override { return eControlType::Menu; }
       std::string GetLabel() const override { return "MenuBar"; }
+
+      float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         float totalHeight = GetTotalChildHeight(window, context);
+         return totalHeight;
+      }
+
+      float GetVerticalSpacing(WindowBase* const window, nk_context* context) const override
+      {
+         return 0;
+      }
    };
 
    class GuiMenu : public ChildSupportingGuiControlBase
@@ -1075,8 +1086,11 @@ namespace wgui
 
       eControlType GetControlType() const override { return eControlType::Menu; }
       bool SupportsChildren() const override { return true; }
-
       std::string GetLabel() const override { return "Menu"; }
+      float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         return mHeight * window->GetContentScaleY();
+      }
 
    protected:
       int64_t& mTextAlignment;

@@ -24,7 +24,7 @@ void KeyritaMenu::Render(WindowBase* const window, nk_context* context)
 
 ExampleUi::ExampleUi()
 {
-   XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/ExampleUi.guix", mOwnedControls, mControls);
+   XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/ExampleUI.guix", mOwnedControls, mControls);
 }
 
 void ExampleUi::Render(WindowBase* const window, nk_context* context)

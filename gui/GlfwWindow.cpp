@@ -562,9 +562,9 @@ namespace wgui
 
       SetStyle(ctx, eTheme::Black);
 
-      ctx->style.window.scrollbar_size = nk_vec2(10, 10);
+      ctx->style.window.scrollbar_size = nk_vec2(2, 2);
       ctx->style.window.group_padding = nk_vec2(2, 4);
-      ctx->style.window.group_border = 4;
+      ctx->style.window.group_border = 2;
       ctx->style.window.spacing = nk_vec2(4, 4);
 
       // Add the window to the application static data.
@@ -572,7 +572,7 @@ namespace wgui
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
       glfwSetWindowPosCallback(mWindow, WindowMoveCallback);
 
-      glfwSwapInterval(0);
+      glfwSwapInterval(1);
 
       // Create window style from the previously set style.
       mWindowStyle = std::make_unique<WindowStyle>(&ctx->style);

@@ -634,7 +634,7 @@ namespace wgui
       if (mImagePath.empty())
       {
          int width = mWidth * window->GetContentScaleX();
-         int height = mHeight * window->GetContentScaleY();
+         int height = GetHeight(window, context);
          if (nk_menu_begin_label(context, mText.c_str(), mTextAlignment,
             nk_vec2(width, height)))
          {
