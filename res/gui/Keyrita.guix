@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
-  <Window Title="Keyrita" TrackWin="True">
+  <Window Title="Keyrita" Width="500" Height="500"
+          TrackWin="true" Scrollable="false" Border="false">
     <KeyritaMenu/>
-    <DynamicRow Height="400">
+    <DynamicRow AutoHeight="true">
       <ExampleUi/>
     </DynamicRow>
+
+    <DynamicRow Height="50" Width="100">
+      <Button Text="One"/>
+      <Button Text="Two"/>
+    </DynamicRow>
+
     <DynamicRow>
-      <Button Text="Hello!"></Button>
+      <Button Text="This should be right on the line of the second button"/>
     </DynamicRow>
   </Window>
 </GuiRoot>

@@ -1,18 +1,18 @@
 <GuiRoot>
-  <Group Scrollable="False">
-    <DynamicRow>
+  <Group Scrollable="true">
+    <DynamicRow Height="30">
       <Checkbox Text="Checkbox1" Checked="True"/>
       <Checkbox Text="Checkbox2" Checked="False"/>
       <Checkbox Text="Checkbox3" Checked="True"/>
     </DynamicRow>
     <RadioButtonGroup Selection="2">
-      <DynamicRow>
+      <DynamicRow Height="30">
         <RadioButton Text="RB 1"/>
         <RadioButton Text="RB 2"/>
       </DynamicRow>
     </RadioButtonGroup>
 
-    <DynamicGrid Width1="50%" Width2="50%" Height="400">
+    <DynamicGrid Width1="50%" Width2="50%" AutoHeight="True">
       <Group Scrollable="True">
         <TreeTab Text="Tree" InitiallyOpen="True">
           <TreeTab Text="Controls1">

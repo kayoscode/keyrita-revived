@@ -10,6 +10,28 @@ class GLFWmonitor;
 
 namespace wgui
 {
+   class WindowStyle
+   {
+   public:
+      WindowStyle(nk_style* copyFrom, int fontSize = 16)
+         : mFontSize(fontSize)
+      {
+         std::memcpy(&mStyle, copyFrom, sizeof(nk_style));
+      }
+
+      int GetFontSize() { return mFontSize; }
+      void SetFontSize(int fontSize)
+      {
+         mFontSize = fontSize;
+      }
+
+      void Scale(nk_style* style, nk_font* font, float scaleX, float scaleY);
+
+   private:
+      nk_style mStyle;
+      int mFontSize;
+   };
+
    class WindowRenderer;
 
    /// <summary>
@@ -59,22 +81,22 @@ namespace wgui
       void SetRenderer(WindowRenderer* renderer) { mLastRenderer = renderer; }
       WindowRenderer* GetRenderer() const { return mLastRenderer; }
 
-      void SetFontSize(int fontSize) { mFontSize = fontSize; }
       void SetContentScale();
       double GetContentScaleX() { return mContentScaleX; }
       double GetContentScaleY() { return mContentScaleY; }
+      WindowStyle* GetStyle() { return mWindowStyle.get(); }
 
    protected:
       WindowRenderer* mLastRenderer = nullptr;
 
       GLFWwindow* mWindow;
       std::string mWindowTitle;
-      int mFontSize = 16;
-      double mContentScaleX = 1;
-      double mContentScaleY = 1;
+      double mContentScaleX = 0.0;
+      double mContentScaleY = 0.0;
       struct nk_font* mFont;
 
       NuklearGlfwContextManager mNkContext;
+      std::unique_ptr<WindowStyle> mWindowStyle;
 
       friend class WindowInput;
       friend class Application;

@@ -241,6 +241,177 @@ namespace
 /// </summary>
 namespace wgui
 {
+   void ScaleVec2(struct nk_vec2& result, const struct nk_vec2& base, float scaleX, float scaleY)
+   {
+      result.x = scaleX * base.x;
+      result.y = scaleY * base.y;
+   }
+
+   void ScaleButton(nk_style_button& result, const nk_style_button& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.image_padding, base.image_padding, scaleX, scaleY);
+      ScaleVec2(result.touch_padding, base.touch_padding, scaleX, scaleY);
+   }
+
+   void ScaleOption(nk_style_toggle& result, const nk_style_toggle& base, float scaleX, float scaleY)
+   {
+
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.touch_padding, base.touch_padding, scaleX, scaleY);
+      result.spacing = scaleX * base.spacing; // NOTE: Spacing does not matter for height!
+      result.border = scaleY * base.border;
+   }
+
+   void ScaleSelectable(nk_style_selectable& result, const nk_style_selectable& base, float scaleX, float scaleY)
+   {
+      result.rounding = scaleY * base.rounding;
+
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.touch_padding, base.touch_padding, scaleX, scaleY);
+      ScaleVec2(result.image_padding, base.image_padding, scaleX, scaleY);
+   }
+
+   void ScaleSlider(nk_style_slider& result, const nk_style_slider& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      result.bar_height = scaleY * base.bar_height;
+
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.spacing, base.spacing, scaleX, scaleY);
+      ScaleVec2(result.cursor_size, base.cursor_size, scaleX, scaleY);
+      ScaleButton(result.inc_button, base.inc_button, scaleX, scaleY);
+      ScaleButton(result.dec_button, base.dec_button, scaleX, scaleY);
+   }
+
+   void ScaleProgress(nk_style_progress& result, const nk_style_progress& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      result.cursor_border = scaleY * base.cursor_border;
+      result.cursor_rounding = scaleY * base.cursor_rounding;
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+   }
+
+   void ScaleScrollbar(nk_style_scrollbar& result, const nk_style_scrollbar& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      result.border_cursor = scaleY * base.border_cursor;
+      result.rounding_cursor = scaleY * base.rounding_cursor;
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleButton(result.inc_button, base.inc_button, scaleX, scaleY);
+      ScaleButton(result.dec_button, base.dec_button, scaleX, scaleY);
+   }
+
+   void ScaleEdit(nk_style_edit& result, const nk_style_edit& base, float scaleX, float scaleY)
+   {
+      ScaleScrollbar(result.scrollbar, base.scrollbar, scaleX, scaleY);
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      result.cursor_size = scaleY * base.cursor_size;
+      ScaleVec2(result.scrollbar_size, base.scrollbar_size, scaleX, scaleY);
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      result.row_padding = scaleY * base.row_padding;
+   }
+
+   void ScaleProperty(nk_style_property& result, const nk_style_property& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleEdit(result.edit, base.edit, scaleX, scaleY);
+      ScaleButton(result.inc_button, base.inc_button, scaleX, scaleY);
+      ScaleButton(result.dec_button, base.dec_button, scaleX, scaleY);
+   }
+   
+   void ScaleChart(nk_style_chart& result, const nk_style_chart& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+   }
+
+   void ScaleTab(nk_style_tab& result, const nk_style_tab& base, float scaleX, float scaleY)
+   {
+      ScaleButton(result.tab_maximize_button, base.tab_maximize_button, scaleX, scaleY);
+      ScaleButton(result.tab_minimize_button, base.tab_minimize_button, scaleX, scaleY);
+      ScaleButton(result.node_maximize_button, base.node_maximize_button, scaleX, scaleY);
+      ScaleButton(result.node_minimize_button, base.node_minimize_button, scaleX, scaleY);
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      result.indent = scaleY * base.indent;
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.spacing, base.spacing, scaleX, scaleY);
+   }
+
+   void ScaleCombo(nk_style_combo& result, const nk_style_combo& base, float scaleX, float scaleY)
+   {
+      ScaleButton(result.button, base.button, scaleX, scaleY);
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      ScaleVec2(result.content_padding, base.content_padding, scaleX, scaleY);
+      ScaleVec2(result.button_padding, base.button_padding, scaleX, scaleY);
+      ScaleVec2(result.spacing, base.spacing, scaleX, scaleY);
+   }
+
+   void ScaleWindow(nk_style_window& result, const nk_style_window& base, float scaleX, float scaleY)
+   {
+      result.border = scaleY * base.border;
+      result.rounding = scaleY * base.rounding;
+      result.combo_border = scaleY * base.combo_border;
+      result.contextual_border = scaleY * base.contextual_border;
+      result.menu_border = scaleY * base.menu_border;
+      result.group_border = scaleY * base.group_border;
+      result.tooltip_border = scaleY * base.tooltip_border;
+      result.popup_border = scaleY * base.popup_border;
+      result.min_row_height_padding = scaleY * base.min_row_height_padding;
+
+      ScaleVec2(result.spacing, base.spacing, scaleX, scaleY);
+      ScaleVec2(result.scrollbar_size, base.scrollbar_size, scaleX, scaleY);
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.group_padding, base.group_padding, scaleX, scaleY);
+      ScaleVec2(result.popup_padding, base.popup_padding, scaleX, scaleY);
+      ScaleVec2(result.combo_padding, base.combo_padding, scaleX, scaleY);
+      ScaleVec2(result.contextual_padding, base.contextual_padding, scaleX, scaleY);
+      ScaleVec2(result.menu_padding, base.menu_padding, scaleX, scaleY);
+      ScaleVec2(result.tooltip_padding, base.tooltip_padding, scaleX, scaleY);
+   }
+
+   void WindowStyle::Scale(nk_style* style, nk_font* font, float scaleX, float scaleY)
+   {
+      font->handle.height = mFontSize * scaleY;
+
+      // Text
+      style->text.padding = nk_vec2(scaleX * mStyle.text.padding.x, scaleY * mStyle.text.padding.y);
+
+      // Buttons
+      ScaleButton(style->button, mStyle.button, scaleX, scaleY);
+      ScaleButton(style->contextual_button, mStyle.contextual_button, scaleX, scaleY);
+      ScaleButton(style->menu_button, mStyle.menu_button, scaleX, scaleY);
+
+      // Option
+      ScaleOption(style->option, mStyle.option, scaleX, scaleY);
+      ScaleOption(style->checkbox, mStyle.checkbox, scaleX, scaleY);
+      
+      ScaleSelectable(style->selectable, mStyle.selectable, scaleX, scaleY);
+      ScaleSlider(style->slider, mStyle.slider, scaleX, scaleY);
+      ScaleProgress(style->progress, mStyle.progress, scaleX, scaleY);
+      ScaleProperty(style->property, mStyle.property, scaleX, scaleY);
+      ScaleEdit(style->edit, mStyle.edit, scaleX, scaleY);
+      ScaleChart(style->chart, mStyle.chart, scaleX, scaleY);
+      ScaleScrollbar(style->scrollh, mStyle.scrollh, scaleX, scaleY);
+      ScaleScrollbar(style->scrollv, mStyle.scrollv, scaleX, scaleY);
+      ScaleTab(style->tab, mStyle.tab, scaleX, scaleY);
+      ScaleCombo(style->combo, mStyle.combo, scaleX, scaleY);
+
+      // Window
+      ScaleWindow(style->window, mStyle.window, scaleX, scaleY);
+   }
+
    NuklearGlfwContextManager::NuklearGlfwContextManager()
       : mNkGlfw(std::make_unique<nk_glfw>()),
       mNkContext(nullptr)
@@ -370,12 +541,11 @@ namespace wgui
       // Setup fonts
       GlLogger.trace("Mapping default font");
 
-
       // DPI settings
       float scaleX, scaleY;
       glfwGetWindowContentScale(mWindow, &scaleX, &scaleY);
 
-      int fontHeight = mFontSize * scaleY;
+      int fontHeight = 16;
       struct nk_font_config cfg = nk_font_config(fontHeight);
       struct nk_font_atlas* fontAtlas;
 
@@ -392,15 +562,20 @@ namespace wgui
 
       SetStyle(ctx, eTheme::Black);
 
-      ctx->style.window.group_padding = nk_vec2(0, 0);
+      ctx->style.window.scrollbar_size = nk_vec2(10, 10);
+      ctx->style.window.group_padding = nk_vec2(2, 4);
+      ctx->style.window.group_border = 4;
+      ctx->style.window.spacing = nk_vec2(4, 4);
 
       // Add the window to the application static data.
       Application::AddWindow(this, mWindow);
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
       glfwSetWindowPosCallback(mWindow, WindowMoveCallback);
 
-      glfwSwapInterval(1);
+      glfwSwapInterval(0);
 
+      // Create window style from the previously set style.
+      mWindowStyle = std::make_unique<WindowStyle>(&ctx->style);
       SetContentScale();
       return true;
    }
@@ -414,7 +589,9 @@ namespace wgui
       {
          mContentScaleX = scaleX;
          mContentScaleY = scaleY;
-         mFont->handle.height = mContentScaleY * mFontSize;
+
+         // Scale padding, spacing, font size etc.
+         mWindowStyle->Scale(&mNkContext.GetContext()->style, mFont, mContentScaleX, mContentScaleY);
       }
    }
 

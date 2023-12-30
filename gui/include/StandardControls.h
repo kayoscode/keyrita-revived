@@ -42,6 +42,21 @@ namespace wgui
       /// attributes set.
       /// </summary>
       virtual void OnInitialized() {}
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const { return 0; }
+
+      /// <summary>
+      /// Override this to indicate how much space is added after the control is in place.
+      /// By default, widgets will have a space of window.spacing.y. Some controls like 
+      /// groups shouln't have any spacing. In order to get auto height correct, vertical scaling
+      /// also needs to be correct.
+      /// </summary>
+      /// <param name="window"></param>
+      /// <param name="context"></param>
+      /// <returns></returns>
+      virtual float GetVerticalSpacing(WindowBase* const window, nk_context* context) const 
+      { 
+         return context->style.window.spacing.y;
+      }
 
       virtual std::string GetLabel() const = 0;
 
@@ -122,6 +137,9 @@ namespace wgui
 
    protected:
       std::vector<GuiControlBase*> mControls;
+
+      float GetMaxChildHeight(WindowBase* const window, nk_context* context) const;
+      float GetTotalChildHeight(WindowBase* const window, nk_context* context) const;
    };
 
 #pragma region Gui Widgets
@@ -147,6 +165,11 @@ namespace wgui
       {
          return eControlType::Widget;
       }
+
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         return 0;
+      }
    };
 
    /// <summary>
@@ -157,9 +180,9 @@ namespace wgui
    public:
       static constexpr std::string_view ThicknessAttribute = "Thickness";
 
-      GuiHorizontalSeparator() 
+      GuiHorizontalSeparator()
          : mThickness(mAttributes->Add<AttrInt>((std::string)ThicknessAttribute)->GetRef()),
-           GuiWidget() 
+         GuiWidget()
       {
          mThickness = 1;
       }
@@ -172,6 +195,8 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
       std::string GetLabel() const override { return "HorizontalSeparator"; }
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const override 
+         { return mThickness * window->GetContentScaleY(); }
 
    protected:
       int64_t& mThickness;
@@ -213,12 +238,12 @@ namespace wgui
    public:
       static constexpr std::string_view CheckedAttr = "Checked";
       GuiCheckbox()
-        :  mChecked(mAttributes->Add<AttrBool>((std::string)CheckedAttr)->GetRef()),
-           GuiLabel()
+         : mChecked(mAttributes->Add<AttrBool>((std::string)CheckedAttr)->GetRef()),
+         GuiLabel()
       {
       }
 
-      GuiCheckbox(const std::string& text, 
+      GuiCheckbox(const std::string& text,
          eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered, bool checked = false)
          : GuiCheckbox()
       {
@@ -299,7 +324,7 @@ namespace wgui
 
       GuiRadioButtonGroup()
          : mCurrentSelection(mAttributes->Add<AttrInt>((std::string)SelectedAttr)->GetRef()),
-           ChildSupportingGuiControlBase()
+         ChildSupportingGuiControlBase()
       {
          mCurrentSelection = 1;
       }
@@ -309,6 +334,9 @@ namespace wgui
       eControlType GetControlType() const override { return eControlType::Group; }
       void Render(WindowBase* const window, nk_context* context) override;
       std::string GetLabel() const override { return "RadioButtonGroup"; }
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const override 
+         { return GetTotalChildHeight(window, context); }
+      virtual float GetVerticalSpacing(WindowBase* const window, nk_context* context) const { return 0; }
 
    protected:
       std::vector<GuiRadioButton*> mRadioButtons;
@@ -329,6 +357,11 @@ namespace wgui
          mComboboxSelectedItem = selectedItem;
          mItemIndex = itemIndex;
          mItemHeight = itemHeight;
+      }
+
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const override 
+      {
+         return *mItemHeight * window->GetContentScaleY();
       }
 
    protected:
@@ -393,7 +426,7 @@ namespace wgui
          mSelectedItem = selectedItem;
          mWidth = width;
          mHeight = height;
-         mItemHeight = 35;
+         mItemHeight = itemHeight;
       }
 
       eControlType GetControlType() const override { return eControlType::Group; }
@@ -426,9 +459,9 @@ namespace wgui
    public:
       GuiSliderInt()
          : mValue(mAttributes->Add<AttrInt>((std::string)ValueAttr)->GetRef()),
-           mMinValue(mAttributes->Add<AttrInt>((std::string)MinValueAttr)->GetRef()),
-           mMaxValue(mAttributes->Add<AttrInt>((std::string)MaxValueAttr)->GetRef()),
-           mStep(mAttributes->Add<AttrInt>((std::string)StepAttr)->GetRef())
+         mMinValue(mAttributes->Add<AttrInt>((std::string)MinValueAttr)->GetRef()),
+         mMaxValue(mAttributes->Add<AttrInt>((std::string)MaxValueAttr)->GetRef()),
+         mStep(mAttributes->Add<AttrInt>((std::string)StepAttr)->GetRef())
       {
          mMinValue = 0;
          mMaxValue = 100;
@@ -447,7 +480,7 @@ namespace wgui
 
       void Render(WindowBase* const window, nk_context* context) override;
       std::string GetLabel() const override { return "SliderInt"; }
-      
+
    protected:
       int64_t& mValue;
       int64_t& mMinValue;
@@ -460,9 +493,9 @@ namespace wgui
    public:
       GuiSliderReal()
          : mValue(mAttributes->Add<AttrReal>((std::string)ValueAttr)->GetRef()),
-           mMinValue(mAttributes->Add<AttrReal>((std::string)MinValueAttr)->GetRef()),
-           mMaxValue(mAttributes->Add<AttrReal>((std::string)MaxValueAttr)->GetRef()),
-           mStep(mAttributes->Add<AttrReal>((std::string)StepAttr)->GetRef())
+         mMinValue(mAttributes->Add<AttrReal>((std::string)MinValueAttr)->GetRef()),
+         mMaxValue(mAttributes->Add<AttrReal>((std::string)MaxValueAttr)->GetRef()),
+         mStep(mAttributes->Add<AttrReal>((std::string)StepAttr)->GetRef())
       {
          mMinValue = 0;
          mMaxValue = 1;
@@ -528,10 +561,10 @@ namespace wgui
    public:
       static constexpr std::string_view NameAttr = "Name";
       static constexpr std::string_view StepPerPxAttr = "StepPerPixel";
-      
+
       GuiInputInt()
          : mName(mAttributes->Add<AttrString>((std::string)NameAttr)->GetRef()),
-           mStepPerPx(mAttributes->Add<AttrReal>((std::string)StepPerPxAttr)->GetRef())
+         mStepPerPx(mAttributes->Add<AttrReal>((std::string)StepPerPxAttr)->GetRef())
       {
          mName = "Unnamed";
          mStepPerPx = 1.0;
@@ -596,7 +629,7 @@ namespace wgui
 
       GuiSelectableLabel(bool selected = false)
          : mSelected(mAttributes->Add<AttrBool>((std::string)SelectedAttr)->GetRef()),
-           GuiLabel()
+         GuiLabel()
       {
          mSelected = selected;
       }
@@ -616,27 +649,39 @@ namespace wgui
    {
    public:
       static constexpr std::string_view HeightAttr = "Height";
+      static constexpr std::string_view AutoHeightAttr = "AutoHeight";
 
       GuiLayoutRowBase(int height, bool autoHeight = false)
          :GuiLayoutRowBase()
       {
          mHeight = height;
+         mAutoHeight = autoHeight;
       }
 
       GuiLayoutRowBase()
          : ChildSupportingGuiControlBase(),
-         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef())
+         mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
+         mAutoHeight(mAttributes->Add<AttrBool>((std::string)AutoHeightAttr)->GetRef())
       {
-         mHeight = 50;
+         mHeight = 30;
+         mAutoHeight = false;
       }
 
-      eControlType GetControlType() const override
+      eControlType GetControlType() const override { return eControlType::LayoutRow; }
+
+      float GetHeight(WindowBase* const window, nk_context* context) const override
       {
-         return eControlType::LayoutRow;
+         if (!mAutoHeight)
+         {
+            return mHeight * window->GetContentScaleY();
+         }
+
+         return GetMaxChildHeight(window, context);
       }
 
    protected:
       int64_t& mHeight;
+      bool& mAutoHeight;
    };
 
    /// <summary>
@@ -789,6 +834,12 @@ namespace wgui
       static constexpr std::string_view HeightGridAttr = "Height";
       static constexpr std::string_view PosXGridAttr = "PosY";
       static constexpr std::string_view PosYGridAttr = "PosX";
+
+      float GetHeight(WindowBase* const window, nk_context* context)
+      {
+         assert("Auto height not supported on spaces" && !mAutoHeight);
+         return mHeight * window->GetContentScaleY();
+      }
    };
 
    /// <summary>
@@ -850,31 +901,48 @@ namespace wgui
       static constexpr std::string_view ScrollXAttr = "ScrollX";
       static constexpr std::string_view ScrollYAttr = "ScrollY";
       static constexpr std::string_view ScrollableAttr = "Scrollable";
+      static constexpr std::string_view BorderAttr = "Border";
 
       GuiLayoutGroup()
          : mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef()),
-         mScrollable(mAttributes->Add<AttrBool>((std::string)ScrollableAttr)->GetRef())
+         mScrollable(mAttributes->Add<AttrBool>((std::string)ScrollableAttr)->GetRef()),
+         mBorder(mAttributes->Add<AttrBool>((std::string)BorderAttr)->GetRef())
       {
          mTitle = "";
          mName = std::to_string(reinterpret_cast<int64_t>(this));
          mScrollable = false;
+         mBorder = false;
       }
 
-      GuiLayoutGroup(const std::string& title, bool scrollable = false)
+      GuiLayoutGroup(const std::string& title, bool scrollable = false, bool border = false)
          : GuiLayoutGroup()
       {
          mTitle = title;
          mScrollable = scrollable;
+         mBorder = border;
       }
 
       eControlType GetControlType() const override { return eControlType::Group; }
       void Render(WindowBase* const window, nk_context* context) override;
       std::string GetLabel() const override { return "Group"; }
 
+      float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         float baseHeight = mScrollable ? context->style.window.scrollbar_size.y : 0;
+         baseHeight += mBorder ? context->style.window.group_border * 2 : 0;
+         baseHeight += context->style.window.group_padding.y;
+
+         baseHeight += GetTotalChildHeight(window, context);
+         return baseHeight;
+     }
+
+      virtual float GetVerticalSpacing(WindowBase* const window, nk_context* context) const { return 0; }
+
    protected:
       std::string& mTitle;
       std::string mName;
       bool& mScrollable;
+      bool& mBorder;
    };
 
    class GuiLayoutTreeBase : public ChildSupportingGuiControlBase
@@ -901,6 +969,19 @@ namespace wgui
       }
 
       eControlType GetControlType() const override { return eControlType::Tree; }
+      float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         //row_height = style->font->height + 2 * style->tab.padding.y;
+         // Since the font is already scaled, the base height after this operation is also scaled.
+         float baseHeight = context->style.font->height + 2 * context->style.tab.padding.y;
+
+         if (mExpanded)
+         {
+            baseHeight += GetTotalChildHeight(window, context);
+         }
+
+         return baseHeight;
+      }
 
    protected:
       bool& mInitiallyOpen;
@@ -977,7 +1058,7 @@ namespace wgui
          mHeight = 40;
       }
 
-      GuiMenu(const std::string& text, const eTextAlignmentFlags alignment, 
+      GuiMenu(const std::string& text, const eTextAlignmentFlags alignment,
          int height, int width,
          const std::string& imagePath = "")
          : GuiMenu()
@@ -1023,7 +1104,7 @@ namespace wgui
          mImagePath = "";
       }
 
-      GuiMenuItem(const std::string& text, const eTextAlignmentFlags alignment, 
+      GuiMenuItem(const std::string& text, const eTextAlignmentFlags alignment,
          int height, int width,
          const std::string& imagePath = "")
          : GuiMenuItem()
@@ -1055,6 +1136,13 @@ namespace wgui
 
       eControlType GetControlType() const override { return eControlType::Group; }
 
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         return GetTotalChildHeight(window, context);
+      }
+
+      virtual float GetVerticalSpacing(WindowBase* const window, nk_context* context) const { return 0; }
+
    protected:
       // All controls created by this class must be owned. Store them here.
       // All children must get raw pointers to objects stored and owned here.
@@ -1066,7 +1154,7 @@ namespace wgui
    /// <summary>
    /// Represents a window on the Gui. This can hold widgets to menus!
    /// </summary>
-   class GuiLayoutWindow : public ChildSupportingGuiControlBase
+   class GuiLayoutWindow : public GuiLayoutGroup
    {
    public:
       static constexpr std::string_view XPosAttr = "XPos";
@@ -1077,12 +1165,11 @@ namespace wgui
       static constexpr std::string_view TrackParentAttr = "TrackWin";
 
       GuiLayoutWindow()
-         : ChildSupportingGuiControlBase(),
+         : GuiLayoutGroup(),
          mPosX(mAttributes->Add<AttrInt>((std::string)XPosAttr)->GetRef()),
          mPosY(mAttributes->Add<AttrInt>((std::string)YPosAttr)->GetRef()),
          mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
          mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef()),
-         mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef()),
          mTrackParentWindowSize(mAttributes->Add<AttrBool>((std::string)TrackParentAttr)->GetRef())
       {
          // Set to defaults.
@@ -1115,6 +1202,16 @@ namespace wgui
       }
 
       std::string GetLabel() const override { return "Window"; }
+      virtual float GetHeight(WindowBase* const window, nk_context* context) const override
+      {
+         float baseHeight = mScrollable ? context->style.window.scrollbar_size.y : 0;
+         baseHeight += mBorder ? context->style.window.border * 2 : 0;
+         baseHeight += context->style.window.padding.y;
+
+         baseHeight += GetTotalChildHeight(window, context);
+         return baseHeight;
+      }
+      virtual float GetVerticalSpacing(WindowBase* const window, nk_context* context) const { return 0; }
 
    protected:
       int64_t& mPosX;
@@ -1123,7 +1220,6 @@ namespace wgui
       int64_t& mWidth;
       int64_t& mHeight;
 
-      std::string& mTitle;
       bool& mTrackParentWindowSize;
       std::string mWindowName;
    };

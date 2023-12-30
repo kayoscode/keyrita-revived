@@ -95,6 +95,36 @@ namespace wgui
       SelfOnInitalized();
    }
 
+   float ChildSupportingGuiControlBase::GetMaxChildHeight(WindowBase* const window, nk_context* context) const
+   {
+      float maxHeight = 0;
+
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         float ht = mControls[i]->GetHeight(window, context);
+         ht += mControls[i]->GetVerticalSpacing(window, context);
+         if (ht > maxHeight)
+         {
+            maxHeight = ht;
+         }
+      }
+
+      return maxHeight;
+   }
+
+   float ChildSupportingGuiControlBase::GetTotalChildHeight(WindowBase* const window, nk_context* context) const
+   {
+      float totalHeight = 0;
+
+      for (int i = 0; i < mControls.size(); i++)
+      {
+         totalHeight += mControls[i]->GetHeight(window, context);
+         totalHeight += mControls[i]->GetVerticalSpacing(window, context);
+      }
+
+      return totalHeight;
+   }
+
    void ChildSupportingGuiControlBase::ForEachChild(std::function<void(GuiControlBase* child, int index)> function) 
    {
       for (int i = 0; i < mControls.size(); i++)
@@ -123,15 +153,18 @@ namespace wgui
       }
       else
       {
-         height = mHeight * window->GetContentScaleY();
+         height = GetHeight(window, context);
          width = mWidth * window->GetContentScaleX();
          posX = mPosX * window->GetContentScaleX();
          posY = mPosY * window->GetContentScaleY();
       }
 
+      nk_flags flags = (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
+      flags |= mBorder ? NK_WINDOW_BORDER : 0;
+
       // 0 flags for now! We will have to fix that.
       if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), 
-         nk_rect(posX, posY, width, height), 0))
+         nk_rect(posX, posY, width, height), flags))
       {
          for (const auto& control : mControls)
          {
@@ -157,9 +190,11 @@ namespace wgui
       struct nk_window* win = context->current;
       const struct nk_style* style = &context->style;
 
+      float thickness = GetHeight(window, context);
+
       nk_stroke_line(&win->buffer,
-         bounds.x, bounds.y + (mThickness / 2.0), bounds.x + bounds.w, bounds.y + (mThickness / 2.0),
-         mThickness, nk_color(0, 0, 0, 255 / 3));
+         bounds.x, bounds.y + (thickness / 2.0), bounds.x + bounds.w, bounds.y + (thickness / 2.0),
+         thickness, nk_color(0, 0, 0, 255 / 3));
    }
 
    void GuiButton::Render(WindowBase* const window, nk_context* context)
@@ -255,7 +290,7 @@ namespace wgui
 
    void GuiComboboxItem::Render(WindowBase* const window, nk_context* context)
    {
-      int itemHeight = *mItemHeight * window->GetContentScaleY();
+      int itemHeight = GetHeight(window, context);
       nk_layout_row_dynamic(context, itemHeight, 1);
 
       if (nk_combo_item_label(context, mText.c_str(), mTextAlignment))
@@ -340,7 +375,7 @@ namespace wgui
 
    void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
    {
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
 
       nk_layout_row_dynamic(context, height, mControls.size());
       for (int i = 0; i < mControls.size(); i++)
@@ -351,7 +386,7 @@ namespace wgui
 
    void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
    {
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
       int width = mColWidth * window->GetContentScaleX();
 
       nk_layout_row_static(context, height, width, mControls.size());
@@ -368,7 +403,7 @@ namespace wgui
          throw std::runtime_error("More controls exist than scales.");
       }
 
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
       nk_layout_row_begin(context, NK_DYNAMIC, height, mControls.size());
 
       // There's guaranteed to be one scale for every control.
@@ -390,7 +425,7 @@ namespace wgui
       }
 
       // Min cols is ignored here.
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
       nk_layout_row_begin(context, NK_STATIC, height, mControls.size());
 
       // There's guaranteed to be one scale for every control.
@@ -413,7 +448,7 @@ namespace wgui
       }
 
       // Min cols is ignored here.
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
       nk_layout_row_template_begin(context, height);
 
       for (int i = 0; i < mControls.size(); i++)
@@ -451,13 +486,14 @@ namespace wgui
 
    void GuiLayoutStaticSpace::Render(WindowBase* const window, nk_context* context)
    {
+      assert(!mAutoHeight);
       if (mControls.size() > mWidths.size())
       {
          throw std::runtime_error("More controls exist than scale and position attributes.");
       }
 
       // Min cols is ignored here.
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
       nk_layout_space_begin(context, NK_STATIC, height, mControls.size());
 
       for (int i = 0; i < mControls.size(); i++)
@@ -490,13 +526,14 @@ namespace wgui
 
    void GuiLayoutDynamicSpace::Render(WindowBase* const window, nk_context* context)
    {
+      assert(!mAutoHeight);
       if (mControls.size() > mWidths.size())
       {
          throw std::runtime_error("More controls exist than scale and position attributes.");
       }
 
       // Min cols is ignored here.
-      int height = mHeight * window->GetContentScaleY();
+      int height = GetHeight(window, context);
       nk_layout_space_begin(context, NK_DYNAMIC, height, mControls.size());
 
       for (int i = 0; i < mControls.size(); i++)
@@ -511,6 +548,7 @@ namespace wgui
    void GuiLayoutGroup::Render(WindowBase* const window, nk_context* context)
    {
       int64_t flags = (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
+      flags |= (mBorder)? NK_WINDOW_BORDER : 0;
 
       if (nk_group_begin_titled(context, mName.c_str(), mTitle.c_str(), flags))
       {
@@ -528,7 +566,15 @@ namespace wgui
       nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
          nk_collapse_states::NK_MINIMIZED;
 
+      bool previousState = mExpanded;
       mExpanded = nk_tree_push_hashed(context, NK_TREE_NODE, mText.c_str(), state, mName.c_str(), mName.size(), 0);
+
+      // We need to delay the expansion of the tree by a single frame to avoid scrollbar issues.
+      if (mExpanded != previousState && !previousState)
+      {
+         nk_tree_pop(context);
+         return;
+      }
 
       if (mExpanded)
       {
@@ -546,7 +592,15 @@ namespace wgui
       nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
          nk_collapse_states::NK_MINIMIZED;
 
+      bool previousState = mExpanded;
       mExpanded = nk_tree_push_hashed(context, NK_TREE_TAB, mText.c_str(), state, mName.c_str(), mName.size(), 0);
+
+      // We need to delay the expansion of the tree by a single frame to avoid scrollbar stuff.
+      if (mExpanded != previousState && !previousState)
+      {
+         nk_tree_pop(context);
+         return;
+      }
 
       if (mExpanded)
       {
