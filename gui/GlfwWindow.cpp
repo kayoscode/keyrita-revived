@@ -8,6 +8,7 @@
 #include "nuklear_glfw_gl3.h"
 
 std::map<GLFWwindow*, wgui::WindowBase*> wgui::Application::mWindows;
+wgui::MainWindow* wgui::Application::mMainWindow;
 
 namespace
 {
@@ -30,8 +31,6 @@ namespace
       glClear(GL_COLOR_BUFFER_BIT);
       nk_glfw3_render(nkGlfw, NK_ANTI_ALIASING_ON, MaxVertexBuffer, MaxElementBuffer);
       layoutRenderer->RenderFinish(window, &nkGlfw->ctx);
-
-      glfwSwapBuffers(gWin);
    }
 
    void WindowResizeCallback(GLFWwindow* window, int width, int height)
@@ -39,7 +38,9 @@ namespace
       wgui::WindowBase* win = wgui::Application::GetWindow(window);
       if (win->GetRenderer())
       {
-         DrawFrame(win, window, win->GetContext().GetGlfw(), win->GetRenderer());
+         auto win = wgui::Application::GetWindow(window);
+         win->Render();
+         glfwSwapBuffers(window);
       }
    }
 
@@ -241,6 +242,8 @@ namespace
 /// </summary>
 namespace wgui
 {
+#pragma region Scale window with content scale
+
    void ScaleVec2(struct nk_vec2& result, const struct nk_vec2& base, float scaleX, float scaleY)
    {
       result.x = scaleX * base.x;
@@ -412,6 +415,8 @@ namespace wgui
       ScaleWindow(style->window, mStyle.window, scaleX, scaleY);
    }
 
+#pragma endregion
+
    NuklearGlfwContextManager::NuklearGlfwContextManager()
       : mNkGlfw(std::make_unique<nk_glfw>()),
       mNkContext(nullptr)
@@ -442,7 +447,6 @@ namespace wgui
 
    GlfwContextManager::~GlfwContextManager()
    {
-      glfwTerminate();
    }
 
    bool GlfwContextManager::InitContext()
@@ -477,6 +481,35 @@ namespace wgui
       }
 
       return true;
+   }
+
+   void Application::RenderWindows()
+   {
+      glfwSwapInterval(1);
+      assert("You must have a main window" && mMainWindow != nullptr);
+
+      for (auto& window : mWindows)
+      {
+         assert("Each window must have a renderer" && window.second->mLastRenderer);
+         window.second->Render();
+         window.second->Update();
+
+         glfwSwapBuffers(window.second->mWindow);
+         glfwSwapInterval(0);
+      }
+
+      glfwPollEvents();
+   }
+
+   void Application::Shutdown()
+   {
+      // Close all windows.
+      for (auto& window : mWindows)
+      {
+         window.second->CloseWindow();
+      }
+
+      glfwTerminate();
    }
 }
 
@@ -568,7 +601,7 @@ namespace wgui
       ctx->style.window.spacing = nk_vec2(4, 4);
 
       // Add the window to the application static data.
-      Application::AddWindow(this, mWindow);
+      Application::AddMainWindow(this);
       glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
       glfwSetWindowPosCallback(mWindow, WindowMoveCallback);
 
@@ -576,6 +609,59 @@ namespace wgui
 
       // Create window style from the previously set style.
       mWindowStyle = std::make_unique<WindowStyle>(&ctx->style);
+      SetContentScale();
+      return true;
+   }
+
+   bool Dialog::CreateWindow(const std::string& title,
+      int width, int height,
+      bool resizable,
+      bool visible, bool decorated, bool fullScreen)
+   {
+      mWindow = glfwCreateWindow(width, height, title.c_str(), fullScreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+      glfwMakeContextCurrent(mWindow);
+
+      mNkContext.InitNkContext(mWindow);
+      nk_context* ctx = mNkContext.GetContext();
+      nk_glfw* nkGlfw = mNkContext.GetGlfw();
+
+      if (ctx == nullptr)
+      {
+         Application::Logger.critical("Failed to initialize nk");
+         return false;
+      }
+
+      // Setup fonts
+      Application::Logger.trace("Mapping default font");
+
+      // DPI settings
+      float scaleX, scaleY;
+      glfwGetWindowContentScale(mWindow, &scaleX, &scaleY);
+
+      int fontHeight = 16;
+      struct nk_font_config cfg = nk_font_config(fontHeight);
+      struct nk_font_atlas* fontAtlas;
+
+      nk_glfw3_font_stash_begin(nkGlfw, &fontAtlas);
+      mFont = nk_font_atlas_add_from_file(fontAtlas,
+         "res/fonts/RockoFLF.ttf", fontHeight, &cfg);
+
+      mFont->config->oversample_h = 8;
+      mFont->config->oversample_v = 8;
+      mFont->config->pixel_snap = true;
+
+      nk_glfw3_font_stash_end(nkGlfw);
+      nk_style_set_font(ctx, &mFont->handle);
+
+      mWindowStyle = std::make_unique<WindowStyle>(*(reinterpret_cast<WindowBase*>(mMainWindow)->mWindowStyle.get()));
+
+      // Add the window to the application static data.
+      Application::AddDialog(this);
+      glfwSetWindowSizeCallback(mWindow, WindowResizeCallback);
+      glfwSetWindowPosCallback(mWindow, WindowMoveCallback);
+
+      glfwSwapInterval(1);
+
       SetContentScale();
       return true;
    }
@@ -595,16 +681,16 @@ namespace wgui
       }
    }
 
-   void MainWindow::Render()
+   void WindowBase::Render()
    {
+      glfwMakeContextCurrent(mWindow);
       nk_glfw* nkGlfw = mNkContext.GetGlfw();
       DrawFrame(this, mWindow, nkGlfw, mLastRenderer);
    }
 
    void WindowBase::Update()
    {
-      // TODO: does this need to change for multiple windows?
-      glfwPollEvents();
+      mClosing = glfwWindowShouldClose(mWindow);
    }
 
    bool WindowInput::IsKeyDown(nk_keys key) const
@@ -660,14 +746,11 @@ namespace wgui
    }
 
    WindowBase::WindowBase()
-      : mWindow(nullptr), mWindowTitle(), mNkContext()
+      : mWindow(nullptr), mWindowTitle(), mNkContext(), mFont(nullptr)
    {
    }
 
-   WindowBase::~WindowBase()
-   {
-      glfwDestroyWindow(mWindow);
-   }
+   WindowBase::~WindowBase() { }
 
    void WindowBase::SetWindowSize(int width, int height)
    {
@@ -723,16 +806,14 @@ namespace wgui
    void WindowBase::CloseWindow()
    {
       glfwSetWindowShouldClose(mWindow, GLFW_TRUE);
+      glfwDestroyWindow(mWindow);
+      mClosing = true;
    }
 
    void WindowBase::CancelWindowClose()
    {
       glfwSetWindowShouldClose(mWindow, GLFW_FALSE);
-   }
-
-   bool WindowBase::Closing() const
-   {
-      return glfwWindowShouldClose(mWindow);
+      mClosing = false;
    }
 }
 

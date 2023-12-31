@@ -144,6 +144,21 @@ namespace wgui
       nk_flags flags = (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
       flags |= mBorder ? NK_WINDOW_BORDER : 0;
 
+      if (!window->GetWindowFocused())
+      {
+         flags |= NK_WINDOW_NOT_INTERACTIVE;
+         flags |= NK_WINDOW_NO_INPUT;
+      }
+      else
+      {
+         nk_window* win = nk_window_find(context, mName.c_str());
+         if (win)
+         {
+            win->flags &= ~NK_WINDOW_NOT_INTERACTIVE;
+            win->flags &= ~NK_WINDOW_NO_INPUT;
+         }
+      }
+
       // 0 flags for now! We will have to fix that.
       if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), 
          nk_rect(posX, posY, width, height), flags))

@@ -7,10 +7,29 @@ namespace wgui
    class Application
    {
    public:
-      static void AddWindow(wgui::WindowBase* window, GLFWwindow* gWin)
+      static void AddMainWindow(wgui::MainWindow* mainWindow)
       {
-         mWindows[gWin] = window;
+         AddWindow(mainWindow);
+         mMainWindow = mainWindow;
       }
+
+      static void AddDialog(wgui::Dialog* dialog)
+      {
+         AddWindow(dialog);
+      }
+
+      static void CloseDialog(wgui::Dialog* dialog)
+      {
+         dialog->CloseWindow();
+         mWindows.erase(mWindows.find(dialog->GetContext().GetGlfw()->win));
+      }
+
+      static MainWindow* GetMainWindow()
+      {
+         return mMainWindow;
+      }
+
+      static void RenderWindows();
 
       /// <summary>
       /// Returns window associated with the GLFWwindow* 
@@ -36,9 +55,17 @@ namespace wgui
          Logger.setLevel(Level::LEVEL_TRACE);
       }
 
+      static void Shutdown();
+
       static DebugLogger Logger;
 
    private:
+      static void AddWindow(wgui::WindowBase* window)
+      {
+         mWindows[window->GetContext().GetGlfw()->win] = window;
+      }
+
       static std::map<GLFWwindow*, wgui::WindowBase*> mWindows;
+      static MainWindow* mMainWindow;
    };
 }

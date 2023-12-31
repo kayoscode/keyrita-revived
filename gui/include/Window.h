@@ -19,6 +19,12 @@ namespace wgui
          std::memcpy(&mStyle, copyFrom, sizeof(nk_style));
       }
 
+      WindowStyle(const WindowStyle& copy)
+         : mFontSize(copy.mFontSize)
+      {
+         std::memcpy(&mStyle, &copy.mStyle, sizeof(nk_style));
+      }
+
       int GetFontSize() { return mFontSize; }
       void SetFontSize(int fontSize)
       {
@@ -63,7 +69,7 @@ namespace wgui
 
       void CloseWindow();
       void CancelWindowClose();
-      bool Closing() const;
+      bool Closing() { return mClosing; }
 
       virtual bool CreateWindow(const std::string& title,
          int width, int height,
@@ -73,10 +79,10 @@ namespace wgui
       /// <summary>
       /// Renders the next frame to the screen.
       /// </summary>
-      virtual void Render() = 0;
+      virtual void Render();
       virtual void Update();
 
-      NuklearGlfwContextManager& GetContext() { return mNkContext; }
+      virtual NuklearGlfwContextManager& GetContext() { return mNkContext; }
 
       void SetRenderer(WindowRenderer* renderer) { mLastRenderer = renderer; }
       WindowRenderer* GetRenderer() const { return mLastRenderer; }
@@ -84,7 +90,8 @@ namespace wgui
       void SetContentScale();
       double GetContentScaleX() { return mContentScaleX; }
       double GetContentScaleY() { return mContentScaleY; }
-      WindowStyle* GetStyle() { return mWindowStyle.get(); }
+
+      virtual WindowStyle* GetStyle() { return mWindowStyle.get(); }
 
    protected:
       WindowRenderer* mLastRenderer = nullptr;
@@ -94,12 +101,14 @@ namespace wgui
       double mContentScaleX = 0.0;
       double mContentScaleY = 0.0;
       struct nk_font* mFont;
+      bool mClosing = false;
 
       NuklearGlfwContextManager mNkContext;
       std::unique_ptr<WindowStyle> mWindowStyle;
 
       friend class WindowInput;
       friend class Application;
+      friend class Dialog;
    };
 
    /// <summary>
@@ -116,15 +125,31 @@ namespace wgui
          bool resizable = true,
          bool visible = true, bool decorated = true, bool fullScreen = false) override;
 
-      void Render() override;
-
    private:
       static DebugLogger GlfwLogger;
       static DebugLogger GlLogger;
    };
 
-   //TODO:
-   //class Dialog : public WindowBase
+   /// <summary>
+   /// Creates a window assuming 
+   /// </summary>
+   class Dialog : public WindowBase
+   {
+   public:
+      Dialog(MainWindow* mainWindow) 
+         : mMainWindow(mainWindow)
+      {
+      }
+
+      bool CreateWindow(const std::string& title,
+         int width, int height,
+         bool resizable = true,
+         bool visible = true, bool decorated = true, bool fullScreen = false) override;
+
+   private:
+      // A non-owned pointer to the main window.
+      MainWindow* mMainWindow;
+   };
 
    /// <summary>
    /// Class responsible for providing callers with input from windows.

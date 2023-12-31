@@ -29,20 +29,27 @@ int main()
    mainWindow.CreateWindow("Keyrita", 1600, 1200, false, true, true, false);
    mainWindow.SetWindowSizeLimits(1200, 900);
 
+   MainWindow secondWindow;
+   secondWindow.CreateWindow("Dialog", 400, 300, false, true, true, false);
+   secondWindow.SetWindowSizeLimits(1200, 900);
+
    bool resiable = false;
 
-   XmlRenderer renderer;
-   renderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
-   renderer.Init();
+   XmlRenderer mainWindowRenderer;
+   mainWindowRenderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
+   mainWindowRenderer.Init();
+   mainWindow.SetRenderer(&mainWindowRenderer);
 
-   mainWindow.SetRenderer(&renderer);
+   XmlRenderer secondRenderer;
+   secondRenderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
+   secondRenderer.Init();
+   secondWindow.SetRenderer(&mainWindowRenderer);
 
    Timer t;
    int frameCount = 0;
    while (!mainWindow.Closing())
    {
-      mainWindow.Update();
-      mainWindow.Render();
+      Application::RenderWindows();
 
       if (t.milliseconds() >= 5000)
       {
@@ -53,6 +60,8 @@ int main()
 
       frameCount++;
    }
+
+   Application::Shutdown();
 
    return 0;
 }
