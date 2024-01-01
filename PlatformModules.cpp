@@ -76,6 +76,8 @@ bool SetupWinHooks()
    {
       return false;
    }
+
+   return true;
 }
 
 bool PlatformWindows::Initialize()

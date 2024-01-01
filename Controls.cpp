@@ -14,18 +14,9 @@ void KeyritaControlsFactory::Init()
 void KeyritaMenu::Init()
 {
    XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/KeyritaMenu.guix", mOwnedControls, mControls);
-
-   for (auto itt = this->begin(); itt != this->end(); ++itt)
-   {
-      std::cout << (*itt)->GetLabel() << "\n";
-   }
-
-   std::vector<GuiMenu*> ctrls;
-   //GuiMenu* ctrl = ControlAccessUtils::GetUniqueControlWithType<GuiMenu>(mOwnedControls.begin(), mOwnedControls.end());
-   ControlAccessUtils::GetControlsWithTag(mOwnedControls.begin(), mOwnedControls.end(), "Menu", ctrls);
 }
 
-void KeyritaMenu::Render(WindowBase* const window, nk_context* context)
+void KeyritaMenu::ChildRender(WindowBase* const window, nk_context* context)
 {
    for (int i = 0; i < mControls.size(); i++)
    {
@@ -38,7 +29,7 @@ void ExampleUi::Init()
    XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/ExampleUI.guix", mOwnedControls, mControls);
 }
 
-void ExampleUi::Render(WindowBase* const window, nk_context* context)
+void ExampleUi::ChildRender(WindowBase* const window, nk_context* context)
 {
    for (int i = 0; i < mControls.size(); i++)
    {

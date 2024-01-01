@@ -11,7 +11,7 @@ public:
 class KeyritaMenu : public wgui::GuiAbstractControl
 {
 public:
-   void Render(wgui::WindowBase* const window, nk_context* context);
+   void ChildRender(wgui::WindowBase* const window, nk_context* context) override;
 
    void Init() override;
    std::string GetLabel() const override { return "KeyritaMenu"; }
@@ -20,7 +20,7 @@ public:
 class ExampleUi : public wgui::GuiAbstractControl
 {
 public:
-   void Render(wgui::WindowBase* const window, nk_context* context);
+   void ChildRender(wgui::WindowBase* const window, nk_context* context) override;
 
    void Init() override;
    std::string GetLabel() const override { return "ExampleUI"; }
