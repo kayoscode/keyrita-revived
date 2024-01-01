@@ -23,6 +23,85 @@ namespace wgui
       Menu,
    };
 
+#pragma region Iterator
+
+   class GuiControlBase;
+   class ControlTreeIterator 
+   {
+   public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = GuiControlBase*;
+      using difference_type = std::ptrdiff_t;
+      using pointer = GuiControlBase**;
+      using reference = GuiControlBase*&;
+
+      ControlTreeIterator(value_type root) : mCurrent(root), mChildIndex(0) 
+      {
+         BuildPath();
+      }
+
+      reference operator*() const { return (const reference)mCurrent; }
+      pointer operator->() { return &mCurrent; }
+
+      ControlTreeIterator& operator++() 
+      {
+         if (!mPath.empty())
+         {
+            if (mChildIndex < mPath.top().ChildrenCount)
+            {
+               mCurrent = mPath.top().Children[mChildIndex];
+               mPath.top().LastIndex = mChildIndex;
+               mChildIndex = 0;
+               BuildPath();
+            }
+            else
+            {
+               mPath.pop();
+
+               if (mPath.empty())
+               {
+                  mCurrent = nullptr;
+                  mChildIndex = 0;
+               }
+               else
+               {
+                  mChildIndex = mPath.top().LastIndex;
+                  mChildIndex++;
+                  return ++*(this);
+               }
+            }
+         }
+
+         return *this;
+      }
+
+      bool operator==(const ControlTreeIterator& other) const 
+      {
+         return mCurrent == other.mCurrent;
+      }
+
+      bool operator!=(const ControlTreeIterator& other) const 
+      {
+         return !(*this == other);
+      }
+
+   private:
+      struct PathInfo 
+      {
+         std::vector<value_type> Children;
+         int ChildrenCount;
+         int LastIndex;
+      };
+
+      void BuildPath();
+
+      value_type mCurrent;
+      int mChildIndex;
+      std::stack<PathInfo> mPath;
+   };
+
+#pragma endregion
+
    /// <summary>
    /// Purely abstract class designed to give developers a tool to program a generic ui layout.
    /// When rendered to the screen, even control is rendered together. They should be grouped up and only drawn within
@@ -32,8 +111,11 @@ namespace wgui
    class GuiControlBase
    {
    public:
+      static constexpr std::string_view TagAttr = "Tag";
       GuiControlBase()
-         : mAttributes(std::make_unique<AttributeSet>()) {}
+         : mAttributes(std::make_unique<AttributeSet>()),
+         mTag(mAttributes->Add<AttrString>((std::string)TagAttr)->GetRef())
+      {}
 
       virtual void Init() {}
 
@@ -110,10 +192,16 @@ namespace wgui
       }
 
       AttributeSet* const GetAttributes() { return mAttributes.get(); }
+      std::string GetTag() const { return mTag; }
+
+      // Iterator implementation.
+      ControlTreeIterator begin() { return ControlTreeIterator(this); }
+      ControlTreeIterator end() { return ControlTreeIterator(nullptr); }
 
    protected:
       std::unique_ptr<AttributeSet> mAttributes;
       std::string mControlType;
+      std::string& mTag;
    };
 
    class ChildSupportingGuiControlBase : public GuiControlBase

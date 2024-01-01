@@ -142,6 +142,39 @@ namespace wgui
       return true;
    }
 
+   bool XmlToUiUtil::ConstructLayoutFromXmlText(const std::string& text,
+      std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
+      std::vector<GuiControlBase*>& controlTree)
+   {
+      controlTree.clear();
+      ownedControls.clear();
+
+      xml_document doc;
+      xml_parse_result parseResult = doc.load_string(text.c_str());
+
+      if (parseResult.status == -1)
+      {
+         Application::Logger.error("Unable to load XML string");
+         return false;
+      }
+
+      if (doc.empty() || std::string(doc.first_child().name()) != "GuiRoot")
+      {
+         Application::Logger.error("Expected a root of 'GuiRoot' -> will not parse");
+         return false;
+      }
+
+      if (doc.empty())
+      {
+         return false;
+      }
+
+      // Here, we will only work within the window tags. Ignore everything else.
+      ConstructControls(doc.first_child().children(), nullptr, ownedControls, controlTree);
+
+      return true;
+   }
+
    bool XmlRenderer::ConstructLayoutFromXmlFile(const std::string& fileName)
    {
       return XmlToUiUtil::ConstructLayoutFromXmlFile(fileName, mOwnedControls, mControls);

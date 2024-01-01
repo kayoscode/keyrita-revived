@@ -422,7 +422,7 @@ namespace wgui
       }
 
       template<typename T>
-      Attribute* Get(const std::string& name) const
+      T* Get(const std::string& name) const
          requires std::is_base_of_v<CtrlAttribute, T>
       {
          return (*this)[name]->As<T>();
