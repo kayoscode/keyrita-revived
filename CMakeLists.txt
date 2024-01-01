@@ -33,6 +33,9 @@ FetchContent_Declare(
 FetchContent_Populate(glfw3)
 message(STATUS "glfw loc:" ${glfw3_SOURCE_DIR})
 FetchContent_GetProperties(glfw3)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build GLFW without examples")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build GLFW without tests")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build GLFW without docs")
 add_subdirectory(${glfw3_SOURCE_DIR})
 
 set(OpenGL_GL_PREFERENCE LEGACY)

@@ -134,7 +134,7 @@ namespace wgui
          StandardGuiRenderer::AddChild(pWin);
       }
 
-   private:
+   protected:
       std::vector<std::unique_ptr<GuiControlBase>> mOwnedControls;
    };
 }

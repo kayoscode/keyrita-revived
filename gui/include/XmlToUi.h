@@ -13,6 +13,12 @@
 
 namespace wgui
 {
+   class StandardControlFactory : public GuiControlFactoryBase
+   {
+   public:
+      void Init() override;
+   };
+
    /// <summary>
    /// Utility class for maintaining the state of the control factories
    /// and for parsing xml to a control tree.
@@ -20,12 +26,6 @@ namespace wgui
    class XmlToUiUtil
    {
    private:
-      class StandardControlFactory : public GuiControlFactoryBase
-      {
-      public:
-         void Init() override;
-      };
-
       static std::vector<std::unique_ptr<GuiControlFactoryBase>> mControlFactories;
       static AttributeParser mAttributeParser;
 
@@ -44,6 +44,10 @@ namespace wgui
       /// <param name="ownedControls"></param>
       /// <returns></returns>
       static bool ConstructLayoutFromXmlFile(const std::string& fileName, 
+         std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
+         std::vector<GuiControlBase*>& controlTree);
+
+      static bool ConstructLayoutFromXmlText(const std::string& xmlText, 
          std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
          std::vector<GuiControlBase*>& controlTree);
 

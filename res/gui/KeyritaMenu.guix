@@ -4,9 +4,9 @@
                             Width2="35"
                             Width3="75"
                             Width4="70">
-      <Menu Text="File" Width="150" Height="500">
+      <Menu Text="File" Width="150" Height="500" Tag="Menu">
         <DynamicRow Height="30">
-          <MenuItem Text="New" TextAlign="FLAGS:FullyCentered"/>
+          <MenuItem Text="New"/>
         </DynamicRow>
         <DynamicRow Height="30">
           <MenuItem Text="Open"/>
@@ -27,7 +27,7 @@
           <MenuItem Text="Clear Dataset"/>
         </DynamicRow>
       </Menu>
-      <Menu Text="Edit" Width="200" Height="250">
+      <Menu Text="Edit" Width="200" Height="250" Tag="Menu">
         <DynamicRow Height="30">
           <MenuItem Text="Undo"/>
         </DynamicRow>

@@ -65,3 +65,6 @@ target_link_libraries(${PROJ_NAME} DebugLogger
 								   GLMath
 								   ${OPENGL_gl_LIBRARY})
 target_include_directories(${PROJ_NAME} PUBLIC include nk_include)
+
+# Add tests for wgui
+add_subdirectory(Tests)

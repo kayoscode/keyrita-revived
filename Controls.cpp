@@ -1,6 +1,8 @@
 #include "KeyritaControls.h"
 #include "XmlToUi.h"
 
+#include "ControlAccessUtils.h"
+
 using namespace wgui;
 
 void KeyritaControlsFactory::Init()
@@ -12,6 +14,15 @@ void KeyritaControlsFactory::Init()
 void KeyritaMenu::Init()
 {
    XmlToUiUtil::ConstructLayoutFromXmlFile("./res/gui/KeyritaMenu.guix", mOwnedControls, mControls);
+
+   for (auto itt = this->begin(); itt != this->end(); ++itt)
+   {
+      std::cout << (*itt)->GetLabel() << "\n";
+   }
+
+   std::vector<GuiMenu*> ctrls;
+   //GuiMenu* ctrl = ControlAccessUtils::GetUniqueControlWithType<GuiMenu>(mOwnedControls.begin(), mOwnedControls.end());
+   ControlAccessUtils::GetControlsWithTag(mOwnedControls.begin(), mOwnedControls.end(), "Menu", ctrls);
 }
 
 void KeyritaMenu::Render(WindowBase* const window, nk_context* context)

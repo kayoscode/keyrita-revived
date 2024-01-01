@@ -37,7 +37,7 @@ namespace
 
 namespace wgui
 {
-   void XmlToUiUtil::StandardControlFactory::StandardControlFactory::Init()
+   void StandardControlFactory::StandardControlFactory::Init()
    {
       RegisterControl<GuiLayoutWindow>();
 
@@ -71,6 +71,22 @@ namespace wgui
       RegisterControl<GuiProgressBar>();
       RegisterControl<GuiInputInt>();
       RegisterControl<GuiInputReal>();
+   }
+
+   void ControlTreeIterator::BuildPath()
+   {
+      mPath.push({ {}, 0, 0 });
+
+      if (!mCurrent)
+      {
+         return;
+      }
+
+      mCurrent->ForEachChild([&](GuiControlBase* child, int childIndex) 
+      {
+         mPath.top().Children.push_back(child);
+         mPath.top().ChildrenCount++;
+      });
    }
 
    void StandardGuiRenderer::Init()
