@@ -139,20 +139,6 @@ namespace wgui
 
 #pragma region Gui Widgets
 
-   enum class eTextAlignmentFlags
-   {
-      Left = 0x01,
-      Center = 0x02,
-      Right = 0x04,
-      Top = 0x08,
-      VerticalCenter = 0x10,
-      Bottom = 0x20,
-
-      CenterLeft = VerticalCenter | Left,
-      FullyCentered = VerticalCenter | Center,
-      CenterRight = VerticalCenter | Right,
-   };
-
    class GuiWidget : public GuiControlBase
    {
    public:
@@ -165,6 +151,17 @@ namespace wgui
       {
          return 0;
       }
+   };
+
+   class GuiSpace : public GuiWidget
+   {
+   public:
+      GuiSpace()
+      {
+      }
+
+      void Render(WindowBase* const window, nk_context* context) override;
+      std::string GetLabel() const override { return "Space"; }
    };
 
    /// <summary>
@@ -200,51 +197,50 @@ namespace wgui
    class GuiLabel : public GuiWidget
    {
    public:
-      static constexpr std::string_view TextAlignAttr = "TextAlignment";
+      static constexpr std::string_view TextAlignAttr = "TextAlign";
       static constexpr std::string_view TextAttr = "Text";
 
       GuiLabel()
          : GuiWidget(),
          mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
-         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef())
+         mTextAlignFlags(mAttributes->Add<AttrAlignFlags>((std::string)TextAlignAttr)->GetRef())
       {
          mText = "";
-         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
+         mTextAlignFlags = static_cast<int>(eTextAlignmentFlags::CenterLeft);
       }
 
       GuiLabel(const std::string& text, eTextAlignmentFlags alignment)
          : GuiLabel()
       {
          mText = text;
-         mTextAlignment = static_cast<int64_t>(alignment);
+         mTextAlignFlags = static_cast<int>(alignment);
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
-
       std::string GetLabel() const override { return "Label"; }
 
    protected:
-      int64_t& mTextAlignment;
+      int& mTextAlignFlags;
       std::string& mText;
    };
 
-   class GuiCheckbox : public GuiLabel
+   class GuiCheckbox : public GuiWidget
    {
    public:
       static constexpr std::string_view CheckedAttr = "Checked";
       GuiCheckbox()
          : mChecked(mAttributes->Add<AttrBool>((std::string)CheckedAttr)->GetRef()),
-         GuiLabel()
+           mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef()),
+           GuiWidget()
       {
       }
 
       GuiCheckbox(const std::string& text,
-         eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered, bool checked = false)
+         bool checked = false)
          : GuiCheckbox()
       {
          mChecked = checked;
          mText = text;
-         mTextAlignment = static_cast<int64_t>(alignmentFlags);
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
@@ -253,6 +249,7 @@ namespace wgui
 
    protected:
       bool& mChecked;
+      std::string& mText;
    };
 
    class GuiButton : public GuiWidget
@@ -264,7 +261,7 @@ namespace wgui
          mText = "";
       }
 
-      GuiButton(const std::string& text, eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered)
+      GuiButton(const std::string& text)
          : GuiButton()
       {
          mText = text;
@@ -278,11 +275,13 @@ namespace wgui
       std::string& mText;
    };
 
-   class GuiRadioButton : public GuiLabel
+   class GuiRadioButton : public GuiWidget
    {
    public:
       GuiRadioButton()
-         : mButtonIndex(1), mRadioButtonSelection(nullptr), GuiLabel()
+         : mButtonIndex(1), mRadioButtonSelection(nullptr), 
+         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef()),
+         GuiWidget()
       {
       }
 
@@ -293,11 +292,10 @@ namespace wgui
       }
 
       GuiRadioButton(const std::string& text,
-         eTextAlignmentFlags alignmentFlags = eTextAlignmentFlags::FullyCentered, bool checked = false)
+         bool checked = false)
          : GuiRadioButton()
       {
          mText = text;
-         mTextAlignment = static_cast<int64_t>(alignmentFlags);
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
@@ -306,6 +304,7 @@ namespace wgui
 
    protected:
       int64_t* mRadioButtonSelection;
+      std::string& mText;
       int mButtonIndex;
    };
 
@@ -368,23 +367,20 @@ namespace wgui
    class GuiComboboxItem : public GuiComboboxItemBase
    {
    public:
-      static constexpr std::string_view TextAlignAttr = "TextAlignment";
-      static constexpr std::string_view TextAttr = "Text";
-
       GuiComboboxItem()
          : GuiComboboxItemBase(),
-         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
-         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef())
+         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef()),
+         mTextAlignment(mAttributes->Add<AttrAlignFlags>((std::string)GuiLabel::TextAlignAttr)->GetRef())
       {
          mText = "";
-         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
+         mTextAlignment = static_cast<int>(eTextAlignmentFlags::CenterLeft);
       }
 
       GuiComboboxItem(const std::string& text, eTextAlignmentFlags alignment)
          : GuiComboboxItem()
       {
          mText = text;
-         mTextAlignment = static_cast<int64_t>(alignment);
+         mTextAlignment = static_cast<int>(alignment);
       }
 
       void Render(WindowBase* const window, nk_context* context) override;
@@ -392,7 +388,7 @@ namespace wgui
       std::string GetLabel() const override { return "ComboboxItem"; }
 
    protected:
-      int64_t& mTextAlignment;
+      int& mTextAlignment;
       std::string& mText;
    };
 
@@ -898,24 +894,28 @@ namespace wgui
       static constexpr std::string_view ScrollYAttr = "ScrollY";
       static constexpr std::string_view ScrollableAttr = "Scrollable";
       static constexpr std::string_view BorderAttr = "Border";
+      static constexpr std::string_view WindowFlagsAttr = "WinFlags";
 
       GuiLayoutGroup()
          : mTitle(mAttributes->Add<AttrString>((std::string)TitleAttr)->GetRef()),
          mScrollable(mAttributes->Add<AttrBool>((std::string)ScrollableAttr)->GetRef()),
-         mBorder(mAttributes->Add<AttrBool>((std::string)BorderAttr)->GetRef())
+         mBorder(mAttributes->Add<AttrBool>((std::string)BorderAttr)->GetRef()),
+         mFlags(mAttributes->Add<AttrWinFlags>((std::string)WindowFlagsAttr)->GetRef())
       {
          mTitle = "";
          mName = std::to_string(reinterpret_cast<int64_t>(this));
          mScrollable = false;
          mBorder = false;
+         mFlags = 0;
       }
 
-      GuiLayoutGroup(const std::string& title, bool scrollable = false, bool border = false)
+      GuiLayoutGroup(const std::string& title, bool scrollable = false, bool border = false, int flags = 0)
          : GuiLayoutGroup()
       {
          mTitle = title;
          mScrollable = scrollable;
          mBorder = border;
+         mFlags = flags;
       }
 
       eControlType GetControlType() const override { return eControlType::Group; }
@@ -939,6 +939,7 @@ namespace wgui
       std::string mName;
       bool& mScrollable;
       bool& mBorder;
+      int& mFlags;
    };
 
    class GuiLayoutTreeBase : public ChildSupportingGuiControlBase
@@ -1043,21 +1044,19 @@ namespace wgui
    class GuiMenu : public ChildSupportingGuiControlBase
    {
    public:
-      static constexpr std::string_view TextAlignAttr = "TextAlignment";
-      static constexpr std::string_view TextAttr = "Text";
       static constexpr std::string_view ImagePathAttr = "Image";
       static constexpr std::string_view WidthAttr = "Width";
       static constexpr std::string_view HeightAttr = "Height";
 
       GuiMenu()
          : ChildSupportingGuiControlBase(),
-         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef()),
-         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
+         mTextAlignFlags(mAttributes->Add<AttrAlignFlags>((std::string)GuiLabel::TextAlignAttr)->GetRef()),
+         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef()),
          mImagePath(mAttributes->Add<AttrString>((std::string)ImagePathAttr)->GetRef()),
          mWidth(mAttributes->Add<AttrInt>((std::string)WidthAttr)->GetRef()),
          mHeight(mAttributes->Add<AttrInt>((std::string)HeightAttr)->GetRef())
       {
-         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::FullyCentered);
+         mTextAlignFlags = static_cast<int>(eTextAlignmentFlags::FullyCentered);
          mText = "";
          mImagePath = "";
 
@@ -1070,7 +1069,7 @@ namespace wgui
          const std::string& imagePath = "")
          : GuiMenu()
       {
-         mTextAlignment = static_cast<int64_t>(alignment);
+         mTextAlignFlags = static_cast<int>(alignment);
          mText = text;
          mImagePath = imagePath;
 
@@ -1089,7 +1088,7 @@ namespace wgui
       }
 
    protected:
-      int64_t& mTextAlignment;
+      int& mTextAlignFlags;
       std::string& mText;
       std::string& mImagePath;
 
@@ -1099,17 +1098,15 @@ namespace wgui
    class GuiMenuItem : public GuiWidget
    {
    public:
-      static constexpr std::string_view TextAlignAttr = "TextAlignment";
-      static constexpr std::string_view TextAttr = "Text";
       static constexpr std::string_view ImagePathAttr = "Image";
 
       GuiMenuItem()
          : GuiWidget(),
-         mTextAlignment(mAttributes->Add<AttrInt>((std::string)TextAlignAttr)->GetRef()),
-         mText(mAttributes->Add<AttrString>((std::string)TextAttr)->GetRef()),
+         mTextAlignFlags(mAttributes->Add<AttrAlignFlags>((std::string)GuiLabel::TextAlignAttr)->GetRef()),
+         mText(mAttributes->Add<AttrString>((std::string)GuiLabel::TextAttr)->GetRef()),
          mImagePath(mAttributes->Add<AttrString>((std::string)ImagePathAttr)->GetRef())
       {
-         mTextAlignment = static_cast<int64_t>(eTextAlignmentFlags::CenterLeft);
+         mTextAlignFlags = static_cast<int>(eTextAlignmentFlags::CenterLeft);
          mText = "";
          mImagePath = "";
       }
@@ -1119,7 +1116,7 @@ namespace wgui
          const std::string& imagePath = "")
          : GuiMenuItem()
       {
-         mTextAlignment = static_cast<int64_t>(alignment);
+         mTextAlignFlags = static_cast<int>(alignment);
          mText = text;
          mImagePath = imagePath;
       }
@@ -1129,7 +1126,7 @@ namespace wgui
       std::string GetLabel() const override { return "MenuItem"; }
 
    protected:
-      int64_t& mTextAlignment;
+      int& mTextAlignFlags;
       std::string& mText;
       std::string& mImagePath;
    };
@@ -1217,6 +1214,15 @@ namespace wgui
          float baseHeight = mScrollable ? context->style.window.scrollbar_size.y : 0;
          baseHeight += mBorder ? context->style.window.border * 2 : 0;
          baseHeight += context->style.window.padding.y;
+
+         // Check flags for header
+         if (mFlags & static_cast<int>(eWindowFlags::Header))
+         {
+            //header.h = font->height + 2.0f * style->window.header.padding.y;
+            //header.h += (2.0f * style->window.header.label_padding.y);
+            baseHeight += context->style.font->height + 2.0f * context->style.window.header.padding.y;
+            baseHeight += (2.0f * context->style.window.header.label_padding.y);
+         }
 
          baseHeight += GetTotalChildHeight(window, context);
          return baseHeight;

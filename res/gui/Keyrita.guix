@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GuiRoot>
-  <Window Title="Keyrita" Width="500" Height="500"
-          TrackWin="True" Scrollable="False" Border="False">
-    <KeyritaMenu Autoscale="What the hell are you doing."/>
+  <Window Title="Keyrita"
+          TrackWin="True" Scrollable="False">
+    <KeyritaMenu/>
 
     <DynamicRow AutoHeight="True">
       <ExampleUI/>
     </DynamicRow>
 
-    <DynamicRow AutoHeight="True">
-      <Group>
+    <DynamicRow AutoHeight="True" Height="200">
+      <Group Title="Group">
+        <DynamicRow>
+          <Label Text="Hello, world" TextAlign="FLAGS:FullyCentered"></Label>
+        </DynamicRow>
         <DynamicRow Height="40" Width="100">
           <Button Text="One"/>
           <Button Text="Two"/>

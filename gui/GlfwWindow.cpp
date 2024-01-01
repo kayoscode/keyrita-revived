@@ -361,8 +361,19 @@ namespace wgui
       ScaleVec2(result.spacing, base.spacing, scaleX, scaleY);
    }
 
+   void ScaleHeader(nk_style_window_header& result, const nk_style_window_header& base, float scaleX, float scaleY)
+   {
+      ScaleButton(result.close_button, base.close_button, scaleX, scaleY);
+      ScaleButton(result.minimize_button, base.minimize_button, scaleX, scaleY);
+      ScaleVec2(result.padding, base.padding, scaleX, scaleY);
+      ScaleVec2(result.label_padding, base.label_padding, scaleX, scaleY);
+      ScaleVec2(result.spacing, base.spacing, scaleX, scaleY);
+   }
+
    void ScaleWindow(nk_style_window& result, const nk_style_window& base, float scaleX, float scaleY)
    {
+      ScaleHeader(result.header, base.header, scaleX, scaleY);
+
       result.border = scaleY * base.border;
       result.rounding = scaleY * base.rounding;
       result.combo_border = scaleY * base.combo_border;
