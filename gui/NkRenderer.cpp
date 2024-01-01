@@ -159,7 +159,21 @@ namespace wgui
       }
    }
 
-   void GuiLayoutWindow::Render(WindowBase* window, nk_context* context)
+   void GuiControlBase::Render(WindowBase* const window, nk_context* context)
+   {
+      if (!mEnabled)
+      {
+         nk_widget_disable_begin(context);
+         ChildRender(window, context);
+         nk_widget_disable_end(context);
+      }
+      else
+      {
+         ChildRender(window, context);
+      }
+   }
+
+   void GuiLayoutWindow::ChildRender(WindowBase* window, nk_context* context)
    {
       int width, height, posX, posY;
 
@@ -219,17 +233,17 @@ namespace wgui
 
 #pragma region Gui Controls
 
-   void GuiLabel::Render(WindowBase* const window, nk_context* context)
+   void GuiLabel::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_label(context, mText.c_str(), static_cast<nk_flags>(mTextAlignFlags));
    }
 
-   void GuiSpace::Render(WindowBase* const window, nk_context* context)
+   void GuiSpace::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_spacing(context, 1);
    }
 
-   void GuiHorizontalSeparator::Render(WindowBase* const window, nk_context* context)
+   void GuiHorizontalSeparator::ChildRender(WindowBase* const window, nk_context* context)
    {
       struct nk_rect bounds;
       auto state = nk_widget_fitting(&bounds, context, nk_vec2(0, 0));
@@ -245,19 +259,19 @@ namespace wgui
          thickness, nk_color(0, 0, 0, 255 / 3));
    }
 
-   void GuiButton::Render(WindowBase* const window, nk_context* context)
+   void GuiButton::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_button_label(context, mText.c_str());
    }
 
-   void GuiCheckbox::Render(WindowBase* const window, nk_context* context)
+   void GuiCheckbox::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_bool checked = mChecked;
       nk_checkbox_label(context, mText.c_str(), &checked);
       mChecked = checked;
    }
 
-   void GuiRadioButton::Render(WindowBase* const window, nk_context* context)
+   void GuiRadioButton::ChildRender(WindowBase* const window, nk_context* context)
    {
       assert(mRadioButtonSelection != nullptr);
 
@@ -295,7 +309,7 @@ namespace wgui
       func(this, 0);
    }
 
-   void GuiRadioButtonGroup::Render(WindowBase* const window, nk_context* context)
+   void GuiRadioButtonGroup::ChildRender(WindowBase* const window, nk_context* context)
    {
       for (int i = 0; i < mControls.size(); i++)
       {
@@ -336,7 +350,7 @@ namespace wgui
       func(this, 0);
    }
 
-   void GuiComboboxItem::Render(WindowBase* const window, nk_context* context)
+   void GuiComboboxItem::ChildRender(WindowBase* const window, nk_context* context)
    {
       int itemHeight = GetHeight(window, context);
       nk_layout_row_dynamic(context, itemHeight, 1);
@@ -347,7 +361,7 @@ namespace wgui
       }
    }
 
-   void GuiCombobox::Render(WindowBase* const window, nk_context* context)
+   void GuiCombobox::ChildRender(WindowBase* const window, nk_context* context)
    {
       std::string text = "";
       assert(mComboboxItems.size() == mComboboxTexts.size());
@@ -371,14 +385,14 @@ namespace wgui
       }
    }
 
-   void GuiSliderInt::Render(WindowBase* const window, nk_context* context)
+   void GuiSliderInt::ChildRender(WindowBase* const window, nk_context* context)
    {
       int value = mValue;
       nk_slider_int(context, mMinValue, &value, mMaxValue, mStep);
       mValue = value;
    }
 
-   void GuiSliderReal::Render(WindowBase* const window, nk_context* context)
+   void GuiSliderReal::ChildRender(WindowBase* const window, nk_context* context)
    {
       float value = mValue;
       nk_slider_float(context, mMinValue, &value, mMaxValue, mStep);
@@ -386,7 +400,7 @@ namespace wgui
 
    }
 
-   void GuiProgressBar::Render(WindowBase* const window, nk_context* context)
+   void GuiProgressBar::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_size current = static_cast<nk_size>(mValue);
       nk_size max = static_cast<nk_size>(mMaxValue);
@@ -394,7 +408,7 @@ namespace wgui
       mValue = static_cast<int64_t>(current);
    }
 
-   void GuiInputInt::Render(WindowBase* const window, nk_context* context)
+   void GuiInputInt::ChildRender(WindowBase* const window, nk_context* context)
    {
       double stepPerPixel = mStepPerPx / window->GetContentScaleX();
 
@@ -402,7 +416,7 @@ namespace wgui
          mMinValue, mValue, mMaxValue, mStep, stepPerPixel);
    }
 
-   void GuiInputReal::Render(WindowBase* const window, nk_context* context)
+   void GuiInputReal::ChildRender(WindowBase* const window, nk_context* context)
    {
       double stepPerPixel = mStepPerPx / window->GetContentScaleX();
 
@@ -410,7 +424,7 @@ namespace wgui
          mMinValue, mValue, mMaxValue, mStep, stepPerPixel);
    }
 
-   void GuiSelectableLabel::Render(WindowBase* const window, nk_context* context)
+   void GuiSelectableLabel::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_bool selected = static_cast<nk_bool>(mSelected);
       nk_selectable_label(context, mText.c_str(), mTextAlignFlags, &selected);
@@ -421,7 +435,7 @@ namespace wgui
 
 #pragma region Layout Row Implementations
 
-   void GuiLayoutRowDynamic::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutRowDynamic::ChildRender(WindowBase* const window, nk_context* context)
    {
       int height = GetHeight(window, context);
 
@@ -432,7 +446,7 @@ namespace wgui
       }
    }
 
-   void GuiLayoutRowStatic::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutRowStatic::ChildRender(WindowBase* const window, nk_context* context)
    {
       int height = GetHeight(window, context);
       int width = mColWidth * window->GetContentScaleX();
@@ -444,7 +458,7 @@ namespace wgui
       }
    }
 
-   void GuiLayoutRowDynamicGrid::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutRowDynamicGrid::ChildRender(WindowBase* const window, nk_context* context)
    {
       if (mControls.size() > mScales.size())
       {
@@ -465,7 +479,7 @@ namespace wgui
       nk_layout_row_end(context);
    }
 
-   void GuiLayoutRowStaticGrid::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutRowStaticGrid::ChildRender(WindowBase* const window, nk_context* context)
    {
       if (mControls.size() > mScales.size())
       {
@@ -488,7 +502,7 @@ namespace wgui
       nk_layout_row_end(context);
    }
 
-   void GuiLayoutRowVariableGrid::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutRowVariableGrid::ChildRender(WindowBase* const window, nk_context* context)
    {
       if (mControls.size() > mScales.size())
       {
@@ -532,7 +546,7 @@ namespace wgui
       return true;
    }
 
-   void GuiLayoutStaticSpace::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutStaticSpace::ChildRender(WindowBase* const window, nk_context* context)
    {
       assert(!mAutoHeight);
       if (mControls.size() > mWidths.size())
@@ -572,7 +586,7 @@ namespace wgui
       return true;
    }
 
-   void GuiLayoutDynamicSpace::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutDynamicSpace::ChildRender(WindowBase* const window, nk_context* context)
    {
       assert(!mAutoHeight);
       if (mControls.size() > mWidths.size())
@@ -593,7 +607,7 @@ namespace wgui
       nk_layout_space_end(context);
    }
 
-   void GuiLayoutGroup::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutGroup::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_flags flags = WinFlagsToNkWinFlags(mFlags);
 
@@ -618,7 +632,7 @@ namespace wgui
       }
    }
 
-   void GuiLayoutTreeNode::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutTreeNode::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
          nk_collapse_states::NK_MINIMIZED;
@@ -644,7 +658,7 @@ namespace wgui
       }
    }
 
-   void GuiLayoutTreeTab::Render(WindowBase* const window, nk_context* context)
+   void GuiLayoutTreeTab::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_collapse_states state = mInitiallyOpen ? nk_collapse_states::NK_MAXIMIZED :
          nk_collapse_states::NK_MINIMIZED;
@@ -674,7 +688,7 @@ namespace wgui
 
 #pragma region Menu
 
-   void GuiMenuBar::Render(WindowBase* const window, nk_context* context)
+   void GuiMenuBar::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_menubar_begin(context);
 
@@ -686,7 +700,7 @@ namespace wgui
       nk_menubar_end(context);
    }
 
-   void GuiMenu::Render(WindowBase* const window, nk_context* context)
+   void GuiMenu::ChildRender(WindowBase* const window, nk_context* context)
    {
       if (mImagePath.empty())
       {
@@ -705,7 +719,7 @@ namespace wgui
       }
    }
 
-   void GuiMenuItem::Render(WindowBase* const window, nk_context* context)
+   void GuiMenuItem::ChildRender(WindowBase* const window, nk_context* context)
    {
       nk_menu_item_label(context, mText.c_str(), mTextAlignFlags);
    }

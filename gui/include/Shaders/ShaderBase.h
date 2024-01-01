@@ -79,6 +79,7 @@ public:
       }
 
       assert(false);
+      return 0;
    }
 
 protected:
