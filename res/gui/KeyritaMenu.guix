@@ -6,7 +6,7 @@
                             Width4="70">
       <Menu Text="File" Width="150" Height="500">
         <DynamicRow Height="30">
-          <MenuItem Text="New"/>
+          <MenuItem Text="New" TextAlign="FLAGS:FullyCentered"/>
         </DynamicRow>
         <DynamicRow Height="30">
           <MenuItem Text="Open"/>

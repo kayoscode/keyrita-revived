@@ -1,4 +1,5 @@
 #include <cassert>
+#include <functional>
 
 #include "Window.h"
 #include "NuklearWindowRenderer.h"
@@ -6,6 +7,33 @@
 
 #include "GL/glew.h"
 #include "include_nuk.h"
+
+namespace
+{
+   using namespace wgui;
+
+   nk_flags WinFlagsToNkWinFlags(int winFlags)
+   {
+      nk_flags result = 0;
+
+      if (winFlags & static_cast<int>(eWindowFlags::Header))
+      {
+         result |= NK_WINDOW_TITLE;
+      }
+
+      if (winFlags & static_cast<int>(eWindowFlags::ScrollbarAutoHide))
+      {
+         result |= NK_WINDOW_SCROLL_AUTO_HIDE;
+      }
+
+      if (winFlags & static_cast<int>(eWindowFlags::InBackground))
+      {
+         result |= NK_WINDOW_BACKGROUND;
+      }
+
+      return result;
+   }
+}
 
 namespace wgui
 {
@@ -33,6 +61,7 @@ namespace wgui
       RegisterControl<GuiButton>();
       RegisterControl<GuiCheckbox>();
       RegisterControl<GuiHorizontalSeparator>();
+      RegisterControl<GuiSpace>();
       RegisterControl<GuiRadioButtonGroup>();
       RegisterControl<GuiRadioButton>();
       RegisterControl<GuiCombobox>();
@@ -46,14 +75,17 @@ namespace wgui
 
    void StandardGuiRenderer::Init()
    {
-      for (int i = 0; i < mControls.size(); i++)
-      {
-         mControls[i]->Init();
-      }
+      std::function<void(GuiControlBase* control, int index)> childrenOnInitialized = 
+         [&childrenOnInitialized](GuiControlBase* control, int index)
+         {
+            control->OnInitialized();
+            control->ForEachChild(childrenOnInitialized);
+         };
 
       for (int i = 0; i < mControls.size(); i++)
       {
          mControls[i]->OnInitialized();
+         mControls[i]->ForEachChild(childrenOnInitialized);
       }
    }
 
@@ -71,28 +103,6 @@ namespace wgui
 
    void StandardGuiRenderer::RenderFinish(WindowBase* const window, nk_context* context)
    {
-   }
-
-   void ChildSupportingGuiControlBase::Init()
-   {
-      // Initialize all children, then init ourselves.
-      for (int i = 0; i < mControls.size(); i++)
-      {
-         mControls[i]->Init();
-      }
-
-      SelfInit();
-   }
-
-   void ChildSupportingGuiControlBase::OnInitialized()
-   {
-      // Initialize all children, then init ourselves.
-      for (int i = 0; i < mControls.size(); i++)
-      {
-         mControls[i]->OnInitialized();
-      }
-
-      SelfOnInitalized();
    }
 
    float ChildSupportingGuiControlBase::GetMaxChildHeight(WindowBase* const window, nk_context* context) const
@@ -159,8 +169,25 @@ namespace wgui
          posY = mPosY * window->GetContentScaleY();
       }
 
-      nk_flags flags = (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
+      nk_flags flags = WinFlagsToNkWinFlags(mFlags);
+
+      flags |= (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
       flags |= mBorder ? NK_WINDOW_BORDER : 0;
+
+      if (!window->GetWindowFocused())
+      {
+         flags |= NK_WINDOW_NOT_INTERACTIVE;
+         flags |= NK_WINDOW_NO_INPUT;
+      }
+      else
+      {
+         nk_window* win = nk_window_find(context, mName.c_str());
+         if (win)
+         {
+            win->flags &= ~NK_WINDOW_NOT_INTERACTIVE;
+            win->flags &= ~NK_WINDOW_NO_INPUT;
+         }
+      }
 
       // 0 flags for now! We will have to fix that.
       if (nk_begin_titled(context, mWindowName.c_str(), mTitle.c_str(), 
@@ -178,7 +205,12 @@ namespace wgui
 
    void GuiLabel::Render(WindowBase* const window, nk_context* context)
    {
-      nk_label(context, mText.c_str(), static_cast<nk_flags>(mTextAlignment));
+      nk_label(context, mText.c_str(), static_cast<nk_flags>(mTextAlignFlags));
+   }
+
+   void GuiSpace::Render(WindowBase* const window, nk_context* context)
+   {
+      nk_spacing(context, 1);
    }
 
    void GuiHorizontalSeparator::Render(WindowBase* const window, nk_context* context)
@@ -219,7 +251,7 @@ namespace wgui
       }
    }
 
-   void GuiRadioButtonGroup::SelfInit()
+   void GuiRadioButtonGroup::OnInitialized()
    {
       mRadioButtons.clear();
 
@@ -255,7 +287,7 @@ namespace wgui
       }
    }
 
-   void GuiCombobox::SelfInit()
+   void GuiCombobox::OnInitialized()
    {
       mComboboxItems.clear();
       mComboboxTexts.clear();
@@ -276,7 +308,7 @@ namespace wgui
                itemIndex++;
                items->push_back(cb);
 
-               texts->push_back(&cb->GetOrCreateAttribute<std::string, AttrString>((std::string)GuiComboboxItem::TextAttr));
+               texts->push_back(&cb->GetOrCreateAttribute<std::string, AttrString>((std::string)GuiLabel::TextAttr));
             }
 
             if (control != nullptr && control->SupportsChildren())
@@ -365,7 +397,7 @@ namespace wgui
    void GuiSelectableLabel::Render(WindowBase* const window, nk_context* context)
    {
       nk_bool selected = static_cast<nk_bool>(mSelected);
-      nk_selectable_label(context, mText.c_str(), mTextAlignment, &selected);
+      nk_selectable_label(context, mText.c_str(), mTextAlignFlags, &selected);
       mSelected = static_cast<bool>(selected);
    }
 
@@ -547,7 +579,16 @@ namespace wgui
 
    void GuiLayoutGroup::Render(WindowBase* const window, nk_context* context)
    {
-      int64_t flags = (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
+      nk_flags flags = WinFlagsToNkWinFlags(mFlags);
+
+      // The following flags are disallowed for groups.
+      if ((flags & (NK_WINDOW_TITLE | NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_MOVABLE |
+         NK_WINDOW_MINIMIZED | NK_WINDOW_CLOSED | NK_WINDOW_SCALABLE | NK_WINDOW_SCALE_LEFT)))
+      {
+         assert("Using disallowed flags on a group" && false);
+      }
+
+      flags |= (!mScrollable) ? NK_WINDOW_NO_SCROLLBAR : 0;
       flags |= (mBorder)? NK_WINDOW_BORDER : 0;
 
       if (nk_group_begin_titled(context, mName.c_str(), mTitle.c_str(), flags))
@@ -635,7 +676,7 @@ namespace wgui
       {
          int width = mWidth * window->GetContentScaleX();
          int height = GetHeight(window, context);
-         if (nk_menu_begin_label(context, mText.c_str(), mTextAlignment,
+         if (nk_menu_begin_label(context, mText.c_str(), mTextAlignFlags,
             nk_vec2(width, height)))
          {
             for (int i = 0; i < mControls.size(); i++)
@@ -646,12 +687,11 @@ namespace wgui
             nk_menu_end(context);
          }
       }
-
    }
 
    void GuiMenuItem::Render(WindowBase* const window, nk_context* context)
    {
-      nk_menu_item_label(context, mText.c_str(), mTextAlignment);
+      nk_menu_item_label(context, mText.c_str(), mTextAlignFlags);
    }
 
 #pragma endregion

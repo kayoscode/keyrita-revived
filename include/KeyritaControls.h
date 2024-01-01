@@ -11,18 +11,18 @@ public:
 class KeyritaMenu : public wgui::GuiAbstractControl
 {
 public:
-   KeyritaMenu();
    void Render(wgui::WindowBase* const window, nk_context* context);
 
+   void Init() override;
    std::string GetLabel() const override { return "KeyritaMenu"; }
 };
 
 class ExampleUi : public wgui::GuiAbstractControl
 {
 public:
-   ExampleUi();
    void Render(wgui::WindowBase* const window, nk_context* context);
 
-   std::string GetLabel() const override { return "ExampleUi"; }
+   void Init() override;
+   std::string GetLabel() const override { return "ExampleUI"; }
 };
 
