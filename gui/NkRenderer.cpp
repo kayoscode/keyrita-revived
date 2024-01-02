@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "NuklearWindowRenderer.h"
 #include "XmlToUi.h"
+#include "ControlAccessUtils.h"
 
 #include "GL/glew.h"
 #include "include_nuk.h"
@@ -91,17 +92,12 @@ namespace wgui
 
    void StandardGuiRenderer::Init()
    {
-      std::function<void(GuiControlBase* control, int index)> childrenOnInitialized = 
-         [&childrenOnInitialized](GuiControlBase* control, int index)
-         {
-            control->OnInitialized();
-            control->ForEachChild(childrenOnInitialized);
-         };
-
       for (int i = 0; i < mControls.size(); i++)
       {
-         mControls[i]->OnInitialized();
-         mControls[i]->ForEachChild(childrenOnInitialized);
+         for (auto it = mControls[i]->begin(); it != mControls[i]->end(); ++it)
+         {
+            (*it)->OnInitialized();
+         }
       }
    }
 
@@ -159,6 +155,13 @@ namespace wgui
       }
    }
 
+   void GuiControlBase::HandleEvents(WindowBase* window, nk_context* context)
+   {
+      // Handle common event listeners.
+      // Mouse entered event.
+      ChildHandleEvents(window, context);
+   }
+
    void GuiControlBase::Render(WindowBase* const window, nk_context* context)
    {
       if (!mEnabled)
@@ -170,6 +173,7 @@ namespace wgui
       else
       {
          ChildRender(window, context);
+         HandleEvents(window, context);
       }
    }
 
@@ -261,6 +265,8 @@ namespace wgui
 
    void GuiButton::ChildRender(WindowBase* const window, nk_context* context)
    {
+      struct nk_rect bounds = nk_widget_bounds(context);
+
       nk_button_label(context, mText.c_str());
    }
 

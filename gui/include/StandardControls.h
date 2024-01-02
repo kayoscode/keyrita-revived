@@ -6,6 +6,7 @@
 
 #include "App.h"
 #include "Attributes.h"
+#include "ControlEvent.h"
 
 struct nk_context;
 
@@ -118,7 +119,8 @@ namespace wgui
       GuiControlBase()
          : mAttributes(std::make_unique<AttributeSet>()),
          mTag(mAttributes->Add<AttrString>((std::string)TagAttr)->GetRef()),
-         mEnabled(mAttributes->Add<AttrBool>((std::string)EnabledAttr)->GetRef())
+         mEnabled(mAttributes->Add<AttrBool>((std::string)EnabledAttr)->GetRef()),
+         mEventDispatcher(std::make_unique<EventDispatcher>(this))
       {
          mTag = "Untagged";
          mEnabled = true;
@@ -149,6 +151,9 @@ namespace wgui
       }
 
       virtual std::string GetLabel() const = 0;
+
+      void HandleEvents(WindowBase* window, nk_context* context);
+      virtual void ChildHandleEvents(WindowBase* window, nk_context* context) { }
 
       /// <summary>
       /// Renders the control to the screen.
@@ -212,6 +217,9 @@ namespace wgui
       std::string mControlType;
       std::string& mTag;
       bool& mEnabled;
+
+      GuiControlBase* mParent;
+      std::unique_ptr<EventDispatcher> mEventDispatcher;
    };
 
    class ChildSupportingGuiControlBase : public GuiControlBase
