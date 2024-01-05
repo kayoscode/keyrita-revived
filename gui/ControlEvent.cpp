@@ -3,15 +3,37 @@
 
 namespace wgui
 {
-   void EventDispatcher::DispatchMouseEnterEvent(nk_context* context)
+   bool MouseEnterEventObserver::ObserveEvent(WindowBase* window, nk_context* context)
    {
-      MouseEventData data;
-      data.MouseX = context->input.mouse.pos.x;
-      data.MouseY = context->input.mouse.pos.y;
+      int mouseX, mouseY;
+      window->GetInput().GetMousePos(mouseX, mouseY);
 
-      for (int i = 0; i < mMouseEnterEventHandlers.EventHandlers.size(); i++)
+      bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
+
+      if (!mPreviouslyInBounds && intersecting)
       {
-         mMouseEnterEventHandlers.EventHandlers[i](mControl, data);
+         return true;
       }
+
+      mPreviouslyInBounds = intersecting;
+
+      return false;
+   }
+
+   bool MouseLeaveEventObserver::ObserveEvent(WindowBase* window, nk_context* context)
+   {
+      int mouseX, mouseY;
+      window->GetInput().GetMousePos(mouseX, mouseY);
+
+      bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
+
+      if (mPreviouslyInBounds && !intersecting)
+      {
+         return true;
+      }
+
+      mPreviouslyInBounds = intersecting;
+
+      return false;
    }
 }

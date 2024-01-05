@@ -757,7 +757,11 @@ namespace wgui
    }
 
    WindowBase::WindowBase()
-      : mWindow(nullptr), mWindowTitle(), mNkContext(), mFont(nullptr)
+      : mWindow(nullptr), 
+        mWindowInput(this), 
+        mWindowTitle(), 
+        mNkContext(), 
+        mFont(nullptr)
    {
    }
 

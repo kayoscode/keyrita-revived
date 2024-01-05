@@ -119,8 +119,7 @@ namespace wgui
       GuiControlBase()
          : mAttributes(std::make_unique<AttributeSet>()),
          mTag(mAttributes->Add<AttrString>((std::string)TagAttr)->GetRef()),
-         mEnabled(mAttributes->Add<AttrBool>((std::string)EnabledAttr)->GetRef()),
-         mEventDispatcher(std::make_unique<EventDispatcher>(this))
+         mEnabled(mAttributes->Add<AttrBool>((std::string)EnabledAttr)->GetRef())
       {
          mTag = "Untagged";
          mEnabled = true;
@@ -219,7 +218,6 @@ namespace wgui
       bool& mEnabled;
 
       GuiControlBase* mParent;
-      std::unique_ptr<EventDispatcher> mEventDispatcher;
    };
 
    class ChildSupportingGuiControlBase : public GuiControlBase
