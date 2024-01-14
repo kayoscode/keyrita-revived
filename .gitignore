@@ -3,3 +3,8 @@ out/
 .vscode/
 .vs/
 vsproj/
+.cache/
+.cmake-kits.json
+buildDebug/
+buildRelease/
+compile_commands.json
