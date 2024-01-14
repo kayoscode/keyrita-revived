@@ -1,9 +1,9 @@
+#include "App.h"
+#include "KeyritaControls.h"
 #include "NuklearWindowRenderer.h"
 #include "OperatingSystem.h"
 #include "PlatformModules.h"
-#include "App.h"
 #include "XmlToUi.h"
-#include "KeyritaControls.h"
 
 using namespace wgui;
 
@@ -29,8 +29,8 @@ int main()
    mainWindow.CreateWindow("Keyrita", 1600, 1200, false, true, true, false);
    mainWindow.SetWindowSizeLimits(1200, 900);
 
-   //MainWindow secondWindow;
-   //secondWindow.CreateWindow("Dialog", 400, 300, false, true, true, false);
+   // MainWindow secondWindow;
+   // secondWindow.CreateWindow("Dialog", 400, 300, false, true, true, false);
 
    bool resiable = false;
 
@@ -39,10 +39,10 @@ int main()
    mainWindowRenderer.Init();
    mainWindow.SetRenderer(&mainWindowRenderer);
 
-   //XmlRenderer secondRenderer;
-   //secondRenderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
-   //secondRenderer.Init();
-   //secondWindow.SetRenderer(&mainWindowRenderer);
+   // XmlRenderer secondRenderer;
+   // secondRenderer.ConstructLayoutFromXmlFile("./res/gui/Keyrita.guix");
+   // secondRenderer.Init();
+   // secondWindow.SetRenderer(&mainWindowRenderer);
 
    Timer t;
    int frameCount = 0;

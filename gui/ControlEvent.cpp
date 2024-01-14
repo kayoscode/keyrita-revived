@@ -3,37 +3,37 @@
 
 namespace wgui
 {
-   bool MouseEnterEventObserver::ObserveEvent(WindowBase* window, nk_context* context)
+bool MouseEnterEventObserver::ObserveEvent(WindowBase *window, nk_context *context)
+{
+   int mouseX, mouseY;
+   window->GetInput().GetMousePos(mouseX, mouseY);
+
+   bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
+
+   if (!mPreviouslyInBounds && intersecting)
    {
-      int mouseX, mouseY;
-      window->GetInput().GetMousePos(mouseX, mouseY);
-
-      bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
-
-      if (!mPreviouslyInBounds && intersecting)
-      {
-         return true;
-      }
-
-      mPreviouslyInBounds = intersecting;
-
-      return false;
+      return true;
    }
 
-   bool MouseLeaveEventObserver::ObserveEvent(WindowBase* window, nk_context* context)
-   {
-      int mouseX, mouseY;
-      window->GetInput().GetMousePos(mouseX, mouseY);
+   mPreviouslyInBounds = intersecting;
 
-      bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
-
-      if (mPreviouslyInBounds && !intersecting)
-      {
-         return true;
-      }
-
-      mPreviouslyInBounds = intersecting;
-
-      return false;
-   }
+   return false;
 }
+
+bool MouseLeaveEventObserver::ObserveEvent(WindowBase *window, nk_context *context)
+{
+   int mouseX, mouseY;
+   window->GetInput().GetMousePos(mouseX, mouseY);
+
+   bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
+
+   if (mPreviouslyInBounds && !intersecting)
+   {
+      return true;
+   }
+
+   mPreviouslyInBounds = intersecting;
+
+   return false;
+}
+} // namespace wgui

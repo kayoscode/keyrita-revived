@@ -1,94 +1,91 @@
 #pragma once
 
-#include <vector>
-#include <stack>
 #include <map>
 #include <memory>
+#include <stack>
+#include <vector>
 
 #include "Attributes.h"
-#include "pugixml.hpp"
-#include "Window.h"
-#include "Attributes.h"
 #include "NuklearWindowRenderer.h"
+#include "Window.h"
+#include "pugixml.hpp"
 
 namespace wgui
 {
-   class StandardControlFactory : public GuiControlFactoryBase
+class StandardControlFactory : public GuiControlFactoryBase
+{
+ public:
+   void Init() override;
+};
+
+/// <summary>
+/// Utility class for maintaining the state of the control factories
+/// and for parsing xml to a control tree.
+/// </summary>
+class XmlToUiUtil
+{
+ private:
+   static std::vector<std::unique_ptr<GuiControlFactoryBase>> mControlFactories;
+   static AttributeParser mAttributeParser;
+
+ public:
+   static void Init()
    {
-   public:
-      void Init() override;
-   };
+      AddControlFactory<StandardControlFactory>();
+   }
 
    /// <summary>
-   /// Utility class for maintaining the state of the control factories
-   /// and for parsing xml to a control tree.
+   /// Uses the XML to parse a list of subnodes.
+   /// Everything is listed under the GuiRoot tag.
    /// </summary>
-   class XmlToUiUtil
+   /// <param name="fileName"></param>
+   /// <param name="ownedControls"></param>
+   /// <returns></returns>
+   static bool ConstructLayoutFromXmlFile(const std::string &fileName,
+                                          std::vector<std::unique_ptr<GuiControlBase>> &ownedControls,
+                                          std::vector<GuiControlBase *> &controlTree);
+
+   static bool ConstructLayoutFromXmlText(const std::string &xmlText,
+                                          std::vector<std::unique_ptr<GuiControlBase>> &ownedControls,
+                                          std::vector<GuiControlBase *> &controlTree);
+
+   template <class T>
+   static void AddControlFactory()
+      requires std::is_base_of_v<GuiControlFactoryBase, T>
    {
-   private:
-      static std::vector<std::unique_ptr<GuiControlFactoryBase>> mControlFactories;
-      static AttributeParser mAttributeParser;
+      Application::Logger.trace("Initializing new control factory");
 
-   public:
+      mControlFactories.push_back(std::make_unique<T>());
+      mControlFactories[mControlFactories.size() - 1]->Init();
 
-      static void Init()
+      std::vector<std::string> newControls = mControlFactories[mControlFactories.size() - 1]->ListRegisteredControls();
+      std::string ctrls;
+      for (int i = 0; i < newControls.size(); i++)
       {
-         AddControlFactory<StandardControlFactory>();
+         ctrls += newControls[i] + ((i < newControls.size() - 1) ? ", " : " ");
       }
 
-      /// <summary>
-      /// Uses the XML to parse a list of subnodes.
-      /// Everything is listed under the GuiRoot tag.
-      /// </summary>
-      /// <param name="fileName"></param>
-      /// <param name="ownedControls"></param>
-      /// <returns></returns>
-      static bool ConstructLayoutFromXmlFile(const std::string& fileName, 
-         std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
-         std::vector<GuiControlBase*>& controlTree);
+      Application::Logger.trace("Added controls {str}", ctrls.c_str());
+   }
 
-      static bool ConstructLayoutFromXmlText(const std::string& xmlText, 
-         std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
-         std::vector<GuiControlBase*>& controlTree);
+ private:
+   static void ConstructControls(const pugi::xml_object_range<pugi::xml_node_iterator> &document,
+                                 GuiControlBase *parent, std::vector<std::unique_ptr<GuiControlBase>> &ownedControls,
+                                 std::vector<GuiControlBase *> &resultControls);
 
-      template <class T>
-      static void AddControlFactory()
-         requires std::is_base_of_v<GuiControlFactoryBase, T>
+   static std::unique_ptr<GuiControlBase> CreateControl(const std::string &controlName)
+   {
+      for (const auto &factory : mControlFactories)
       {
-         Application::Logger.trace("Initializing new control factory");
+         std::unique_ptr<GuiControlBase> newControl = factory->CreateControl(controlName);
 
-         mControlFactories.push_back(std::make_unique<T>());
-         mControlFactories[mControlFactories.size() - 1]->Init();
-
-         std::vector<std::string> newControls = mControlFactories[mControlFactories.size() - 1]->ListRegisteredControls();
-         std::string ctrls;
-         for (int i = 0; i < newControls.size(); i++)
+         if (newControl != nullptr)
          {
-            ctrls += newControls[i] + ((i < newControls.size() - 1) ? ", " : " ");
+            return std::move(newControl);
          }
-
-         Application::Logger.trace("Added controls {str}", ctrls.c_str());
       }
 
-   private:
-      static void ConstructControls(const pugi::xml_object_range<pugi::xml_node_iterator>& document,
-         GuiControlBase* parent,
-         std::vector<std::unique_ptr<GuiControlBase>>& ownedControls,
-         std::vector<GuiControlBase*>& resultControls);
-
-      static std::unique_ptr<GuiControlBase> CreateControl(const std::string& controlName)
-      {
-         for (const auto& factory : mControlFactories)
-         {
-            std::unique_ptr<GuiControlBase> newControl = factory->CreateControl(controlName);
-
-            if (newControl != nullptr)
-            {
-               return std::move(newControl);
-            }
-         }
-
-         return nullptr;
-      }
-   };
-}
+      return nullptr;
+   }
+};
+} // namespace wgui

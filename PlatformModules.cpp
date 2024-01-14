@@ -1,5 +1,4 @@
 #include "PlatformModules.h"
-#include <cassert>
 
 #ifdef OS_WINDOWS
 
@@ -9,8 +8,8 @@
 #include <Windows.h>
 #include <psapi.h>
 
-typedef HMODULE(WINAPI* LOADLIBRARYA)(LPCSTR libraryName);
-typedef HMODULE(WINAPI* LOADLIBRARYW)(LPCWSTR libraryName);
+typedef HMODULE(WINAPI *LOADLIBRARYA)(LPCSTR libraryName);
+typedef HMODULE(WINAPI *LOADLIBRARYW)(LPCWSTR libraryName);
 
 // Pointer for calling original LoadLibraryA.
 LOADLIBRARYA FPLoadLibraryA = NULL;
@@ -41,11 +40,9 @@ HMODULE WINAPI DetourLoadLibraryW(LPCWSTR libraryName)
 }
 
 template <typename T>
-inline MH_STATUS MH_CreateHookApiEx(
-   LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, T** ppOriginal)
+inline MH_STATUS MH_CreateHookApiEx(LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, T **ppOriginal)
 {
-   return MH_CreateHookApi(
-      pszModule, pszProcName, pDetour, reinterpret_cast<LPVOID*>(ppOriginal));
+   return MH_CreateHookApi(pszModule, pszProcName, pDetour, reinterpret_cast<LPVOID *>(ppOriginal));
 }
 
 bool SetupWinHooks()
@@ -95,10 +92,10 @@ PlatformWindows::~PlatformWindows()
 #else
 
 // None of this should ever execute if things are running properly.
-bool PlatformWindows::Initialize() 
-{ 
-   assert(false); 
-   return false; 
+bool PlatformWindows::Initialize()
+{
+   assert(false);
+   return false;
 }
 
 PlatformWindows::~PlatformWindows()
@@ -107,4 +104,3 @@ PlatformWindows::~PlatformWindows()
 }
 
 #endif
-
