@@ -131,6 +131,8 @@ class GuiControlBase
       mEnabled = true;
    }
 
+   virtual ~GuiControlBase() = default;
+
    virtual void Init()
    {
    }
@@ -489,7 +491,7 @@ class GuiRadioButtonGroup : public ChildSupportingGuiControlBase
    {
       return GetTotalChildHeight(window, context);
    }
-   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const
+   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const override
    {
       return 0;
    }
@@ -1157,7 +1159,7 @@ class GuiLayoutGroup : public ChildSupportingGuiControlBase
       return baseHeight;
    }
 
-   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const
+   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const override
    {
       return 0;
    }
@@ -1410,7 +1412,7 @@ class GuiAbstractControl : public ChildSupportingGuiControlBase
       return GetTotalChildHeight(window, context);
    }
 
-   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const
+   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const override
    {
       return 0;
    }
@@ -1492,7 +1494,7 @@ class GuiLayoutWindow : public GuiLayoutGroup
       baseHeight += GetTotalChildHeight(window, context);
       return baseHeight;
    }
-   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const
+   virtual float GetVerticalSpacing(WindowBase *const window, nk_context *context) const override
    {
       return 0;
    }

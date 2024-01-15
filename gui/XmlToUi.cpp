@@ -70,7 +70,8 @@ void XmlToUiUtil::ConstructControls(const xml_object_range<xml_node_iterator> &d
    {
       if (!parent->SupportsChildren() && !doc.empty())
       {
-         Application::Logger.error("Control of type: '{str}' does not support child controls", parent->GetLabel());
+         Application::Logger.error("Control of type: '{str}' does not support child controls",
+                                   parent->GetLabel().c_str());
          return;
       }
    }
@@ -115,7 +116,7 @@ bool XmlToUiUtil::ConstructLayoutFromXmlFile(const std::string &fileName,
    xml_document doc;
    xml_parse_result parseResult = doc.load_file(fileName.c_str());
 
-   if (parseResult.status == -1)
+   if (parseResult.status != xml_parse_status::status_ok)
    {
       Application::Logger.error("Unable to load file: {str}", fileName.c_str());
       return false;
@@ -148,7 +149,7 @@ bool XmlToUiUtil::ConstructLayoutFromXmlText(const std::string &text,
    xml_document doc;
    xml_parse_result parseResult = doc.load_string(text.c_str());
 
-   if (parseResult.status == -1)
+   if (parseResult.status != xml_parse_status::status_ok)
    {
       Application::Logger.error("Unable to load XML string");
       return false;

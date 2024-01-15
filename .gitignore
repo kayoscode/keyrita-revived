@@ -5,6 +5,7 @@ out/
 vsproj/
 .cache/
 .cmake-kits.json
+.vimspector.json
 buildDebug/
 buildRelease/
 compile_commands.json

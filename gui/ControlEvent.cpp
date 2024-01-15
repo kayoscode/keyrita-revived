@@ -8,7 +8,7 @@ bool MouseEnterEventObserver::ObserveEvent(WindowBase *window, nk_context *conte
    int mouseX, mouseY;
    window->GetInput().GetMousePos(mouseX, mouseY);
 
-   bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
+   bool intersecting = IsIntersecting(mWidgetBounds, nk_vec2(mouseX, mouseY));
 
    if (!mPreviouslyInBounds && intersecting)
    {
@@ -25,7 +25,7 @@ bool MouseLeaveEventObserver::ObserveEvent(WindowBase *window, nk_context *conte
    int mouseX, mouseY;
    window->GetInput().GetMousePos(mouseX, mouseY);
 
-   bool intersecting = IsIntersecting(mWidgetBounds, struct nk_vec2(mouseX, mouseY));
+   bool intersecting = IsIntersecting(mWidgetBounds, nk_vec2(mouseX, mouseY));
 
    if (mPreviouslyInBounds && !intersecting)
    {

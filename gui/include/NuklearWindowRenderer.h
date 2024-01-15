@@ -48,6 +48,8 @@ class WindowRenderer
 class GuiControlFactoryBase
 {
  public:
+   virtual ~GuiControlFactoryBase() = default;
+
    std::unique_ptr<GuiControlBase> CreateControl(const std::string &controlType)
    {
       if (mFactory.find(controlType) != mFactory.end())

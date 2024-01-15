@@ -52,7 +52,7 @@ int main()
 
       if (t.milliseconds() >= 5000)
       {
-         std::cout << "Fps: " << frameCount / 5 << "\n";
+         Application::Logger.trace("Frames Per Sec: {int}", frameCount / 5);
          frameCount = 0;
          t.reset();
       }

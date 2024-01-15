@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -137,6 +135,8 @@ class CtrlAttribute
    CtrlAttribute(attr_type_id_t typeId) : mType(typeId)
    {
    }
+
+   virtual ~CtrlAttribute() = default;
 
    attr_type_id_t GetType() const
    {
@@ -538,6 +538,7 @@ class AttributeSet
 class AttributeParseFactoryBase
 {
  public:
+   virtual ~AttributeParseFactoryBase() = default;
    typedef std::function<std::unique_ptr<Attribute>(const std::string &text)> CreateAttrFunc;
 
    /// <summary>
